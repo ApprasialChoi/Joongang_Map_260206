@@ -149,9 +149,16 @@
     <body>
         <div id="kakao-map"></div>
 		<div id="map"></div>
-		<div class="search-filter-container" style="position: fixed; top: 20px; left: 70px; z-index: 2000; display: flex; gap: 5px; background: white; border-radius: 20px;">
-		    <input type="text" id="target-search" class="search-filter-input" placeholder="제출처 검색 (예: 기업은행)" 
-		           style="width: 250px; padding: 10px 15px; border: 2px solid #0051af; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); outline: none; font-size: 14px; -webkit-appearance: none;">
+		<div class="search-filter-container" style="position: fixed; top: 20px; left: 70px; z-index: 2000; display: flex; gap: 5px; background: white; padding: 5px; border-radius: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+		    <select id="search-field" style="padding: 8px 10px; border: none; border-radius: 20px; outline: none; font-size: 13px; cursor: pointer; background: #f0f7ff; color: #0051af; font-weight: bold;">
+		        <option value="제출처">제출처</option>
+		        <option value="담당자">담당자</option>
+		        <option value="주소">주소</option>
+		        <option value="감정서번호">감정서번호</option>
+		        <option value="건명">건명</option>
+		    </select>
+		    <input type="text" id="target-search" placeholder="검색어를 입력하세요..." 
+		           style="width: 200px; padding: 8px 15px; border: 1px solid #ddd; border-radius: 20px; outline: none; font-size: 14px;">
 		</div>
         <script src="js/qgis2web_expressions.js"></script>
         <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=231190ac1aca72ada0b739110d8a0eb4"></script>
@@ -472,38 +479,33 @@
         });
 
 		// --- 동적 검색 필터 로직 시작 ---
-        function dynamicFilter() {
-            var searchText = document.getElementById('target-search').value.trim();
+        function multiFieldFilter() {
+		    var selectedField = document.getElementById('search-field').value; // 선택된 항목 (예: 담당자)
+		    var searchText = document.getElementById('target-search').value.toLowerCase().trim(); // 입력된 글자
+		
+		    layer_map_data.eachLayer(function(layer) {
+		        // 사용자가 선택한 필드의 실제 데이터를 가져옴
+		        var targetValue = String(layer.feature.properties[selectedField] || "").toLowerCase();
+		        
+		        // 검색어가 포함되어 있는지 확인
+		        var isMatch = searchText === "" || targetValue.includes(searchText);
+		
+		        if (isMatch) {
+		            if (!map.hasLayer(layer)) map.addLayer(layer);
+		        } else {
+		            if (map.hasLayer(layer)) map.removeLayer(layer);
+		        }
+		    });
+		
+		    // 필터링 후 라벨(툴팁) 재배치
+		    if (typeof resetLabels === "function") {
+		        resetLabels([layer_map_data]);
+		    }
+		}
 
-            layer_map_data.eachLayer(function(layer) {
-                // 주의: 필드명이 정확히 '제출처'인지 '제출처(Tar'인지 확인 후 수정하세요.
-                // 위 popupFieldConfig 리스트를 보니 '제출처' 필드가 존재하네요.
-                var targetValue = layer.feature.properties['제출처'] || ""; 
-                
-                // 검색어가 포함되어 있는지 확인 (대소문자 구분 없음)
-                var isMatch = searchText === "" || 
-                              targetValue.toLowerCase().includes(searchText.toLowerCase());
-
-                if (isMatch) {
-                    if (!map.hasLayer(layer)) {
-                        map.addLayer(layer);
-                    }
-                } else {
-                    if (map.hasLayer(layer)) {
-                        map.removeLayer(layer);
-                    }
-                }
-            });
-            
-            // 필터링 후 라벨 재배치 (labelgun 연동)
-            if (typeof resetLabels === "function") {
-                resetLabels([layer_map_data]);
-            }
-        }
-
-        // 입력창에 타이핑할 때마다 실행
-        document.getElementById('target-search').addEventListener('input', dynamicFilter);
-        // --- 동적 검색 필터 로직 끝 ---
+		// 입력창에 타이핑할 때 + 검색 항목을 바꿀 때 모두 작동
+		document.getElementById('target-search').addEventListener('input', multiFieldFilter);
+		document.getElementById('search-field').addEventListener('change', multiFieldFilter);
         </script>        
     </body>
 </html>
