@@ -149,16 +149,26 @@
     <body>
         <div id="kakao-map"></div>
 		<div id="map"></div>
-		<div class="search-filter-container" style="position: fixed; top: 20px; left: 70px; z-index: 2000; display: flex; gap: 5px; background: white; padding: 5px; border-radius: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
-		    <select id="search-field" style="padding: 8px 10px; border: none; border-radius: 20px; outline: none; font-size: 13px; cursor: pointer; background: #f0f7ff; color: #0051af; font-weight: bold;">
-		        <option value="제출처">제출처</option>
-		        <option value="담당자">담당자</option>
-		        <option value="주소">주소</option>
-		        <option value="감정서번호">감정서번호</option>
-		        <option value="건명">건명</option>
-		    </select>
-		    <input type="text" id="target-search" placeholder="검색어를 입력하세요..." 
-		           style="width: 200px; padding: 8px 15px; border: 1px solid #ddd; border-radius: 20px; outline: none; font-size: 14px;">
+				/* 통합 상세 필터 패널 */
+		<div class="filter-panel" style="position: fixed; top: 20px; left: 70px; z-index: 2000; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 280px; font-family: sans-serif;">
+		    <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #333;">상세 필터</h4>
+		    
+		    <div style="margin-bottom: 8px;">
+		        <label style="font-size: 11px; color: #666;">제출처</label>
+		        <input type="text" class="multi-filter-input" data-field="제출처" placeholder="예: 기업은행" style="width: 100%; padding: 6px 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;">
+		    </div>
+		    
+		    <div style="margin-bottom: 8px;">
+		        <label style="font-size: 11px; color: #666;">주소</label>
+		        <input type="text" class="multi-filter-input" data-field="주소" placeholder="예: 서울" style="width: 100%; padding: 6px 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;">
+		    </div>
+		
+		    <div style="margin-bottom: 8px;">
+		        <label style="font-size: 11px; color: #666;">담당자</label>
+		        <input type="text" class="multi-filter-input" data-field="담당자" placeholder="담당자 이름" style="width: 100%; padding: 6px 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;">
+		    </div>
+		
+		    <div id="filter-result-count" style="font-size: 12px; color: #0051af; font-weight: bold; margin-top: 10px; text-align: right;"></div>
 		</div>
         <script src="js/qgis2web_expressions.js"></script>
         <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=231190ac1aca72ada0b739110d8a0eb4"></script>
@@ -479,33 +489,52 @@
         });
 
 		// --- 동적 검색 필터 로직 시작 ---
-        function multiFieldFilter() {
-		    var selectedField = document.getElementById('search-field').value; // 선택된 항목 (예: 담당자)
-		    var searchText = document.getElementById('target-search').value.toLowerCase().trim(); // 입력된 글자
+       function applyMultiFilter() {
+		    // 모든 입력창 요소를 가져옴
+		    var filterInputs = document.querySelectorAll('.multi-filter-input');
+		    var activeFilters = [];
+		
+		    // 현재 입력값이 있는 필터들만 추출
+		    filterInputs.forEach(function(input) {
+		        if (input.value.trim() !== "") {
+		            activeFilters.push({
+		                field: input.getAttribute('data-field'),
+		                value: input.value.toLowerCase().trim()
+		            });
+		        }
+		    });
+		
+		    var visibleCount = 0;
 		
 		    layer_map_data.eachLayer(function(layer) {
-		        // 사용자가 선택한 필드의 실제 데이터를 가져옴
-		        var targetValue = String(layer.feature.properties[selectedField] || "").toLowerCase();
+		        var props = layer.feature.properties;
 		        
-		        // 검색어가 포함되어 있는지 확인
-		        var isMatch = searchText === "" || targetValue.includes(searchText);
+		        // every() 함수는 모든 조건이 참(true)일 때만 true를 반환합니다 (AND 조건)
+		        var isMatch = activeFilters.every(function(filter) {
+		            var dataValue = String(props[filter.field] || "").toLowerCase();
+		            return dataValue.includes(filter.value);
+		        });
 		
 		        if (isMatch) {
 		            if (!map.hasLayer(layer)) map.addLayer(layer);
+		            visibleCount++;
 		        } else {
 		            if (map.hasLayer(layer)) map.removeLayer(layer);
 		        }
 		    });
 		
-		    // 필터링 후 라벨(툴팁) 재배치
+		    // 결과 건수 업데이트
+		    document.getElementById('filter-result-count').innerText = "검색 결과: " + visibleCount + "건";
+		
 		    if (typeof resetLabels === "function") {
 		        resetLabels([layer_map_data]);
 		    }
 		}
-
-		// 입력창에 타이핑할 때 + 검색 항목을 바꿀 때 모두 작동
-		document.getElementById('target-search').addEventListener('input', multiFieldFilter);
-		document.getElementById('search-field').addEventListener('change', multiFieldFilter);
+		
+		// 모든 입력창에 이벤트 연결
+		document.querySelectorAll('.multi-filter-input').forEach(function(input) {
+		    input.addEventListener('input', applyMultiFilter);
+		});
         </script>        
     </body>
 </html>
