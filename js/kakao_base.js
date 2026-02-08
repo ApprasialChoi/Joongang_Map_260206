@@ -47,6 +47,7 @@
       level: leafletZoomToKakaoLevel(z),
       mapTypeId: kakaoMapTypeFromString(opts.mapTypeId)
     });
+    window.kakaoMap = kakaoMap;
 
     // 배경지도는 클릭/드래그/휠을 받지 않도록(Leaflet만 조작)
     kakaoMap.setDraggable(false);
@@ -79,4 +80,5 @@
     return kakaoMap;
   };
 })();
+
 
