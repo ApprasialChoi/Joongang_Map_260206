@@ -1,176 +1,60 @@
 <!doctype html>
 <html lang="en">
-	    <head>
-	        <meta charset="utf-8">
-	        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-	        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
-	        <meta name="mobile-web-app-capable" content="yes">
-	        <meta name="apple-mobile-web-app-capable" content="yes">
-	        <link rel="stylesheet" href="css/leaflet.css">
-	        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jjimenezshaw/Leaflet.Control.Layers.Tree@master/L.Control.Layers.Tree.css">
-	        <link rel="stylesheet" href="css/qgis2web.css">
-	        <link rel="stylesheet" href="css/fontawesome-all.min.css">
-	        <link rel="stylesheet" href="css/leaflet.photon.css">
-	        <style>
-	        html, body, #kakao-map, #map {
-	            width: 100%;
-	            height: 100%;
-	            padding: 0;
-	            margin: 0;
-	        }
-	
-	        /* 1. 팝업창 전체 상자 디자인 (가로 넓히기 + 파란 테두리) */
-	        .leaflet-popup-content-wrapper {
-	            width: 450px !important;            /* 가로 너비 확장 */
-	            border: 3px solid #0000ff !important; /* 파란색 테두리 */
-	            background: #ffffff !important;      /* 배경 흰색 */
-	            border-radius: 10px;                 /* 모서리 둥글게 */
-	            box-shadow: 3px 3px 10px rgba(0,0,0,0.2); /* 그림자 */
-	        }
-	
-	        /* 2. 팝업 내부 글자 및 테이블 설정 */
-	        .leaflet-popup-content {
-	            width: 420px !important;            /* 내부 콘텐츠 너비 */
-	            color: #000000 !important;          /* 글자색 검정 */
-	            font-size: 14px;
-	            line-height: 1.6;
-	        }
-	
-	        .leaflet-popup-content table {
-	            width: 100% !important;
-	            border-collapse: collapse;
-	        }
-	
-	        .leaflet-popup-content th {
-	            min-width: 100px;                   /* 왼쪽 항목 이름 너비 확보 */
-	            text-align: left;
-	            vertical-align: top;
-	            padding-right: 10px;
-	        }
-	
-	        /* 3. 툴팁(라벨) 스타일 유지 및 강화 */
-	        .leaflet-tooltip.css_map_data {
-	            max-width: none !important;
-	            width: max-content;
-	            white-space: normal;
-	            color: #000000 !important;
-	            font-weight: bold;
-	            background-color: #ffffff !important;
-	            border: 2px solid #0000ff !important;
-	            padding: 5px 10px;
-	            border-radius: 4px;
-	            text-shadow: none; /* 상자 배경이 생겼으므로 그림자는 제거하는 게 깔끔합니다 */
-	        }
-	        </style>
-	    </head>
-        /* 카카오지도를 배경으로 두고, Leaflet은 그 위에 오버레이로 올립니다. */
-        #kakao-map, #map {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+    <link rel="stylesheet" href="css/leaflet.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jjimenezshaw/Leaflet.Control.Layers.Tree@master/L.Control.Layers.Tree.css">
+    <link rel="stylesheet" href="css/qgis2web.css">
+    <link rel="stylesheet" href="css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="css/leaflet.photon.css">
+    <style>
+        html, body, #kakao-map, #map { width: 100%; height: 100%; padding: 0; margin: 0; }
+        #kakao-map, #map { position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
+        #kakao-map { z-index: 0; }
+        #map { z-index: 1; background: transparent; }
+
+        /* 1. 팝업창 디자인 (가로 넓히기 + 파란 테두리 + 북동쪽 배치를 위한 여백) */
+        .leaflet-popup-content-wrapper {
+            width: 450px !important; 
+            border: 3px solid #0000ff !important;
+            background: #ffffff !important;
+            border-radius: 10px;
+            box-shadow: 3px 3px 10px rgba(0,0,0,0.2);
         }
-        #kakao-map {
-            z-index: 0;
+        .leaflet-popup-content {
+            width: 420px !important;
+            color: #000000 !important;
+            font-size: 14px;
         }
-        #map {
-            z-index: 1;
-            background: transparent;
+        .leaflet-popup-content table { width: 100%; border-collapse: collapse; }
+        .leaflet-popup-content th { min-width: 110px; text-align: left; padding: 5px; }
+        .leaflet-popup-content td { padding: 5px; word-break: break-all; }
+
+        /* 2. 라벨(툴팁) 디자인 */
+        .leaflet-tooltip.css_map_data {
+            background-color: #ffffff !important;
+            border: 2px solid #0000ff !important;
+            color: #000000 !important;
+            font-weight: bold;
+            padding: 8px 12px;
+            border-radius: 6px;
+            max-width: none !important;
+            width: max-content;
         }
-        /* 팝업(속성표) 가독성 개선 */
-        .leaflet-popup-content table {
-            border-collapse: collapse;
-            width: 100%;
-        }
-        .leaflet-popup-content th,
-        .leaflet-popup-content td {
-            padding: 2px 6px;
-            vertical-align: top;
-            word-break: break-word;
-            white-space: normal;
-        }
-        .leaflet-popup-content th {
-            text-align: left;
-            font-weight: 600;
-            white-space: nowrap;
-            opacity: 0.85;
-        }
-        /* 팝업 필드 토글 컨트롤 UI */
+
         .popup-field-toggle {
             background: rgba(255, 255, 255, 0.95);
             padding: 8px 10px;
             border-radius: 4px;
             box-shadow: 0 1px 5px rgba(0,0,0,0.3);
-            max-height: 45vh;
-            overflow: auto;
-            font: 12px/1.2 Arial, Helvetica, sans-serif;
+            z-index: 1000;
         }
-        .popup-field-toggle .title {
-            font-weight: 700;
-            margin-bottom: 6px;
-        }
-        .popup-field-toggle .actions {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 6px;
-        }
-        .popup-field-toggle .actions button {
-            font-size: 11px;
-            padding: 2px 6px;
-            cursor: pointer;
-        }
-        .popup-field-toggle label {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-            margin: 3px 0;
-            cursor: pointer;
-            user-select: none;
-        }
-        /* 라벨(툴팁) 폭/줄바꿈 제어 */
-      .leaflet-tooltip.css_map_data {
-    		/* 1. 기존 유지: 글자 꺾임 방지 및 레이아웃 */
-    		max-width: none !important;
-		    width: max-content;
-		    white-space: normal;
-		    font-weight: bold;
-		    text-shadow: 1px 1px 2px white;
-		    color: #000000 !important;
-		
-		    /* 2. 추가: 상자 배경 및 테두리 디자인 */
-		    background-color: #ffffff !important; /* 배경색 흰색 */
-		    border: 2px solid #0000ff !important;  /* 테두리 파란색 */
-		    border-radius: 6px;                    /* 모서리 둥글게 */
-		    padding: 8px 12px;                     /* 상자 안쪽 여백 (위아래 8px, 좌우 12px) */
-		    box-shadow: 2px 2px 5px rgba(0,0,0,0.1); /* 미세한 그림자 (고급스러움 추가) */
-		}
-
-/* 3. 추가: 말풍선 꼬리 색상도 파란색으로 통일 (선택사항) */
-.leaflet-tooltip-left.css_map_data::before { border-left-color: #0000ff !important; }
-.leaflet-tooltip-right.css_map_data::before { border-right-color: #0000ff !important; }
-.leaflet-tooltip-top.css_map_data::before { border-top-color: #0000ff !important; }
-.leaflet-tooltip-bottom.css_map_data::before { border-bottom-color: #0000ff !important; }
-			
-        .leaflet-tooltip.css_map_data .q2w-label {
-			color: #000000 !important;
-            display: inline-block;
-            max-width: none !important;
-        }
-        .q2w-label.q2w-label--single {
-            white-space: nowrap; /* 1개 필드일 때는 가로로 */
-        }
-        .q2w-label.q2w-label--multi {
-            white-space: pre-line; /* 2개 이상이면 줄바꿈 유지 */
-        }
-        /* 라벨(툴팁) 토글을 위한 CSS */
-        .labels-hidden .leaflet-tooltip-pane {
-            display: none;
-        }
-        </style>
-        <title></title>
-    </head>
-    <body>
+        .labels-hidden .leaflet-tooltip-pane { display: none; }
+    </style>
+</head>
+<body>
         <div id="kakao-map"></div>
         <div id="map"></div>
         <script src="js/qgis2web_expressions.js"></script>
