@@ -118,12 +118,41 @@
 		.leaflet-popup-content {
 		    width: 420px !important;    /* 실제 내용이 들어가는 너비 (wrapper보다 약간 작게) */
 		}
+
+				/* 검색창 컨테이너 디자인 */
+		.search-filter-container {
+		    position: absolute;
+		    top: 15px;      /* 위치 조정 */
+		    left: 60px;     /* 줌 컨트롤 옆 */
+		    z-index: 1000;
+		    display: flex;
+		    gap: 5px;
+		}
+		
+		.search-filter-input {
+		    width: 200px;
+		    padding: 8px 12px;
+		    border: 2px solid #0051af;
+		    border-radius: 20px;
+		    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+		    outline: none;
+		    font-size: 14px;
+		}
+		
+		.search-filter-input:focus {
+		    background-color: #f0f7ff;
+		}
+			
         </style>
         <title></title>
     </head>
     <body>
         <div id="kakao-map"></div>
-        <div id="map"></div>
+		<div id="map"></div>
+		<div class="search-filter-container" style="position: absolute; top: 15px; left: 60px; z-index: 1000; display: flex; gap: 5px;">
+		    <input type="text" id="target-search" class="search-filter-input" placeholder="제출처 검색 (예: 기업은행)" 
+		           style="width: 200px; padding: 8px 12px; border: 2px solid #0051af; border-radius: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); outline: none; font-size: 14px;">
+		</div>
         <script src="js/qgis2web_expressions.js"></script>
         <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=231190ac1aca72ada0b739110d8a0eb4"></script>
         <script src="js/leaflet.js"></script>
@@ -441,6 +470,40 @@
         map.on("layerremove", function(){
             resetLabels([layer_map_data]);
         });
+
+		// --- 동적 검색 필터 로직 시작 ---
+        function dynamicFilter() {
+            var searchText = document.getElementById('target-search').value.trim();
+
+            layer_map_data.eachLayer(function(layer) {
+                // 주의: 필드명이 정확히 '제출처'인지 '제출처(Tar'인지 확인 후 수정하세요.
+                // 위 popupFieldConfig 리스트를 보니 '제출처' 필드가 존재하네요.
+                var targetValue = layer.feature.properties['제출처'] || ""; 
+                
+                // 검색어가 포함되어 있는지 확인 (대소문자 구분 없음)
+                var isMatch = searchText === "" || 
+                              targetValue.toLowerCase().includes(searchText.toLowerCase());
+
+                if (isMatch) {
+                    if (!map.hasLayer(layer)) {
+                        map.addLayer(layer);
+                    }
+                } else {
+                    if (map.hasLayer(layer)) {
+                        map.removeLayer(layer);
+                    }
+                }
+            });
+            
+            // 필터링 후 라벨 재배치 (labelgun 연동)
+            if (typeof resetLabels === "function") {
+                resetLabels([layer_map_data]);
+            }
+        }
+
+        // 입력창에 타이핑할 때마다 실행
+        document.getElementById('target-search').addEventListener('input', dynamicFilter);
+        // --- 동적 검색 필터 로직 끝 ---
         </script>        
     </body>
 </html>
