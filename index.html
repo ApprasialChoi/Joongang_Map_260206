@@ -84,13 +84,13 @@
             user-select: none;
         }
         /* 라벨(툴팁) 폭/줄바꿈 제어 */
-        .leaflet-tooltip.css___EPSG_4326_Ver03_2025_0 {
+        .leaflet-tooltip.css_map_data {
             /* 기본 leaflet max-width 때문에 글자가 세로로 꺾이는 현상 방지 */
             max-width: none !important;
             width: max-content; /* 가능하면 내용만큼 가로로 확장 */
             white-space: normal; /* 실제 줄바꿈은 내부 .q2w-label이 제어 */
         }
-        .leaflet-tooltip.css___EPSG_4326_Ver03_2025_0 .q2w-label {
+        .leaflet-tooltip.css_map_data .q2w-label {
             display: inline-block;
             max-width: none !important;
         }
@@ -135,7 +135,7 @@
         var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
 
         // 팝업에 표시할 필드(속성)별 토글 설정
-        var popupFieldConfig___EPSG_4326_Ver03_2025_0 = (function() {
+        var popupFieldConfig_map_data = (function() {
             var fields = [
                 '감정서번호', '본사/지사', '담당자', '평가사', '건명', '거래처명', '의뢰인', '상태',
                 '의뢰일자', '발송일자', '소유자전화', '채무자', '채무자전화', '의뢰문서번', '의뢰부서',
@@ -149,20 +149,20 @@
 
         // 라벨(지도 위 텍스트)에 표시할 필드별 토글 설정
         // - qgis2web 기본 라벨식: 제출처(Tar) / 담당자 / 의뢰일자 / 상태 / 주소
-        var labelFieldConfig___EPSG_4326_Ver03_2025_0 = (function() {
+        var labelFieldConfig_map_data = (function() {
             var fields = ['제출처(Tar', '담당자', '의뢰일자', '상태', '주소'];
             var vis = {};
             for (var i = 0; i < fields.length; i++) vis[fields[i]] = true;
             return { fields: fields, visible: vis };
         })();
 
-        function buildPopupContent___EPSG_4326_Ver03_2025_0(feature) {
+        function buildPopupContent_map_data(feature) {
             function fmt(v) {
                 if (v === null || v === undefined) return '';
                 return autolinker.link(String(v).replace(/'/g, '\'').toLocaleString());
             }
             var rows = '';
-            var cfg = popupFieldConfig___EPSG_4326_Ver03_2025_0;
+            var cfg = popupFieldConfig_map_data;
             for (var i = 0; i < cfg.fields.length; i++) {
                 var key = cfg.fields[i];
                 if (!cfg.visible[key]) continue;
@@ -173,8 +173,8 @@
             return '<table>' + (rows || '<tr><td>표시할 속성이 없습니다.</td></tr>') + '</table>';
         }
 
-        function buildLabelContent___EPSG_4326_Ver03_2025_0(feature) {
-            var cfg = labelFieldConfig___EPSG_4326_Ver03_2025_0;
+        function buildLabelContent_map_data(feature) {
+            var cfg = labelFieldConfig_map_data;
             var props = feature && feature.properties ? feature.properties : feature;
             if (!props) return '';
             var parts = [];
@@ -260,18 +260,18 @@
         var bounds_group = new L.featureGroup([]);
         function setBounds() {
         }
-        function pop___EPSG_4326_Ver03_2025_0(feature, layer) {
+        function pop_map_data(feature, layer) {
 			layer.on('popupopen', function(e) {
 				addClassToPopupIfMedia(e.popup.getContent(), e.popup);
 			});
 			layer.bindPopup(function() {
-                return buildPopupContent___EPSG_4326_Ver03_2025_0(feature);
+                return buildPopupContent_map_data(feature);
             }, { maxHeight: 400 });
         }
 
-        function style___EPSG_4326_Ver03_2025_0_0() {
+        function style_map_data_0() {
             return {
-                pane: 'pane___EPSG_4326_Ver03_2025_0',
+                pane: 'pane_map_data',
                 radius: 4.0,
                 opacity: 1,
                 color: 'rgba(35,35,35,1.0)',
@@ -285,26 +285,26 @@
                 interactive: true,
             }
         }
-        map.createPane('pane___EPSG_4326_Ver03_2025_0');
-        map.getPane('pane___EPSG_4326_Ver03_2025_0').style.zIndex = 400;
-        map.getPane('pane___EPSG_4326_Ver03_2025_0').style['mix-blend-mode'] = 'normal';
-        var layer___EPSG_4326_Ver03_2025_0 = new L.geoJson(json_map_data, {
+        map.createPane('pane_map_data');
+        map.getPane('pane_map_data').style.zIndex = 400;
+        map.getPane('pane_map_data').style['mix-blend-mode'] = 'normal';
+        var layer_map_data = new L.geoJson(json_map_data, {
             attribution: '',
             interactive: true,
-            dataVar: 'json___EPSG_4326_Ver03_2025_0',
-            layerName: 'layer___EPSG_4326_Ver03_2025_0',
-            pane: 'pane___EPSG_4326_Ver03_2025_0',
-            onEachFeature: pop___EPSG_4326_Ver03_2025_0,
+            dataVar: 'json_map_data',
+            layerName: 'layer_map_data',
+            pane: 'pane_map_data',
+            onEachFeature: pop_map_data,
             pointToLayer: function (feature, latlng) {
                 var context = {
                     feature: feature,
                     variables: {}
                 };
-                return L.circleMarker(latlng, style___EPSG_4326_Ver03_2025_0_0(feature));
+                return L.circleMarker(latlng, style_map_data_0(feature));
             },
         });
-        bounds_group.addLayer(layer___EPSG_4326_Ver03_2025_0);
-        map.addLayer(layer___EPSG_4326_Ver03_2025_0);
+        bounds_group.addLayer(layer_map_data);
+        map.addLayer(layer_map_data);
         
         // QGIS 데이터(오버레이) 토글 컨트롤
         // - 마커(피처)와 텍스트(라벨)를 분리 토글합니다.
@@ -317,15 +317,15 @@
                 m.getContainer().classList.add('labels-hidden');
             }
         });
-        var layer_labels___EPSG_4326_Ver03_2025_0 = new LabelToggleLayer();
+        var layer_labels_map_data = new LabelToggleLayer();
         // 기본값: 라벨 표시(체크된 상태)
-        layer_labels___EPSG_4326_Ver03_2025_0.addTo(map);
+        layer_labels_map_data.addTo(map);
 
         L.control.layers(
             null,
             {
-                '마커': layer___EPSG_4326_Ver03_2025_0,
-                '텍스트(라벨)': layer_labels___EPSG_4326_Ver03_2025_0
+                '마커': layer_map_data,
+                '텍스트(라벨)': layer_labels_map_data
             },
             { collapsed: false, position: 'topright' }
         ).addTo(map);
@@ -349,19 +349,19 @@
                     L.DomEvent.disableScrollPropagation(div);
 
                     var list = div.querySelector('.list');
-                    var cfg = labelFieldConfig___EPSG_4326_Ver03_2025_0;
+                    var cfg = labelFieldConfig_map_data;
 
                     function refreshLabels() {
                         var idx = 0;
-                        layer___EPSG_4326_Ver03_2025_0.eachLayer(function(lyr) {
+                        layer_map_data.eachLayer(function(lyr) {
                             var tt = (lyr.getTooltip && lyr.getTooltip()) ? lyr.getTooltip() : null;
                             if (tt) {
-                                tt.setContent(buildLabelContent___EPSG_4326_Ver03_2025_0(lyr.feature));
+                                tt.setContent(buildLabelContent_map_data(lyr.feature));
                             }
                             idx++;
                         });
                         // labelgun 재계산
-                        resetLabels([layer___EPSG_4326_Ver03_2025_0]);
+                        resetLabels([layer_map_data]);
                     }
 
                     for (var i = 0; i < cfg.fields.length; i++) {
@@ -398,28 +398,28 @@
         })();
         setBounds();
         var i = 0;
-        layer___EPSG_4326_Ver03_2025_0.eachLayer(function(layer) {
+        layer_map_data.eachLayer(function(layer) {
             var context = {
                 feature: layer.feature,
                 variables: {}
             };
             // 라벨은 필드별 토글 설정을 반영해 생성
-            layer.bindTooltip(buildLabelContent___EPSG_4326_Ver03_2025_0(layer.feature), {permanent: true, offset: [-0, -16], className: 'css___EPSG_4326_Ver03_2025_0'});
+            layer.bindTooltip(buildLabelContent_map_data(layer.feature), {permanent: true, offset: [-0, -16], className: 'css_map_data'});
             labels.push(layer);
             totalMarkers += 1;
               layer.added = true;
               addLabel(layer, i);
               i++;
         });
-        resetLabels([layer___EPSG_4326_Ver03_2025_0]);
+        resetLabels([layer_map_data]);
         map.on("zoomend", function(){
-            resetLabels([layer___EPSG_4326_Ver03_2025_0]);
+            resetLabels([layer_map_data]);
         });
         map.on("layeradd", function(){
-            resetLabels([layer___EPSG_4326_Ver03_2025_0]);
+            resetLabels([layer_map_data]);
         });
         map.on("layerremove", function(){
-            resetLabels([layer___EPSG_4326_Ver03_2025_0]);
+            resetLabels([layer_map_data]);
         });
         </script>        
     </body>
