@@ -169,6 +169,9 @@
 		    </div>
 		
 		    <div id="filter-result-count" style="font-size: 12px; color: #0051af; font-weight: bold; margin-top: 10px; text-align: right;"></div>
+			<button onclick="exportToExcel()" style="width: 100%; margin-top: 10px; padding: 8px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px;">
+			    📊 현재 검색결과 엑셀 저장
+			</button>
 		</div>
         <script src="js/qgis2web_expressions.js"></script>
         <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=231190ac1aca72ada0b739110d8a0eb4"></script>
@@ -535,6 +538,43 @@
 		document.querySelectorAll('.multi-filter-input').forEach(function(input) {
 		    input.addEventListener('input', applyMultiFilter);
 		});
+		function exportToExcel() {
+		    var data = [];
+		    var headers = ['감정서번호', '담당자', '제출처', '주소', '물건종류', '상태']; // 엑셀에 포함할 필드명들
+		
+		    // 1. 헤더 추가
+		    data.push(headers.join(','));
+		
+		    // 2. 현재 지도에 보이는 마커들의 데이터 추출
+		    layer_map_data.eachLayer(function(layer) {
+		        if (map.hasLayer(layer)) {
+		            var props = layer.feature.properties;
+		            var row = headers.map(function(header) {
+		                // 데이터 내에 쉼표(,)가 있으면 엑셀 형식이 깨지므로 제거하거나 큰따옴표 처리
+		                var val = String(props[header] || "").replace(/,/g, " ");
+		                return '"' + val + '"'; 
+		            });
+		            data.push(row.join(','));
+		        }
+		    });
+		
+		    if (data.length <= 1) {
+		        alert("내보낼 데이터가 없습니다.");
+		        return;
+		    }
+		
+		    // 3. 파일 생성 및 다운로드 (한글 깨짐 방지를 위해 BOM 추가)
+		    var csvContent = "\uFEFF" + data.join("\n");
+		    var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+		    var url = URL.createObjectURL(blob);
+		    
+		    var link = document.createElement("a");
+		    link.setAttribute("href", url);
+		    link.setAttribute("download", "검색결과_" + new Date().toLocaleDateString() + ".csv");
+		    document.body.appendChild(link);
+		    link.click();
+		    document.body.removeChild(link);
+		}
         </script>        
     </body>
 </html>
