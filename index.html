@@ -167,6 +167,19 @@
 		        <label style="font-size: 11px; color: #666;">담당자</label>
 		        <input type="text" class="multi-filter-input" data-field="담당자" placeholder="담당자 이름" style="width: 100%; padding: 6px 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;">
 		    </div>
+
+			<div style="margin-top: 10px; padding: 10px; background: #f9f9f9; border-radius: 10px; border: 1px dashed #ccc;">
+		        <div style="font-size: 11px; font-weight: bold; margin-bottom: 5px; color: #555;">지도 부가 기능</div>
+		        <label style="display: block; font-size: 12px; margin-bottom: 5px; cursor: pointer;">
+		            <input type="checkbox" class="kakao-layer-toggle" data-type="USE_DISTRICT"> 🗺️ 지적편집도
+		        </label>
+		        <label style="display: block; font-size: 12px; margin-bottom: 5px; cursor: pointer;">
+		            <input type="checkbox" class="kakao-layer-toggle" data-type="TRAFFIC"> 🚦 실시간 교통
+		        </label>
+		        <label style="display: block; font-size: 12px; cursor: pointer;">
+		            <input type="checkbox" class="kakao-layer-toggle" data-type="ROADVIEW"> 📷 로드뷰 도로 확인
+		        </label>
+		    </div>
 		
 		    <div id="filter-result-count" style="font-size: 12px; color: #0051af; font-weight: bold; margin-top: 10px; text-align: right;"></div>
 			<button onclick="exportToExcel()" style="width: 100%; margin-top: 10px; padding: 8px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px;">
@@ -575,6 +588,23 @@
 		    link.click();
 		    document.body.removeChild(link);
 		}
+		document.querySelectorAll('.kakao-layer-toggle').forEach(function(checkbox) {
+		            checkbox.addEventListener('change', function(e) {
+		                var layerType = e.target.getAttribute('data-type');
+		                
+		                // 주의: kakao_base.js에서 정의한 변수명이 kakaoMap인지 확인하세요.
+		                // 보통 qgis2web 커스텀 시 kakaoMap 이라는 변수를 사용합니다.
+		                if (typeof kakaoMap !== 'undefined') {
+		                    if (e.target.checked) {
+		                        kakaoMap.addOverlayMapTypeId(kakao.maps.MapTypeId[layerType]);
+		                    } else {
+		                        kakaoMap.removeOverlayMapTypeId(kakao.maps.MapTypeId[layerType]);
+		                    }
+		                } else {
+		                    console.error("kakaoMap 객체를 찾을 수 없습니다. 변수명을 확인해주세요.");
+		                }
+		            });
+		        });
         </script>        
     </body>
 </html>
