@@ -109,6 +109,15 @@
         .labels-hidden .leaflet-tooltip-pane {
             display: none;
         }
+		/* 팝업 가로 넓이 및 디자인 수정 */
+		.leaflet-popup-content-wrapper {
+		    width: 450px !important;    /* 상자 전체 너비 (원하는 수치로 조정) */
+		    border: 2px solid #0000ff;  /* 아까 원하셨던 파란 테두리 추가 */
+		}
+		
+		.leaflet-popup-content {
+		    width: 420px !important;    /* 실제 내용이 들어가는 너비 (wrapper보다 약간 작게) */
+		}
         </style>
         <title></title>
     </head>
