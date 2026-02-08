@@ -276,11 +276,17 @@
         }
         function pop_map_data(feature, layer) {
 			layer.on('popupopen', function(e) {
-				addClassToPopupIfMedia(e.popup.getContent(), e.popup);
-			});
-			layer.bindPopup(function() {
+                addClassToPopupIfMedia(e.popup.getContent(), e.popup);
+            });
+            layer.bindPopup(function() {
                 return buildPopupContent_map_data(feature);
-            }, { maxHeight: 400 });
+            }, { 
+                maxHeight: 400,
+                // --- 아래 옵션들을 추가하세요 ---
+                maxWidth: 500,  /* 최대 가로 너비 확장 (예: 500px) */
+                minWidth: 400,  /* 최소 가로 너비 확보 (예: 400px) */
+                className: 'custom-popup' /* CSS에서 추가 제어를 위한 클래스명 */
+            });;
         }
 
         function style_map_data_0() {
