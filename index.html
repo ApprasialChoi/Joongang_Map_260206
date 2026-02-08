@@ -1,23 +1,68 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
-        <meta name="mobile-web-app-capable" content="yes">
-        <meta name="apple-mobile-web-app-capable" content="yes">
-        <link rel="stylesheet" href="css/leaflet.css">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jjimenezshaw/Leaflet.Control.Layers.Tree@master/L.Control.Layers.Tree.css">
-        <link rel="stylesheet" href="css/qgis2web.css">
-        <link rel="stylesheet" href="css/fontawesome-all.min.css">
-        <link rel="stylesheet" href="css/leaflet.photon.css">
-        <style>
-        html, body, #kakao-map, #map {
-            width: 100%;
-            height: 100%;
-            padding: 0;
-            margin: 0;
-        }
+	    <head>
+	        <meta charset="utf-8">
+	        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+	        <meta name="mobile-web-app-capable" content="yes">
+	        <meta name="apple-mobile-web-app-capable" content="yes">
+	        <link rel="stylesheet" href="css/leaflet.css">
+	        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jjimenezshaw/Leaflet.Control.Layers.Tree@master/L.Control.Layers.Tree.css">
+	        <link rel="stylesheet" href="css/qgis2web.css">
+	        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+	        <link rel="stylesheet" href="css/leaflet.photon.css">
+	        <style>
+	        html, body, #kakao-map, #map {
+	            width: 100%;
+	            height: 100%;
+	            padding: 0;
+	            margin: 0;
+	        }
+	
+	        /* 1. 팝업창 전체 상자 디자인 (가로 넓히기 + 파란 테두리) */
+	        .leaflet-popup-content-wrapper {
+	            width: 450px !important;            /* 가로 너비 확장 */
+	            border: 3px solid #0000ff !important; /* 파란색 테두리 */
+	            background: #ffffff !important;      /* 배경 흰색 */
+	            border-radius: 10px;                 /* 모서리 둥글게 */
+	            box-shadow: 3px 3px 10px rgba(0,0,0,0.2); /* 그림자 */
+	        }
+	
+	        /* 2. 팝업 내부 글자 및 테이블 설정 */
+	        .leaflet-popup-content {
+	            width: 420px !important;            /* 내부 콘텐츠 너비 */
+	            color: #000000 !important;          /* 글자색 검정 */
+	            font-size: 14px;
+	            line-height: 1.6;
+	        }
+	
+	        .leaflet-popup-content table {
+	            width: 100% !important;
+	            border-collapse: collapse;
+	        }
+	
+	        .leaflet-popup-content th {
+	            min-width: 100px;                   /* 왼쪽 항목 이름 너비 확보 */
+	            text-align: left;
+	            vertical-align: top;
+	            padding-right: 10px;
+	        }
+	
+	        /* 3. 툴팁(라벨) 스타일 유지 및 강화 */
+	        .leaflet-tooltip.css_map_data {
+	            max-width: none !important;
+	            width: max-content;
+	            white-space: normal;
+	            color: #000000 !important;
+	            font-weight: bold;
+	            background-color: #ffffff !important;
+	            border: 2px solid #0000ff !important;
+	            padding: 5px 10px;
+	            border-radius: 4px;
+	            text-shadow: none; /* 상자 배경이 생겼으므로 그림자는 제거하는 게 깔끔합니다 */
+	        }
+	        </style>
+	    </head>
         /* 카카오지도를 배경으로 두고, Leaflet은 그 위에 오버레이로 올립니다. */
         #kakao-map, #map {
             position: absolute;
@@ -306,21 +351,48 @@
         map.createPane('pane_map_data');
         map.getPane('pane_map_data').style.zIndex = 400;
         map.getPane('pane_map_data').style['mix-blend-mode'] = 'normal';
-        var layer_map_data = new L.geoJson(json_map_data, {
-            attribution: '',
-            interactive: true,
-            dataVar: 'json_map_data',
-            layerName: 'layer_map_data',
-            pane: 'pane_map_data',
-            onEachFeature: pop_map_data,
-            pointToLayer: function (feature, latlng) {
-                var context = {
-                    feature: feature,
-                    variables: {}
-                };
-                return L.circleMarker(latlng, style_map_data_0(feature));
-            },
-        });
+		       var layer_map_data = new L.geoJson(json_map_data, {
+		    attribution: '',
+		    interactive: true,
+		    dataVar: 'json_map_data',
+		    layerName: 'layer_map_data',
+		    pane: 'pane_map_data',
+		    onEachFeature: function(feature, layer) {
+		        // 1. 기존 팝업 함수 실행
+		        pop_map_data(feature, layer);
+		        
+		        // 2. 팝업 옵션 동적 수정 (가로 넓이 및 북동쪽 위치)
+		        if (layer.getPopup()) {
+		            layer.getPopup().setOptions({
+		                maxWidth: 500,           // 최대 가로 너비 확장
+		                minWidth: 400,           // 최소 가로 너비 확보
+		                offset: L.point(150, 0), // [가로, 세로] 가로 150px만큼 오른쪽(동측) 이동
+		                className: 'custom-popup' // CSS 제어를 위한 클래스명 추가
+		            });
+		        }
+		    },
+		    pointToLayer: function (feature, latlng) {
+		        var context = {
+		            feature: feature,
+		            variables: {}
+		        };
+		        // 3. 마커 크기 키우기: radius 값을 기존보다 크게 설정 (예: 13)
+		        return L.circleMarker(latlng, {
+		            pane: 'pane_map_data',
+		            radius: 13.0,            // 여기서 숫자를 키우면 마커가 커집니다!
+		            opacity: 1,
+		            color: 'rgba(35,35,35,1.0)', // 테두리 색상
+		            dashArray: '',
+		            lineCap: 'butt',
+		            lineJoin: 'miter',
+		            weight: 1.0,
+		            fill: true,
+		            fillOpacity: 1,
+		            fillColor: 'rgba(255,0,0,1.0)', // 채우기 색상
+		            interactive: true,
+		        });
+		    },
+		});
         bounds_group.addLayer(layer_map_data);
         map.addLayer(layer_map_data);
         
