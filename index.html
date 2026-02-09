@@ -380,7 +380,6 @@
         function setBounds() {
         }
        function pop_map_data(feature, layer) {
-		    // 배경용 가림판 생성 (기존과 동일)
 		    if (!document.querySelector('.leaflet-popup-backdrop')) {
 		        var backdrop = document.createElement('div');
 		        backdrop.className = 'leaflet-popup-backdrop';
@@ -388,24 +387,28 @@
 		        backdrop.onclick = function() { map.closePopup(); };
 		    }
 		
-		    // 팝업 설정: 이제 마커 위에 뜨므로 offset(위치 보정)을 살짝 줍니다.
 		    layer.bindPopup(function(l) {
 		        return buildPopupContent_map_data(l.feature);
 		    }, { 
 		        maxHeight: 500,
 		        minWidth: 400,
 		        maxWidth: 450,
-		        offset: [0, -10], // 마커보다 약간 위로 띄움
-		        className: 'custom-central-popup' 
+		        offset: [0, -10],
+		        className: 'custom-central-popup',
+		        // --- 아래 옵션을 추가하여 팝업을 최상위 레이어에 배치합니다 ---
+		        pane: 'popupPane' 
 		    });
 		
 		    layer.on('popupopen', function(e) {
-		        // 가림판 보이게 하기
 		        var bd = document.querySelector('.leaflet-popup-backdrop');
 		        if(bd) bd.style.display = 'block';
 		        
-		        // 중요: 팝업이 가림판 위로 오도록 강제 확인
-		        e.popup._container.style.zIndex = "2000";
+		        // 브라우저가 팝업을 가림판보다 위에 그리도록 강제 명령
+		        var popupContainer = e.popup._container;
+		        popupContainer.style.zIndex = "10000"; 
+		        
+		        // 팝업이 열린 후 스크롤바 조작이 가능하도록 포커스 유지
+		        L.DomEvent.disableClickPropagation(popupContainer); 
 		    });
 		
 		    layer.on('popupclose', function() {
