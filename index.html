@@ -380,40 +380,28 @@
         function setBounds() {
         }
        function pop_map_data(feature, layer) {
-		    if (!document.querySelector('.leaflet-popup-backdrop')) {
-		        var backdrop = document.createElement('div');
-		        backdrop.className = 'leaflet-popup-backdrop';
-		        document.body.appendChild(backdrop);
-		        backdrop.onclick = function() { map.closePopup(); };
-		    }
-		
+		    // 1. 팝업 연결 (가림판 관련 로직 삭제)
 		    layer.bindPopup(function(l) {
 		        return buildPopupContent_map_data(l.feature);
 		    }, { 
 		        maxHeight: 500,
 		        minWidth: 400,
 		        maxWidth: 450,
-		        offset: [0, -10],
-		        className: 'custom-central-popup',
-		        // --- 아래 옵션을 추가하여 팝업을 최상위 레이어에 배치합니다 ---
-		        pane: 'popupPane' 
+		        offset: [0, -10], // 마커에서 살짝 위로 띄움
+		        className: 'custom-popup-styled' // 클래스명 변경
 		    });
 		
+		    // 2. 미디어 체크 로직만 유지
 		    layer.on('popupopen', function(e) {
-		        var bd = document.querySelector('.leaflet-popup-backdrop');
-		        if(bd) bd.style.display = 'block';
+		        addClassToPopupIfMedia(e.popup.getContent(), e.popup);
 		        
-		        // 브라우저가 팝업을 가림판보다 위에 그리도록 강제 명령
-		        var popupContainer = e.popup._container;
-		        popupContainer.style.zIndex = "10000"; 
-		        
-		        // 팝업이 열린 후 스크롤바 조작이 가능하도록 포커스 유지
-		        L.DomEvent.disableClickPropagation(popupContainer); 
-		    });
-		
-		    layer.on('popupclose', function() {
-		        var bd = document.querySelector('.leaflet-popup-backdrop');
-		        if(bd) bd.style.display = 'none';
+		        // 사진이 로드되면 팝업 위치를 다시 계산해주는 안전장치
+		        var img = e.popup._container.querySelector('img');
+		        if (img) {
+		            img.onload = function() {
+		                e.popup.update();
+		            };
+		        }
 		    });
 		}
 
