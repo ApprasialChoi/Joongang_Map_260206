@@ -142,6 +142,46 @@
 		.search-filter-input:focus {
 		    background-color: #f0f7ff;
 		}
+		.leaflet-popup-backdrop {
+		    position: fixed;
+		    top: 0; left: 0;
+		    width: 100vw; height: 100vh;
+		    background: rgba(0, 0, 0, 0.7); /* 검은색 반투명 */
+		    z-index: 1500; /* 필터 패널보다는 낮고 지도보다는 높게 */
+		    display: none;
+		}
+		
+		/* 팝업 화면 중앙 고정 */
+		.custom-central-popup.leaflet-popup {
+		    position: fixed !important;
+		    top: 50% !important;
+		    left: 50% !important;
+		    transform: translate(-50%, -50%) !important;
+		    margin: 0 !important;
+		    z-index: 1600;
+		}
+		
+		/* 중앙 팝업 시 화살표 제거 */
+		.custom-central-popup .leaflet-popup-tip-container {
+		    display: none;
+		}
+		
+		/* 팝업 내 이미지 스타일 */
+		.popup-image-container img {
+		    width: 100%;
+		    max-height: 300px;
+		    object-fit: contain; /* 이미지가 잘리지 않게 */
+		    border-radius: 8px;
+		    margin-bottom: 10px;
+		}
+
+
+
+
+
+
+
+
 			
         </style>
         <title></title>
@@ -238,6 +278,19 @@
                 return autolinker.link(String(v).replace(/'/g, '\'').toLocaleString());
             }
             var rows = '';
+
+			// ---------------------------------------------------------
+			// 바로 여기! 이 자리에 제가 드린 [이미지 삽입 코드]를 넣으시면 됩니다.
+			// ---------------------------------------------------------
+			if (props['감정서번호']) { 
+			    var imgName = props['감정서번호'] + ".jpg"; 
+			    rows += '<tr><td colspan="2" class="popup-image-container" style="text-align:center;">' +
+			            '<img src="images/' + imgName + '" ' +
+			            'style="width:100%; max-height:300px; object-fit:contain; border-radius:8px;" ' +
+			            'onerror="this.parentElement.parentElement.style.display=\'none\'">' + 
+			            '</td></tr>';
+			}
+			// ---------------------------------------------------------
             var cfg = popupFieldConfig_map_data;
             for (var i = 0; i < cfg.fields.length; i++) {
                 var key = cfg.fields[i];
@@ -337,19 +390,39 @@
         function setBounds() {
         }
         function pop_map_data(feature, layer) {
-			layer.on('popupopen', function(e) {
-                addClassToPopupIfMedia(e.popup.getContent(), e.popup);
-            });
-            layer.bindPopup(function() {
-                return buildPopupContent_map_data(feature);
-            }, { 
-                maxHeight: 400,
-                // --- 아래 옵션들을 추가하세요 ---
-                maxWidth: 500,  /* 최대 가로 너비 확장 (예: 500px) */
-                minWidth: 400,  /* 최소 가로 너비 확보 (예: 400px) */
-                className: 'custom-popup' /* CSS에서 추가 제어를 위한 클래스명 */
-            });;
-        }
+		    // 1. 배경용 어두운 막 생성 (없을 때만)
+		    if (!document.querySelector('.leaflet-popup-backdrop')) {
+		        var backdrop = document.createElement('div');
+		        backdrop.className = 'leaflet-popup-backdrop';
+		        document.body.appendChild(backdrop);
+		        
+		        // 배경 클릭 시 팝업 닫기 기능 추가
+		        backdrop.onclick = function() { map.closePopup(); };
+		    }
+		
+		    // 2. 팝업 연결 및 중앙 배치 설정
+		    layer.bindPopup(function() {
+		        return buildPopupContent_map_data(feature);
+		    }, { 
+		        maxHeight: 500,
+		        minWidth: 400,
+		        maxWidth: 500,
+		        className: 'custom-central-popup' // CSS 연결
+		    });
+		
+		    // 3. 팝업 상태에 따른 배경 토글
+		    layer.on('popupopen', function() {
+		        document.querySelector('.leaflet-popup-backdrop').style.display = 'block';
+		    });
+		    layer.on('popupclose', function() {
+		        document.querySelector('.leaflet-popup-backdrop').style.display = 'none';
+		    });
+		
+		    // 기존의 media 체크 로직 유지
+		    layer.on('popupopen', function(e) {
+		        addClassToPopupIfMedia(e.popup.getContent(), e.popup);
+		    });
+		}
 
         function style_map_data_0() {
             return {
