@@ -147,13 +147,13 @@
 		    top: 0; left: 0;
 		    width: 100vw; height: 100vh;
 		    background: rgba(0, 0, 0, 0.7); /* 검은색 반투명 */
-		    z-index: 1000; /* 필터 패널보다는 낮고 지도보다는 높게 */
+		    z-index: 500; /* 필터 패널보다는 낮고 지도보다는 높게 */
 		    display: none;
 		}
 		
 		/* 팝업 화면 중앙 고정 */
 		.custom-central-popup.leaflet-popup {
-			z-index: 2000 !important; /* 가림판(1000)보다 높게 설정 */
+			z-index: 10000 !important; /* 가림판(1000)보다 높게 설정 */
 		}
 		
 		
