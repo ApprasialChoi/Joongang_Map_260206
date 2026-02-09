@@ -273,36 +273,40 @@
         })();
 
         function buildPopupContent_map_data(feature) {
-            function fmt(v) {
-                if (v === null || v === undefined) return '';
-                return autolinker.link(String(v).replace(/'/g, '\'').toLocaleString());
-            }
-            
-            // 1. 변수 정의를 가장 위로 올립니다. (순서 중요!)
-            var props = feature.properties; 
-            var rows = '';
-
-            // 2. 이미지 삽입 로직
-            if (props['감정서번호']) { 
-                var imgName = props['감정서번호'] + ".jpg"; 
-                rows += '<tr><td colspan="2" class="popup-image-container" style="text-align:center;">' +
-                        '<img src="images/' + imgName + '" ' +
-                        'style="width:100%; max-height:300px; object-fit:contain; border-radius:8px;" ' +
-                        'onerror="this.parentElement.parentElement.style.display=\'none\'">' + 
-                        '</td></tr>';
-            }
-
-            // 3. 기존 데이터 반복문 로직
-            var cfg = popupFieldConfig_map_data;
-            for (var i = 0; i < cfg.fields.length; i++) {
-                var key = cfg.fields[i];
-                if (!cfg.visible[key]) continue;
-                var val = props[key]; // feature.properties[key] 대신 props[key] 사용
-                if (val === null || val === undefined || val === '') continue;
-                rows += '<tr><th>' + key + '</th><td>' + fmt(val) + '</td></tr>';
-            }
-            return '<table>' + (rows || '<tr><td>표시할 속성이 없습니다.</td></tr>') + '</table>';
-        }
+		    function fmt(v) {
+		        if (v === null || v === undefined) return '';
+		        return autolinker.link(String(v).replace(/'/g, '\'').toLocaleString());
+		    }
+		    
+		    // props 정의를 맨 위로!
+		    var props = feature.properties;
+		    var rows = '';
+		
+		    // 사진 로직 (감정서번호 기준)
+		    if (props['감정서번호']) { 
+		        var imgName = String(props['감정서번호']).trim() + ".jpg"; 
+		        rows += '<tr><td colspan="2" class="popup-image-container" style="text-align:center;">' +
+		                '<img src="images/' + imgName + '" ' +
+		                'style="width:100%; max-height:250px; object-fit:contain; border-radius:8px; margin-bottom:10px;" ' +
+		                'onerror="this.style.display=\'none\'">' + 
+		                '</td></tr>';
+		    }
+		
+		    // 데이터 표 로직
+		    var cfg = popupFieldConfig_map_data;
+		    for (var i = 0; i < cfg.fields.length; i++) {
+		        var key = cfg.fields[i];
+		        if (!cfg.visible[key]) continue;
+		        var val = props[key];
+		        if (val === null || val === undefined || val === '') continue;
+		        rows += '<tr><th style="min-width:80px;">' + key + '</th><td>' + fmt(val) + '</td></tr>';
+		    }
+		    
+		    // 최종 테이블 생성 (중요: rows가 비어있어도 테이블 구조는 반환해야 함)
+		    return '<table style="width:100%; border-collapse:collapse;">' + 
+		           (rows || '<tr><td>표시할 데이터가 없습니다.</td></tr>') + 
+		           '</table>';
+		}
 
         function buildLabelContent_map_data(feature) {
             var cfg = labelFieldConfig_map_data;
@@ -391,38 +395,37 @@
         var bounds_group = new L.featureGroup([]);
         function setBounds() {
         }
-        function pop_map_data(feature, layer) {
-		    // 1. 배경용 어두운 막 생성 (없을 때만)
+       function pop_map_data(feature, layer) {
+		    // 배경막 생성
 		    if (!document.querySelector('.leaflet-popup-backdrop')) {
 		        var backdrop = document.createElement('div');
 		        backdrop.className = 'leaflet-popup-backdrop';
 		        document.body.appendChild(backdrop);
-		        
-		        // 배경 클릭 시 팝업 닫기 기능 추가
 		        backdrop.onclick = function() { map.closePopup(); };
 		    }
 		
-		    // 2. 팝업 연결 및 중앙 배치 설정
-		    layer.bindPopup(function() {
-		        return buildPopupContent_map_data(feature);
+		    // 팝업 연결
+		    layer.bindPopup(function(l) {
+		        return buildPopupContent_map_data(l.feature);
 		    }, { 
 		        maxHeight: 500,
 		        minWidth: 400,
-		        maxWidth: 500,
-		        className: 'custom-central-popup' // CSS 연결
+		        maxWidth: 450,
+		        className: 'custom-central-popup' 
 		    });
 		
-		    // 3. 팝업 상태에 따른 배경 토글
-		    layer.on('popupopen', function() {
+		    // 배경 토글 및 레이아웃 업데이트
+		    layer.on('popupopen', function(e) {
 		        document.querySelector('.leaflet-popup-backdrop').style.display = 'block';
+		        // 사진 로딩 후 팝업 위치 재계산
+		        var img = e.popup._contentNode.querySelector('img');
+		        if (img) {
+		            img.onload = function() { e.popup.update(); };
+		        }
 		    });
+		
 		    layer.on('popupclose', function() {
 		        document.querySelector('.leaflet-popup-backdrop').style.display = 'none';
-		    });
-		
-		    // 기존의 media 체크 로직 유지
-		    layer.on('popupopen', function(e) {
-		        addClassToPopupIfMedia(e.popup.getContent(), e.popup);
 		    });
 		}
 
