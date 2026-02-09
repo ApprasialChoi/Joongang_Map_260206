@@ -147,24 +147,15 @@
 		    top: 0; left: 0;
 		    width: 100vw; height: 100vh;
 		    background: rgba(0, 0, 0, 0.7); /* 검은색 반투명 */
-		    z-index: 1500; /* 필터 패널보다는 낮고 지도보다는 높게 */
+		    z-index: 1000; /* 필터 패널보다는 낮고 지도보다는 높게 */
 		    display: none;
 		}
 		
 		/* 팝업 화면 중앙 고정 */
 		.custom-central-popup.leaflet-popup {
-		    position: fixed !important;
-		    top: 50% !important;
-		    left: 50% !important;
-		    transform: translate(-50%, -50%) !important;
-		    margin: 0 !important;
-		    z-index: 1600;
+			z-index: 2000 !important; /* 가림판(1000)보다 높게 설정 */
 		}
 		
-		/* 중앙 팝업 시 화살표 제거 */
-		.custom-central-popup .leaflet-popup-tip-container {
-		    display: none;
-		}
 		
 		/* 팝업 내 이미지 스타일 */
 		.popup-image-container img {
@@ -174,15 +165,7 @@
 		    border-radius: 8px;
 		    margin-bottom: 10px;
 		}
-
-
-
-
-
-
-
-
-			
+		
         </style>
         <title></title>
     </head>
