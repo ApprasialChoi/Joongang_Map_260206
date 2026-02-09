@@ -277,25 +277,27 @@
                 if (v === null || v === undefined) return '';
                 return autolinker.link(String(v).replace(/'/g, '\'').toLocaleString());
             }
+            
+            // 1. 변수 정의를 가장 위로 올립니다. (순서 중요!)
+            var props = feature.properties; 
             var rows = '';
 
-			// ---------------------------------------------------------
-			// 바로 여기! 이 자리에 제가 드린 [이미지 삽입 코드]를 넣으시면 됩니다.
-			// ---------------------------------------------------------
-			if (props['감정서번호']) { 
-			    var imgName = props['감정서번호'] + ".jpg"; 
-			    rows += '<tr><td colspan="2" class="popup-image-container" style="text-align:center;">' +
-			            '<img src="images/' + imgName + '" ' +
-			            'style="width:100%; max-height:300px; object-fit:contain; border-radius:8px;" ' +
-			            'onerror="this.parentElement.parentElement.style.display=\'none\'">' + 
-			            '</td></tr>';
-			}
-			// ---------------------------------------------------------
+            // 2. 이미지 삽입 로직
+            if (props['감정서번호']) { 
+                var imgName = props['감정서번호'] + ".jpg"; 
+                rows += '<tr><td colspan="2" class="popup-image-container" style="text-align:center;">' +
+                        '<img src="images/' + imgName + '" ' +
+                        'style="width:100%; max-height:300px; object-fit:contain; border-radius:8px;" ' +
+                        'onerror="this.parentElement.parentElement.style.display=\'none\'">' + 
+                        '</td></tr>';
+            }
+
+            // 3. 기존 데이터 반복문 로직
             var cfg = popupFieldConfig_map_data;
             for (var i = 0; i < cfg.fields.length; i++) {
                 var key = cfg.fields[i];
                 if (!cfg.visible[key]) continue;
-                var val = feature.properties[key];
+                var val = props[key]; // feature.properties[key] 대신 props[key] 사용
                 if (val === null || val === undefined || val === '') continue;
                 rows += '<tr><th>' + key + '</th><td>' + fmt(val) + '</td></tr>';
             }
