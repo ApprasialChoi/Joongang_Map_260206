@@ -380,7 +380,7 @@
         function setBounds() {
         }
        function pop_map_data(feature, layer) {
-		    // 1. 배경막 생성 (이미 있으면 생성 안 함)
+		    // 배경용 가림판 생성 (기존과 동일)
 		    if (!document.querySelector('.leaflet-popup-backdrop')) {
 		        var backdrop = document.createElement('div');
 		        backdrop.className = 'leaflet-popup-backdrop';
@@ -388,26 +388,24 @@
 		        backdrop.onclick = function() { map.closePopup(); };
 		    }
 		
-		    // 2. 팝업 바인딩
+		    // 팝업 설정: 이제 마커 위에 뜨므로 offset(위치 보정)을 살짝 줍니다.
 		    layer.bindPopup(function(l) {
 		        return buildPopupContent_map_data(l.feature);
 		    }, { 
 		        maxHeight: 500,
 		        minWidth: 400,
 		        maxWidth: 450,
+		        offset: [0, -10], // 마커보다 약간 위로 띄움
 		        className: 'custom-central-popup' 
 		    });
 		
-		    // 3. 열고 닫힐 때 이벤트
 		    layer.on('popupopen', function(e) {
+		        // 가림판 보이게 하기
 		        var bd = document.querySelector('.leaflet-popup-backdrop');
 		        if(bd) bd.style.display = 'block';
 		        
-		        // 사진 로딩 완료 시 팝업 크기 자동 조절
-		        var img = e.popup._contentNode.querySelector('img');
-		        if (img) {
-		            img.onload = function() { e.popup.update(); };
-		        }
+		        // 중요: 팝업이 가림판 위로 오도록 강제 확인
+		        e.popup._container.style.zIndex = "2000";
 		    });
 		
 		    layer.on('popupclose', function() {
