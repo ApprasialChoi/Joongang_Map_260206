@@ -272,39 +272,40 @@
             return { fields: fields, visible: vis };
         })();
 
-        function buildPopupContent_map_data(feature) {
+		function buildPopupContent_map_data(feature) {
 		    function fmt(v) {
 		        if (v === null || v === undefined) return '';
 		        return autolinker.link(String(v).replace(/'/g, '\'').toLocaleString());
 		    }
 		    
-		    // props 정의를 맨 위로!
-		    var props = feature.properties;
+		    // 변수 선언을 맨 위로 올립니다.
+		    var props = feature.properties || {};
 		    var rows = '';
 		
 		    // 사진 로직 (감정서번호 기준)
 		    if (props['감정서번호']) { 
-		        var imgName = String(props['감정서번호']).trim() + ".jpg"; 
+		        var id = String(props['감정서번호']).trim();
+		        // .jpg와 .png 둘 다 시도하게 하거나, 변환하신 .jpg로 고정합니다.
+		        var imgPath = "images/" + id + ".jpg"; 
+		        
 		        rows += '<tr><td colspan="2" class="popup-image-container" style="text-align:center;">' +
-		                '<img src="images/' + imgName + '" ' +
+		                '<img src="' + imgPath + '" ' +
 		                'style="width:100%; max-height:250px; object-fit:contain; border-radius:8px; margin-bottom:10px;" ' +
-		                'onerror="this.style.display=\'none\'">' + 
+		                'onerror="this.src=\'images/' + id + '.png\'; this.onerror=function(){this.style.display=\'none\'};">' + 
 		                '</td></tr>';
 		    }
 		
-		    // 데이터 표 로직
 		    var cfg = popupFieldConfig_map_data;
 		    for (var i = 0; i < cfg.fields.length; i++) {
 		        var key = cfg.fields[i];
 		        if (!cfg.visible[key]) continue;
 		        var val = props[key];
 		        if (val === null || val === undefined || val === '') continue;
-		        rows += '<tr><th style="min-width:80px;">' + key + '</th><td>' + fmt(val) + '</td></tr>';
+		        rows += '<tr><th style="min-width:80px; text-align:left;">' + key + '</th><td>' + fmt(val) + '</td></tr>';
 		    }
 		    
-		    // 최종 테이블 생성 (중요: rows가 비어있어도 테이블 구조는 반환해야 함)
 		    return '<table style="width:100%; border-collapse:collapse;">' + 
-		           (rows || '<tr><td>표시할 데이터가 없습니다.</td></tr>') + 
+		           (rows || '<tr><td>데이터가 없습니다.</td></tr>') + 
 		           '</table>';
 		}
 
@@ -396,7 +397,7 @@
         function setBounds() {
         }
        function pop_map_data(feature, layer) {
-		    // 배경막 생성
+		    // 1. 배경막 생성 (이미 있으면 생성 안 함)
 		    if (!document.querySelector('.leaflet-popup-backdrop')) {
 		        var backdrop = document.createElement('div');
 		        backdrop.className = 'leaflet-popup-backdrop';
@@ -404,7 +405,7 @@
 		        backdrop.onclick = function() { map.closePopup(); };
 		    }
 		
-		    // 팝업 연결
+		    // 2. 팝업 바인딩
 		    layer.bindPopup(function(l) {
 		        return buildPopupContent_map_data(l.feature);
 		    }, { 
@@ -414,10 +415,12 @@
 		        className: 'custom-central-popup' 
 		    });
 		
-		    // 배경 토글 및 레이아웃 업데이트
+		    // 3. 열고 닫힐 때 이벤트
 		    layer.on('popupopen', function(e) {
-		        document.querySelector('.leaflet-popup-backdrop').style.display = 'block';
-		        // 사진 로딩 후 팝업 위치 재계산
+		        var bd = document.querySelector('.leaflet-popup-backdrop');
+		        if(bd) bd.style.display = 'block';
+		        
+		        // 사진 로딩 완료 시 팝업 크기 자동 조절
 		        var img = e.popup._contentNode.querySelector('img');
 		        if (img) {
 		            img.onload = function() { e.popup.update(); };
@@ -425,7 +428,8 @@
 		    });
 		
 		    layer.on('popupclose', function() {
-		        document.querySelector('.leaflet-popup-backdrop').style.display = 'none';
+		        var bd = document.querySelector('.leaflet-popup-backdrop');
+		        if(bd) bd.style.display = 'none';
 		    });
 		}
 
