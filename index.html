@@ -649,35 +649,34 @@
                             buildFunc = buildLabelContent_map_data;
                         }
 
-                        // 라벨 새로고침 내부 함수
-                     // 라벨 필드 토글 컨트롤 내부의 refresh 함수를 찾아서 교체하세요
 						function refresh() {
 						    targetLayer.eachLayer(function(lyr) {
-						        // 1. 기존 툴팁을 깨끗하게 제거
 						        lyr.unbindTooltip();
 						        
-						        // 2. 새로운 디자인 내용 가져오기
 						        var newContent = buildFunc(lyr.feature);
 						        
-						        // 3. 내용이 있을 때만 새로 연결 (디자인 클래스 포함)
 						        if (newContent) {
 						            lyr.bindTooltip(newContent, {
 						                permanent: true,
 						                direction: 'top',
-						                // B데이터 레이어일 때만 전용 디자인 클래스 적용
 						                className: (targetLayer === layer_B_data_0) ? 'css_map_data_B' : 'css_map_data',
-						                offset: [0, -10]
+						                offset: [0, -10],
+						                // --- 아래 옵션들을 추가/수정하세요 ---
+						                sticky: false,        // 마우스 따라다니지 않게 고정
+						                opacity: 1,           // 투명도 유지
+						                interactive: false    // 라벨이 마우스 클릭 방해하지 않게
 						            });
 						        }
 						    });
-						    
-						    // 4. Leaflet-2-Web 특유의 라벨 재정렬 함수 호출 (충돌 방지)
+						
+						    // qgis2web 특유의 라벨 충돌 방지 로직 강제 종료
 						    if (typeof resetLabels === 'function') {
-						        resetLabels([targetLayer]);
+						        // 이 함수가 실행되면서 겹치는걸 숨길 수 있으므로, 
+						        // 아예 호출하지 않거나 모든 레이어를 강제로 보이게 처리해야 합니다.
+						        resetLabels([targetLayer]); 
 						    }
 						}
 
-                        // 체크박스 생성 루프
                         cfg.fields.forEach(function(key, i) {
                             var row = document.createElement('label');
                             row.style.display = 'block';
@@ -729,16 +728,6 @@
               addLabel(layer, i);
               i++;
         });
-        resetLabels([layer_map_data]);
-        map.on("zoomend", function(){
-            resetLabels([layer_map_data]);
-        });
-        map.on("layeradd", function(){
-            resetLabels([layer_map_data]);
-        });
-        map.on("layerremove", function(){
-            resetLabels([layer_map_data]);
-        });
 
 		// --- 동적 검색 필터 로직 시작 ---
        function applyMultiFilter() {
@@ -778,9 +767,7 @@
 		    // 결과 건수 업데이트
 		    document.getElementById('filter-result-count').innerText = "검색 결과: " + visibleCount + "건";
 		
-		    if (typeof resetLabels === "function") {
-		        resetLabels([layer_map_data]);
-		    }
+		
 		}
 		
 		// 모든 입력창에 이벤트 연결
