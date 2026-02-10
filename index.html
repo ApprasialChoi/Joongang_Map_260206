@@ -890,26 +890,36 @@
 		    var listHtml = '';
 		    var count = 0;
 		
-		    // 현재 지도에 추가되어 있는 모든 레이어를 확인
 		    map.eachLayer(function(layer) {
-		        // 1. 마커(Point) 데이터이면서 feature가 있는 것만 골라냄
-		        if (layer instanceof L.CircleMarker || layer instanceof L.Marker) {
-		            if (layer.feature && bounds.contains(layer.getLatLng())) {
-		                var p = layer.feature.properties;
-		                count++;
+		        if ((layer instanceof L.CircleMarker || layer instanceof L.Marker) && layer.feature && bounds.contains(layer.getLatLng())) {
+		            var p = layer.feature.properties;
+		            count++;
 		
-		                // 데이터 출처(A인지 B인지)에 따라 유연하게 제목과 내용을 뽑아옵니다.
-		                // B데이터는 '소재지(통', A데이터는 '주소' 필드를 쓴다고 가정
-		                var title = p['소재지(통'] || p['주소'] || p['건명'] || '정보 없음';
-		                var price = p['의뢰금액('] || p['감정금액'] || ''; // A데이터에 가격 필드가 있다면 추가
-		                var subInfo = p['세부용도'] || p['물건종류'] || '';
+		            // [체크] B데이터인지 판별 (B데이터에만 있는 필드 '소재지(통' 존재 여부 확인)
+		            var isTypeB = p.hasOwnProperty('소재지(통'); 
 		
+		            if (isTypeB) {
+		                // --- B데이터(매물) 디자인 ---
 		                listHtml += `
-		                    <div class="list-item" onclick="focusAnyMarker(${layer._leaflet_id})" style="padding:15px; border-bottom:1px solid #eee; cursor:pointer;">
-		                        <div class="title" style="font-weight:bold; font-size:14px;">${title}</div>
-		                        ${price ? `<div class="price" style="color:#d32f2f; font-weight:bold; margin-top:5px;">${price}</div>` : ''}
-		                        <div class="info" style="font-size:12px; color:#666; margin-top:3px;">
-		                            ${subInfo} ${p['담당자'] ? '| ' + p['담당자'] : ''}
+		                    <div class="list-item type-b" onclick="focusAnyMarker(${layer._leaflet_id})" 
+		                         style="padding:16px; border-bottom:1px solid #edf2f7; border-left:4px solid #3182ce; background:#fff; cursor:pointer; margin-bottom:4px;">
+		                        <div style="font-size:11px; color:#3182ce; font-weight:bold; margin-bottom:4px;">실시간 매물</div>
+		                        <div class="title" style="font-weight:bold; font-size:15px; color:#2d3748;">${p['소재지(통'] || '주소 정보 없음'}</div>
+		                        <div class="price" style="color:#e53e3e; font-weight:800; font-size:16px; margin-top:6px;">${p['의뢰금액('] || '금액 미정'}</div>
+		                        <div class="info" style="font-size:12px; color:#718096; margin-top:4px;">
+		                            <span style="background:#ebf8ff; padding:2px 6px; border-radius:4px;">${p['세부용도']}</span> | ${p['보증금/월'] || '정보없음'}
+		                        </div>
+		                    </div>
+		                `;
+		            } else {
+		                // --- A데이터(기본) 디자인 ---
+		                listHtml += `
+		                    <div class="list-item type-a" onclick="focusAnyMarker(${layer._leaflet_id})" 
+		                         style="padding:16px; border-bottom:1px solid #edf2f7; border-left:4px solid #718096; background:#f7fafc; cursor:pointer; margin-bottom:4px;">
+		                        <div style="font-size:11px; color:#718096; font-weight:bold; margin-bottom:4px;">기본 데이터</div>
+		                        <div class="title" style="font-weight:bold; font-size:14px; color:#4a5568;">${p['주소'] || p['건명'] || '정보 없음'}</div>
+		                        <div class="info" style="font-size:12px; color:#718096; margin-top:6px;">
+		                            ${p['물건종류'] || ''} | ${p['담당자'] ? '담당: ' + p['담당자'] : '담당자 미정'}
 		                        </div>
 		                    </div>
 		                `;
@@ -917,11 +927,11 @@
 		        }
 		    });
 		
-		    listContainer.innerHTML = listHtml || '<div style="padding:20px; color:#999; text-align:center;">표시할 데이터가 없습니다.</div>';
+		    listContainer.innerHTML = listHtml || '<div style="padding:40px; color:#a0aec0; text-align:center;">표시할 데이터가 없습니다.</div>';
 		    countElement.innerText = count;
 		}
 		
-		// 어떤 레이어든 상관없이 ID로 찾아가는 통합 포커스 함수
+		// 통합 포커스 함수 (그대로 유지)
 		window.focusAnyMarker = function(leaflet_id) {
 		    map.eachLayer(function(layer) {
 		        if (layer._leaflet_id === leaflet_id) {
@@ -931,7 +941,7 @@
 		    });
 		};
 		
-		// 레이어 컨트롤에서 체크박스를 끄고 켤 때도 리스트가 갱신되어야 함
+		// 모든 이벤트 리스너 통합 (레이어 켜고 끌 때 리스트가 즉시 반응함)
 		map.on('overlayadd overlayremove moveend zoomend', updateDashboard);
 
 		var lControl = window.layerControl || window.controlLayers || window.control;
