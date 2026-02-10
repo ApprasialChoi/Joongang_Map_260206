@@ -673,28 +673,13 @@
 		        try {
 		            var geojsonData = JSON.parse(event.target.result);
 		            
-		            // 1. 외부 GeoJSON 레이어 생성 (팝업 + 마커 + 라벨)
+		            // 1. 새로운 레이어 생성
 		            var newLayer = L.geoJson(geojsonData, {
-		                // 각 피처(데이터)가 생성될 때 실행
-		                onEachFeature: function(feature, layer) {
-		                    // (1) 클릭 시 나타나는 팝업 연결
-		                    pop_map_data(feature, layer); 
-		
-		                    // (2) 지도 위에 항상 떠 있는 라벨(Tooltip) 연결
-		                    // 기존에 쓰시던 buildLabelContent_map_data 함수를 호출합니다.
-		                    if (typeof buildLabelContent_map_data === 'function') {
-		                        layer.bindTooltip(buildLabelContent_map_data(feature), {
-		                            permanent: true,     // 항상 보이기
-		                            offset: [0, -16],    // 마커 위로 살짝 띄움
-		                            className: 'css_map_data', // 기존 라벨 스타일 적용
-		                            direction: 'top'
-		                        });
-		                    }
-		                },
+		                onEachFeature: pop_map_data, // 기존 팝업 함수 사용
 		                pointToLayer: function (feature, latlng) {
 		                    return L.circleMarker(latlng, {
 		                        radius: 6,
-		                        fillColor: "#ff7800", // 외부 데이터 구분 색상
+		                        fillColor: "#ff7800", // 외부 데이터는 주황색
 		                        color: "#000",
 		                        weight: 1,
 		                        opacity: 1,
@@ -706,30 +691,29 @@
 		            // 2. 지도에 추가
 		            newLayer.addTo(map);
 		
-		            // 3. 우측 상단 레이어 컨트롤 패널에 등록
+		            // 3. 레이어 컨트롤(우측 상단 패널)에 추가
 		            var layerName = "📂 " + file.name;
+		
+		            // qgis2web에서 사용하는 레이어 컨트롤 변수명을 자동으로 찾아 등록합니다.
+		            // 보통 layerControl 또는 controlLayers라는 이름을 씁니다.
 		            var lControl = window.layerControl || window.controlLayers || window.control;
 		
 		            if (lControl && typeof lControl.addOverlay === 'function') {
 		                lControl.addOverlay(newLayer, layerName);
 		            } else {
+		                // 만약 컨트롤 변수를 못 찾으면 새로 하나 만들어서 우측 상단에 띄웁니다.
 		                L.control.layers(null, {[layerName]: newLayer}, {collapsed: false}).addTo(map);
 		            }
 		            
-		            // 4. 지도 위치 이동 및 라벨 재정렬
+		            // 4. 추가된 데이터 위치로 지도 자동 이동
 		            if (newLayer.getBounds().isValid()) {
 		                map.fitBounds(newLayer.getBounds());
 		            }
-		
-		            // 라벨 겹침 방지 기능이 있다면 실행 (labelgun 등)
-		            if (typeof resetLabels === 'function') {
-		                resetLabels([newLayer]);
-		            }
 		            
-		            alert("'" + file.name + "' 데이터와 라벨을 불러왔습니다!");
+		            alert("'" + file.name + "' 데이터를 성공적으로 불러왔습니다!");
 		        } catch (err) {
 		            console.error(err);
-		            alert("JSON 형식이 올바르지 않거나 라벨 생성 중 오류가 발생했습니다.");
+		            alert("JSON 형식이 올바르지 않습니다.");
 		        }
 		    };
 		    reader.readAsText(file);
