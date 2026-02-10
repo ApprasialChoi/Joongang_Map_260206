@@ -169,25 +169,53 @@
 		<style>
 
 		<style>
-		    /* B데이터 전용 박스 디자인 */
-		    .css_map_data_B {
-		        background-color: #ffffff !important; /* 글씨를 감싸는 흰색 배경 */
-		        border: 2px solid #3388ff !important; /* 파란색 테두리 */
-		        border-radius: 8px !important;       /* 모서리 둥글게 */
-		        padding: 8px 12px !important;        /* 안쪽 여백 */
-		        box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important; /* 부드러운 그림자 */
-		        white-space: nowrap !important;      /* 줄바꿈 방지 */
-		        opacity: 1 !important;               /* 불투명도 100% */
+		    /* 툴팁 외곽 박스 자체의 기본 배경과 테두리 제거 (박스 중복 방지) */
+		    .leaflet-tooltip.css_map_data_B {
+		        background-color: transparent !important;
+		        border: none !important;
+		        box-shadow: none !important;
+		        padding: 0 !important;
 		    }
 		
-		    /* 텍스트(라벨) 체크 해제 시 같이 사라지도록 설정 */
+		    /* 우리가 직접 만든 내부 박스 디자인 */
+		    .custom-tooltip-box {
+		        background-color: #ffffff !important; /* 순백색 배경 */
+		        border: 2px solid #3388ff !important; /* 파란색 테두리 */
+		        border-radius: 8px !important;
+		        padding: 10px 14px !important;
+		        box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
+		        text-align: center;
+		        min-width: 120px;
+		    }
+		
+		    /* 주소~예상 필드 스타일 (진한 흑회색) */
+		    .text-main {
+		        font-weight: bold !important;
+		        color: #1a202c !important; /* 진한 흑회색 */
+		        font-size: 13px !important;
+		        margin-bottom: 2px;
+		        white-space: nowrap;
+		    }
+		
+		    /* 마지막 의뢰금액 스타일 (강렬한 레드) */
+		    .text-price {
+		        font-weight: 900 !important;
+		        color: #e53e3e !important;
+		        font-size: 15px !important;
+		        margin-top: 6px;
+		        border-top: 1px solid #edf2f7;
+		        padding-top: 4px;
+		        white-space: nowrap;
+		    }
+		
+		    /* 토글 기능 연동 */
 		    .labels-hidden .css_map_data_B {
 		        display: none !important;
 		    }
 		
-		    /* 화살표(꼬리) 디자인 */
+		    /* 화살표 제거 (박스가 깔끔해짐) */
 		    .leaflet-tooltip-top.css_map_data_B:before {
-		        border-top-color: #3388ff !important;
+		        display: none !important;
 		    }
 		</style>
         <title></title>
@@ -525,25 +553,24 @@
                 }
                 
                 var p = feature.properties;
-                // [수정된 라벨 디자인]
+                
+                // 요청하신 필드 순서: 소재지 -> 구분 -> 세부용도 -> 보증금/월 -> (단순)예상 -> 의뢰금액
                 var customLabel = `
-                    <div style="text-align: center;">
-                        <div style="font-weight:bold; color:#1a202c; font-size:13px; margin-bottom:2px;">${p['소재지(통'] || ''}</div>
-                        <div style="font-weight:900; color:#e53e3e; font-size:14px; margin-bottom:5px;">${p['의뢰금액('] || ''}</div>
-                        
-                        <div style="color:#4a5568; font-size:11px; line-height:1.4; border-top: 1px solid #edf2f7; pt: 4px;">
-                            <div>${p['구분'] || ''} | ${p['세부용도'] || ''}</div>
-                            <div>보증/월: ${p['보증금/월'] || '-'}</div>
-                            <div style="font-style: italic;">예상: ${p['(단순)예상'] || '-'}</div>
-                        </div>
+                    <div class="custom-tooltip-box">
+                        <div class="text-main">${p['소재지(통'] || ''}</div>
+                        <div class="text-main">${p['구분'] || ''}</div>
+                        <div class="text-main">${p['세부용도'] || ''}</div>
+                        <div class="text-main">${p['보증금/월'] || ''}</div>
+                        <div class="text-main">${p['(단순)예상'] || ''}</div>
+                        <div class="text-price">${p['의뢰금액('] || ''}</div>
                     </div>
                 `;
 
                 layer.bindTooltip(customLabel, {
                     permanent: true,
                     direction: 'top',
-                    className: 'css_map_data_B', // CSS에서 흰색 배경을 입힙니다.
-                    offset: [0, -7]
+                    className: 'css_map_data_B', 
+                    offset: [0, -10]
                 });
             },
 		    pointToLayer: function (feature, latlng) {
