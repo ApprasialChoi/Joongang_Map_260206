@@ -456,12 +456,32 @@
         // 기본값: 라벨 표시(체크된 상태)
         layer_labels_map_data.addTo(map);
 
-        L.control.layers(
-            null,
-            {
-                '마커': layer_map_data,
-                '텍스트(라벨)': layer_labels_map_data
-            },
+		var layer_B_data_0 = new L.geoJson(json_B_data_0, {
+            onEachFeature: pop_map_data,
+            pointToLayer: function (feature, latlng) {
+                return L.circleMarker(latlng, {
+                    radius: 6,
+                    fillColor: "#3388ff", // B 데이터는 파란색
+                    color: "#000",
+                    weight: 1,
+                    fillOpacity: 0.8
+                });
+            }
+        });
+
+        // --- 2. 통합 컨트롤 설정 ---
+        // 기존에 '마커', '텍스트'만 있던 곳에 '매물 데이터 B'를 추가합니다.
+        var baseMaps = {}; // 배경 지도가 있다면 여기에 넣으세요 (보통 null)
+        var overlays = {
+            'A 데이터(마커)': layer_map_data,
+            'B 데이터(매물)': layer_B_data_0, // 새로 추가!
+            '텍스트(라벨)': layer_labels_map_data
+        };
+
+        // window 객체에 저장해두면 나중에 다른 함수에서 접근하기 좋습니다.
+        window.layerControl = L.control.layers(
+            baseMaps, 
+            overlays, 
             { collapsed: false, position: 'topright' }
         ).addTo(map);
 
@@ -790,17 +810,6 @@
 		        });
 		    });
 		}
-		var layer_B_data_0 = new L.geoJson(json_B_data_0, {
-		    onEachFeature: pop_map_data, // 기존 팝업 함수 재활용
-		    pointToLayer: function (feature, latlng) {
-		        return L.circleMarker(latlng, {
-		            radius: 6,
-		            fillColor: "#3388ff", // B 데이터는 파란색으로 구분
-		            color: "#000000",
-		            fillOpacity: 0.8
-		        });
-		    }
-		});
 
 		var lControl = window.layerControl || window.controlLayers || window.control;
 		if (lControl) {
