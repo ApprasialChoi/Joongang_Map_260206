@@ -673,16 +673,13 @@
 		        try {
 		            var geojsonData = JSON.parse(event.target.result);
 		            
-		            // 기존에 올렸던 외부 레이어가 있다면 제거 (새로 올릴 때 초기화)
-		            externalLayerGroup.clearLayers();
-		
-		            // 외부 GeoJSON 레이어 생성 및 추가
+		            // 1. 새로운 레이어 생성
 		            var newLayer = L.geoJson(geojsonData, {
-		                onEachFeature: pop_map_data, // 기존에 만들어둔 팝업 함수 재활용!
+		                onEachFeature: pop_map_data, // 기존 팝업 함수 사용
 		                pointToLayer: function (feature, latlng) {
 		                    return L.circleMarker(latlng, {
 		                        radius: 6,
-		                        fillColor: "#ff7800", // 외부 파일은 주황색으로 구분
+		                        fillColor: "#ff7800", // 외부 데이터는 주황색
 		                        color: "#000",
 		                        weight: 1,
 		                        opacity: 1,
@@ -691,12 +688,29 @@
 		                }
 		            });
 		
-		            externalLayerGroup.addLayer(newLayer);
+		            // 2. 지도에 추가
+		            newLayer.addTo(map);
+		
+		            // 3. 레이어 컨트롤(우측 상단 패널)에 추가
+		            var layerName = "📂 " + file.name;
+		
+		            // qgis2web에서 사용하는 레이어 컨트롤 변수명을 자동으로 찾아 등록합니다.
+		            // 보통 layerControl 또는 controlLayers라는 이름을 씁니다.
+		            var lControl = window.layerControl || window.controlLayers || window.control;
+		
+		            if (lControl && typeof lControl.addOverlay === 'function') {
+		                lControl.addOverlay(newLayer, layerName);
+		            } else {
+		                // 만약 컨트롤 변수를 못 찾으면 새로 하나 만들어서 우측 상단에 띄웁니다.
+		                L.control.layers(null, {[layerName]: newLayer}, {collapsed: false}).addTo(map);
+		            }
 		            
-		            // 추가된 데이터 위치로 지도 자동 이동
-		            map.fitBounds(newLayer.getBounds());
+		            // 4. 추가된 데이터 위치로 지도 자동 이동
+		            if (newLayer.getBounds().isValid()) {
+		                map.fitBounds(newLayer.getBounds());
+		            }
 		            
-		            alert("외부 데이터를 성공적으로 불러왔습니다!");
+		            alert("'" + file.name + "' 데이터를 성공적으로 불러왔습니다!");
 		        } catch (err) {
 		            console.error(err);
 		            alert("JSON 형식이 올바르지 않습니다.");
