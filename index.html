@@ -650,13 +650,32 @@
                         }
 
                         // 라벨 새로고침 내부 함수
-                        function refresh() {
-                            targetLayer.eachLayer(function(lyr) {
-                                var tt = lyr.getTooltip();
-                                if (tt) tt.setContent(buildFunc(lyr.feature));
-                            });
-                            if (typeof resetLabels === 'function') resetLabels([targetLayer]);
-                        }
+                     // 라벨 필드 토글 컨트롤 내부의 refresh 함수를 찾아서 교체하세요
+						function refresh() {
+						    targetLayer.eachLayer(function(lyr) {
+						        // 1. 기존 툴팁을 깨끗하게 제거
+						        lyr.unbindTooltip();
+						        
+						        // 2. 새로운 디자인 내용 가져오기
+						        var newContent = buildFunc(lyr.feature);
+						        
+						        // 3. 내용이 있을 때만 새로 연결 (디자인 클래스 포함)
+						        if (newContent) {
+						            lyr.bindTooltip(newContent, {
+						                permanent: true,
+						                direction: 'top',
+						                // B데이터 레이어일 때만 전용 디자인 클래스 적용
+						                className: (targetLayer === layer_B_data_0) ? 'css_map_data_B' : 'css_map_data',
+						                offset: [0, -10]
+						            });
+						        }
+						    });
+						    
+						    // 4. Leaflet-2-Web 특유의 라벨 재정렬 함수 호출 (충돌 방지)
+						    if (typeof resetLabels === 'function') {
+						        resetLabels([targetLayer]);
+						    }
+						}
 
                         // 체크박스 생성 루프
                         cfg.fields.forEach(function(key, i) {
