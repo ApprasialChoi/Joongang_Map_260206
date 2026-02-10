@@ -245,6 +245,33 @@
             return { fields: fields, visible: vis };
         })();
 
+		// B 데이터용 필드 설정
+		var labelFieldConfig_B_data = {
+		    fields: ["연번", "소재지(통", "구분", "세부용도", "보증금/월", "의뢰금액(", "(단순)예상"],
+		    visible: {
+		        "연번": false, "소재지(통": true, "구분": true, "세부용도": true, 
+		        "보증금/월": true, "의뢰금액(": true, "(단순)예상": true
+		    }
+		};
+		
+		// B 데이터용 라벨 내용 생성 함수
+		function buildLabelContent_B_data(feature) {
+		    var cfg = labelFieldConfig_B_data;
+		    var props = feature.properties;
+		    var parts = [];
+		    for (var i = 0; i < cfg.fields.length; i++) {
+		        var key = cfg.fields[i];
+		        if (!cfg.visible[key]) continue;
+		        var v = props[key];
+		        if (v === null || v === undefined || v === '') continue;
+		        parts.push(String(v));
+		    }
+		    if (!parts.length) return '';
+		    return '<div class="q2w-label" style="color:#ffffff; font-size:10pt; font-family:sans-serif;">' +
+		           parts.join('<br>') + '</div>';
+		}
+
+			
         // 라벨(지도 위 텍스트)에 표시할 필드별 토글 설정
         // - qgis2web 기본 라벨식: 제출처(Tar) / 담당자 / 의뢰일자 / 상태 / 주소
         var labelFieldConfig_map_data = (function() {
@@ -485,17 +512,18 @@
             { collapsed: false, position: 'topright' }
         ).addTo(map);
 
-        // 라벨(텍스트) 필드별 표시/숨김 토글 컨트롤
+// [수정] 라벨 필드별 표시/숨김 토글 컨트롤 (동적 버전)
         (function addLabelFieldToggleControl() {
             var Control = L.Control.extend({
                 options: { position: 'topright' },
                 onAdd: function(m) {
                     var div = L.DomUtil.create('div', 'popup-field-toggle');
+                    div.id = 'dynamic-label-toggle'; // ID 부여
                     div.innerHTML = [
-                        '<div class="title">라벨 필드 토글</div>',
-                        '<div class="actions">',
-                        '  <button type="button" data-action="all">전체</button>',
-                        '  <button type="button" data-action="none">해제</button>',
+                        '<div class="title" style="font-weight:bold; margin-bottom:5px;">라벨 필드 토글</div>',
+                        '<div class="actions" style="margin-bottom:5px;">',
+                        '  <button type="button" data-action="all" style="font-size:10px;">전체</button>',
+                        '  <button type="button" data-action="none" style="font-size:10px;">해제</button>',
                         '</div>',
                         '<div class="list"></div>'
                     ].join('');
@@ -503,49 +531,64 @@
                     L.DomEvent.disableClickPropagation(div);
                     L.DomEvent.disableScrollPropagation(div);
 
-                    var list = div.querySelector('.list');
-                    var cfg = labelFieldConfig_map_data;
+                    // 리스트를 새로 그려주는 핵심 함수
+                    div.updateUI = function() {
+                        var list = div.querySelector('.list');
+                        list.innerHTML = '';
+                        
+                        // 현재 지도에 있는 레이어 판별
+                        var cfg, targetLayer, buildFunc;
+                        if (map.hasLayer(layer_B_data_0)) {
+                            cfg = labelFieldConfig_B_data;
+                            targetLayer = layer_B_data_0;
+                            buildFunc = buildLabelContent_B_data;
+                        } else {
+                            cfg = labelFieldConfig_map_data;
+                            targetLayer = layer_map_data;
+                            buildFunc = buildLabelContent_map_data;
+                        }
 
-                    function refreshLabels() {
-                        var idx = 0;
-                        layer_map_data.eachLayer(function(lyr) {
-                            var tt = (lyr.getTooltip && lyr.getTooltip()) ? lyr.getTooltip() : null;
-                            if (tt) {
-                                tt.setContent(buildLabelContent_map_data(lyr.feature));
-                            }
-                            idx++;
-                        });
-                        // labelgun 재계산
-                        resetLabels([layer_map_data]);
-                    }
-
-                    for (var i = 0; i < cfg.fields.length; i++) {
-                        var key = cfg.fields[i];
-                        var id = 'labelfield_' + i;
-                        var row = document.createElement('label');
-                        row.innerHTML = '<input type="checkbox" id="' + id + '" checked> <span>' + key + '</span>';
-                        (function(k, checkbox) {
-                            checkbox.addEventListener('change', function() {
-                                cfg.visible[k] = !!checkbox.checked;
-                                refreshLabels();
+                        // 라벨 새로고침 내부 함수
+                        function refresh() {
+                            targetLayer.eachLayer(function(lyr) {
+                                var tt = lyr.getTooltip();
+                                if (tt) tt.setContent(buildFunc(lyr.feature));
                             });
-                        })(key, row.querySelector('input'));
-                        list.appendChild(row);
-                    }
+                            if (typeof resetLabels === 'function') resetLabels([targetLayer]);
+                        }
 
-                    div.querySelector('[data-action="all"]').addEventListener('click', function() {
-                        for (var i = 0; i < cfg.fields.length; i++) cfg.visible[cfg.fields[i]] = true;
-                        var inputs = list.querySelectorAll('input[type="checkbox"]');
-                        for (var j = 0; j < inputs.length; j++) inputs[j].checked = true;
-                        refreshLabels();
-                    });
-                    div.querySelector('[data-action="none"]').addEventListener('click', function() {
-                        for (var i = 0; i < cfg.fields.length; i++) cfg.visible[cfg.fields[i]] = false;
-                        var inputs = list.querySelectorAll('input[type="checkbox"]');
-                        for (var j = 0; j < inputs.length; j++) inputs[j].checked = false;
-                        refreshLabels();
+                        // 체크박스 생성 루프
+                        cfg.fields.forEach(function(key, i) {
+                            var row = document.createElement('label');
+                            row.style.display = 'block';
+                            var checked = cfg.visible[key] ? 'checked' : '';
+                            row.innerHTML = '<input type="checkbox" ' + checked + '> <span style="font-size:11px;">' + key + '</span>';
+                            
+                            row.querySelector('input').addEventListener('change', function() {
+                                cfg.visible[key] = !!this.checked;
+                                refresh();
+                            });
+                            list.appendChild(row);
+                        });
+
+                        // 전체/해제 버튼 이벤트 다시 연결
+                        div.querySelector('[data-action="all"]').onclick = function() {
+                            cfg.fields.forEach(function(k) { cfg.visible[k] = true; });
+                            div.updateUI(); refresh();
+                        };
+                        div.querySelector('[data-action="none"]').onclick = function() {
+                            cfg.fields.forEach(function(k) { cfg.visible[k] = false; });
+                            div.updateUI(); refresh();
+                        };
+                    };
+
+                    // 레이어가 추가/삭제될 때 UI 갱신 이벤트 등록
+                    m.on('overlayadd overlayremove', function() {
+                        div.updateUI();
                     });
 
+                    // 초기 1회 실행
+                    setTimeout(function() { div.updateUI(); }, 100);
                     return div;
                 }
             });
@@ -812,9 +855,6 @@
 		}
 
 		var lControl = window.layerControl || window.controlLayers || window.control;
-		if (lControl) {
-		    lControl.addOverlay(layer_B_data_0, "📂 매물 데이터 B");
-		}
         </script>        
     </body>
 </html>
