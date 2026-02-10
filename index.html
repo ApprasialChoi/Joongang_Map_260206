@@ -898,16 +898,23 @@
 		            // [체크] B데이터인지 판별 (B데이터에만 있는 필드 '소재지(통' 존재 여부 확인)
 		            var isTypeB = p.hasOwnProperty('소재지(통'); 
 		
-		            if (isTypeB) {
-		                // --- B데이터(매물) 디자인 ---
+		           if (isTypeB) {
+		                // --- B데이터(매물) 디자인: 정보 항목 보강 ---
 		                listHtml += `
 		                    <div class="list-item type-b" onclick="focusAnyMarker(${layer._leaflet_id})" 
 		                         style="padding:16px; border-bottom:1px solid #edf2f7; border-left:4px solid #3182ce; background:#fff; cursor:pointer; margin-bottom:4px;">
 		                        <div style="font-size:11px; color:#3182ce; font-weight:bold; margin-bottom:4px;">실시간 매물</div>
-		                        <div class="title" style="font-weight:bold; font-size:15px; color:#2d3748;">${p['소재지(통'] || '주소 정보 없음'}</div>
-		                        <div class="price" style="color:#e53e3e; font-weight:800; font-size:16px; margin-top:6px;">${p['의뢰금액('] || '금액 미정'}</div>
-		                        <div class="info" style="font-size:12px; color:#718096; margin-top:4px;">
-		                            <span style="background:#ebf8ff; padding:2px 6px; border-radius:4px;">${p['세부용도']}</span> | ${p['보증금/월'] || '정보없음'}
+		                        <div class="title" style="font-weight:bold; font-size:15px; color:#2d3748; line-height:1.4;">${p['소재지(통'] || '주소 정보 없음'}</div>
+		                        
+		                        <div class="price" style="color:#e53e3e; font-weight:800; font-size:16px; margin-top:6px;">
+		                            ${p['의뢰금액('] || '금액 미정'}
+		                        </div>
+		
+		                        <div class="info" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;">
+		                            ${p['세부용도'] ? `<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">${p['세부용도']}</span>` : ''}
+		                            ${p['보증금/월'] ? `<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">보증/월: ${p['보증금/월']}</span>` : ''}
+		                            ${p['의뢰금액('] ? `<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">의뢰: ${p['의뢰금액(']}</span>` : ''}
+		                            ${p['(단순)예상'] ? `<span style="background:#f8fafc; color:#64748b; padding:2px 6px; border-radius:4px; font-size:11px; border:1px dashed #cbd5e1;">예상: ${p['(단순)예상']}</span>` : ''}
 		                        </div>
 		                    </div>
 		                `;
