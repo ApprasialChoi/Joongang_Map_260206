@@ -181,6 +181,29 @@
 	        box-shadow: 2px 2px 5px rgba(0,0,0,0.2) !important;
 	        white-space: nowrap !important;
 	    }
+		/* 텍스트(라벨) 체크를 해제해도 B데이터는 보이게 하는 강제 규칙 */
+		.labels-hidden .css_map_data_B {
+		    display: block !important;
+		}
+		
+		/* B데이터 라벨의 디자인 (기존과 중복되어도 안전하게 추가) */
+		.css_map_data_B {
+		    background-color: white !important;
+		    border: 2px solid #3388ff !important; /* B데이터 마커 색상과 맞춤 */
+		    border-radius: 4px !important;
+		    padding: 3px 6px !important;
+		    font-size: 12px !important;
+		    font-weight: bold !important;
+		    color: #000 !important;
+		    box-shadow: 2px 2px 5px rgba(0,0,0,0.2) !important;
+		    white-space: nowrap !important;
+		    pointer-events: none !important; /* 라벨 때문에 마커 클릭이 안 되는 현상 방지 */
+		}
+		
+		/* 툴팁 화살표 색상도 파란색으로 통일 */
+		.leaflet-tooltip-top.css_map_data_B:before {
+		    border-top-color: #3388ff !important;
+		}
 		</style>
         <title></title>
     </head>
