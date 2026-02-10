@@ -221,6 +221,7 @@
         <script src="js/labels.js"></script>
         <script src="js/leaflet.photon.js"></script>
         <script src="data/map_data.js"></script>
+		<script src="data/B_data.js"></script>
         <script>
         var map = L.map('map', {
             zoomControl:false, maxZoom:28, minZoom:1
@@ -788,6 +789,22 @@
 		            }
 		        });
 		    });
+		}
+		var layer_B_data_0 = new L.geoJson(json_B_data_0, {
+		    onEachFeature: pop_map_data, // 기존 팝업 함수 재활용
+		    pointToLayer: function (feature, latlng) {
+		        return L.circleMarker(latlng, {
+		            radius: 6,
+		            fillColor: "#3388ff", // B 데이터는 파란색으로 구분
+		            color: "#000000",
+		            fillOpacity: 0.8
+		        });
+		    }
+		});
+
+		var lControl = window.layerControl || window.controlLayers || window.control;
+		if (lControl) {
+		    lControl.addOverlay(layer_B_data_0, "📂 매물 데이터 B");
 		}
         </script>        
     </body>
