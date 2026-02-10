@@ -664,6 +664,11 @@
 		// 외부 JSON 파일을 담을 레이어 그룹 생성
 		var externalLayerGroup = L.featureGroup().addTo(map);
 		
+		// 1. 외부 데이터 전용 전역 변수 설정
+		var externalLabelConfig = { fields: [], visible: {} };
+		var currentExternalLayer = null;
+		var externalLayerGroup = L.featureGroup().addTo(map);
+		
 		document.getElementById('external-geojson-input').addEventListener('change', function(e) {
 		    var file = e.target.files[0];
 		    if (!file) return;
@@ -673,51 +678,105 @@
 		        try {
 		            var geojsonData = JSON.parse(event.target.result);
 		            
-		            // 1. 새로운 레이어 생성
-		            var newLayer = L.geoJson(geojsonData, {
-		                onEachFeature: pop_map_data, // 기존 팝업 함수 사용
+		            // 기존 레이어 및 UI 초기화
+		            externalLayerGroup.clearLayers();
+		            var oldUI = document.getElementById('external-label-controls');
+		            if (oldUI) oldUI.remove();
+		
+		            // 2. 외부 데이터의 필드(Key) 자동 추출 및 초기 설정
+		            if (geojsonData.features && geojsonData.features.length > 0) {
+		                var firstProps = geojsonData.features[0].properties;
+		                externalLabelConfig.fields = Object.keys(firstProps);
+		                externalLabelConfig.fields.forEach(function(f) {
+		                    externalLabelConfig.visible[f] = true; // 초기값은 모두 표시
+		                });
+		                
+		                // 전용 토글 UI 생성
+		                createExternalToggleUI(file.name);
+		            }
+		
+		            // 3. 레이어 생성
+		            currentExternalLayer = L.geoJson(geojsonData, {
+		                onEachFeature: function(feature, layer) {
+		                    pop_map_data(feature, layer); // 기존 팝업 함수 재활용
+		                    renderExternalLabel(layer);   // 외부 전용 라벨 렌더링
+		                },
 		                pointToLayer: function (feature, latlng) {
 		                    return L.circleMarker(latlng, {
-		                        radius: 6,
+		                        radius: 7,
 		                        fillColor: "#ff7800", // 외부 데이터는 주황색
-		                        color: "#000",
-		                        weight: 1,
-		                        opacity: 1,
-		                        fillOpacity: 0.8
+		                        color: "#fff",
+		                        weight: 2,
+		                        fillOpacity: 0.9
 		                    });
 		                }
 		            });
 		
-		            // 2. 지도에 추가
-		            newLayer.addTo(map);
-		
-		            // 3. 레이어 컨트롤(우측 상단 패널)에 추가
-		            var layerName = "📂 " + file.name;
-		
-		            // qgis2web에서 사용하는 레이어 컨트롤 변수명을 자동으로 찾아 등록합니다.
-		            // 보통 layerControl 또는 controlLayers라는 이름을 씁니다.
+		            externalLayerGroup.addLayer(currentExternalLayer);
+		            
+		            // 4. 레이어 컨트롤 등록 (우측 상단 패널)
 		            var lControl = window.layerControl || window.controlLayers || window.control;
+		            if (lControl) lControl.addOverlay(externalLayerGroup, "📂 " + file.name);
 		
-		            if (lControl && typeof lControl.addOverlay === 'function') {
-		                lControl.addOverlay(newLayer, layerName);
-		            } else {
-		                // 만약 컨트롤 변수를 못 찾으면 새로 하나 만들어서 우측 상단에 띄웁니다.
-		                L.control.layers(null, {[layerName]: newLayer}, {collapsed: false}).addTo(map);
-		            }
-		            
-		            // 4. 추가된 데이터 위치로 지도 자동 이동
-		            if (newLayer.getBounds().isValid()) {
-		                map.fitBounds(newLayer.getBounds());
-		            }
-		            
-		            alert("'" + file.name + "' 데이터를 성공적으로 불러왔습니다!");
+		            // 5. 위치 이동
+		            map.fitBounds(currentExternalLayer.getBounds());
+		            alert("'" + file.name + "' 불러오기 완료! 하단에서 라벨을 설정하세요.");
+		
 		        } catch (err) {
 		            console.error(err);
-		            alert("JSON 형식이 올바르지 않습니다.");
+		            alert("JSON 처리 중 오류가 발생했습니다.");
 		        }
 		    };
 		    reader.readAsText(file);
 		});
+		
+		// --- [함수] 외부 데이터 전용 라벨 렌더링 ---
+		function renderExternalLabel(layer) {
+		    var parts = [];
+		    externalLabelConfig.fields.forEach(function(f) {
+		        if (externalLabelConfig.visible[f] && layer.feature.properties[f]) {
+		            parts.push(String(layer.feature.properties[f]));
+		        }
+		    });
+		
+		    if (parts.length > 0) {
+		        layer.bindTooltip('<div style="text-align:center; font-weight:bold; font-size:10pt;">' + parts.join('<br>') + '</div>', {
+		            permanent: true,
+		            offset: [0, -12],
+		            direction: 'top',
+		            className: 'css_map_data' // 기존 라벨 스타일 재사용
+		        }).openTooltip();
+		    } else {
+		        layer.unbindTooltip();
+		    }
+		}
+		
+		// --- [함수] 외부 데이터 전용 토글 UI 생성 ---
+		function createExternalToggleUI(fileName) {
+		    var parent = document.getElementById('external-geojson-input').parentNode;
+		    var ui = document.createElement('div');
+		    ui.id = 'external-label-controls';
+		    ui.style = "margin-top:10px; padding:12px; background:#fff9f0; border-radius:10px; border:1px solid #ffcc80; max-height:200px; overflow-y:auto;";
+		    
+		    var title = '<div style="font-size:11px; font-weight:bold; color:#e65100; margin-bottom:8px;">📍 외부 라벨 필드 선택 (' + fileName + ')</div>';
+		    var listHtml = externalLabelConfig.fields.map(function(f) {
+		        return '<label style="display:block; font-size:11px; margin-bottom:3px; cursor:pointer;">' +
+		               '<input type="checkbox" class="ext-chk" data-field="' + f + '" checked> ' + f + '</label>';
+		    }).join('');
+		
+		    ui.innerHTML = title + listHtml;
+		    parent.appendChild(ui);
+		
+		    // 체크박스 이벤트 바인딩
+		    ui.querySelectorAll('.ext-chk').forEach(function(chk) {
+		        chk.addEventListener('change', function() {
+		            externalLabelConfig.visible[this.dataset.field] = this.checked;
+		            if (currentExternalLayer) {
+		                currentExternalLayer.eachLayer(function(lyr) { renderExternalLabel(lyr); });
+		            }
+		        });
+		    });
+		}
         </script>        
     </body>
 </html>
