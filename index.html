@@ -166,44 +166,6 @@
 		    .list-item .title { font-weight: bold; font-size: 15px; margin-bottom: 5px; }
 		    .list-item .price { color: #d32f2f; font-weight: bold; }
 		    .list-item .info { font-size: 13px; color: #666; margin-top: 5px; }
-
-		<style>
-	    /* 마커와 라벨이 지도보다 뒤로 숨지 않도록 보장 */
-	    .leaflet-pane { z-index: 400 !important; }
-	    .leaflet-tooltip-own {
-	        background-color: white !important;
-	        border: 1px solid #3388ff !important;
-	        border-radius: 4px !important;
-	        padding: 4px 8px !important;
-	        font-size: 12px !important;
-	        font-weight: bold !important;
-	        color: #333 !important;
-	        box-shadow: 2px 2px 5px rgba(0,0,0,0.2) !important;
-	        white-space: nowrap !important;
-	    }
-		/* 텍스트(라벨) 체크를 해제해도 B데이터는 보이게 하는 강제 규칙 */
-		.labels-hidden .css_map_data_B {
-		    display: block !important;
-		}
-		
-		/* B데이터 라벨의 디자인 (기존과 중복되어도 안전하게 추가) */
-		.css_map_data_B {
-		    background-color: white !important;
-		    border: 2px solid #3388ff !important; /* B데이터 마커 색상과 맞춤 */
-		    border-radius: 4px !important;
-		    padding: 3px 6px !important;
-		    font-size: 12px !important;
-		    font-weight: bold !important;
-		    color: #000 !important;
-		    box-shadow: 2px 2px 5px rgba(0,0,0,0.2) !important;
-		    white-space: nowrap !important;
-		    pointer-events: none !important; /* 라벨 때문에 마커 클릭이 안 되는 현상 방지 */
-		}
-		
-		/* 툴팁 화살표 색상도 파란색으로 통일 */
-		.leaflet-tooltip-top.css_map_data_B:before {
-		    border-top-color: #3388ff !important;
-		}
 		</style>
         <title></title>
     </head>
@@ -533,64 +495,43 @@
         // 기본값: 라벨 표시(체크된 상태)
         layer_labels_map_data.addTo(map);
 
-// 1. [중요] B데이터 전용 판(Pane) 생성 - 마커가 지도 위에 뜨도록 보장
-        if (!map.getPane('pane_B_data')) {
-            map.createPane('pane_B_data');
-            map.getPane('pane_B_data').style.zIndex = 450; // 라벨보다 살짝 아래, 지도보단 위
-        }
+		var layer_B_data_0 = new L.geoJson(json_B_data_0, {
+		    onEachFeature: function(feature, layer) {
+		        // [1] 기존 팝업 함수 연결 (클릭 시 창 띄우기)
+		        if (typeof pop_map_data === 'function') {
+		            pop_map_data(feature, layer);
+		        }
+		
+		        // [2] 라벨(텍스트) 연결 (지도 위에 글자 띄우기)
+		        // 우리가 만든 buildLabelContent_B_data 함수를 여기서 호출합니다.
+		        var labelContent = buildLabelContent_B_data(feature);
+		        layer.bindTooltip(labelContent, {
+		            permanent: true,      // 항상 보이게 설정
+		            direction: 'top',     // 마커 위에 표시
+		            className: 'css_map_data' // A 데이터와 동일한 배경 스타일 적용
+		        });
+		    },
+		    pointToLayer: function (feature, latlng) {
+		        return L.circleMarker(latlng, {
+		            radius: 6,
+		            fillColor: "#3388ff", // B 데이터는 파란색
+		            color: "#000",
+		            weight: 1,
+		            fillOpacity: 0.8
+		        });
+		    }
+		});
 
-        // 2. B 데이터 레이어 정의
-        var layer_B_data_0 = new L.geoJson(json_B_data_0, {
-            pane: 'pane_B_data',
-            onEachFeature: function(feature, layer) {
-                // 기존 팝업 기능 유지
-                if (typeof pop_map_data === 'function') {
-                    pop_map_data(feature, layer);
-                }
-                
-                // [B데이터 전용] 영구 라벨 설정
-                var p = feature.properties;
-                var customLabel = `
-                    <div style="text-align:center; line-height:1.2;">
-                        <div style="font-weight:bold; font-size:12px; color:#333;">${p['소재지(통'] || ''}</div>
-                        <div style="font-weight:bold; font-size:11px; color:#e53e3e; margin-top:2px;">${p['의뢰금액('] || ''}</div>
-                    </div>
-                `;
-
-                layer.bindTooltip(customLabel, {
-                    permanent: true,    // 항상 표시
-                    direction: 'top',   // 마커 위쪽에
-                    className: 'css_map_data_B', // CSS 스타일 연결
-                    offset: [0, -5]     // 마커와 살짝 띄우기
-                });
-            },
-            pointToLayer: function (feature, latlng) {
-                return L.circleMarker(latlng, {
-                    pane: 'pane_B_data',
-                    radius: 6,
-                    fillColor: "#3388ff",
-                    color: "#000",
-                    weight: 1,
-                    fillOpacity: 0.8
-                });
-            }
-        });
-
-        // 3. [핵심] 레이어를 지도에 실제로 추가하는 명령
-        layer_B_data_0.addTo(map);
-
-        // 4. 통합 컨트롤 설정 (A, B, 라벨 통합)
-        var baseMaps = {}; 
+        // --- 2. 통합 컨트롤 설정 ---
+        // 기존에 '마커', '텍스트'만 있던 곳에 '매물 데이터 B'를 추가합니다.
+        var baseMaps = {}; // 배경 지도가 있다면 여기에 넣으세요 (보통 null)
         var overlays = {
             'A 데이터(마커)': layer_map_data,
-            'B 데이터(매물)': layer_B_data_0, 
+            'B 데이터(매물)': layer_B_data_0, // 새로 추가!
             '텍스트(라벨)': layer_labels_map_data
         };
 
-        // 기존 컨트롤 중복 방지 및 생성
-        if (window.layerControl) {
-            map.removeControl(window.layerControl);
-        }
+        // window 객체에 저장해두면 나중에 다른 함수에서 접근하기 좋습니다.
         window.layerControl = L.control.layers(
             baseMaps, 
             overlays, 
