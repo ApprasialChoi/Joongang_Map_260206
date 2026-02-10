@@ -169,23 +169,23 @@
 		<style>
 
 		<style>
-		    /* B데이터 라벨: 가독성을 위해 배경색과 테두리 강제 적용 */
+		    /* B데이터 전용 박스 디자인 */
 		    .css_map_data_B {
-		        background-color: white !important;
-		        border: 2px solid #3388ff !important;
-		        border-radius: 6px !important;
-		        padding: 4px 8px !important;
-		        box-shadow: 2px 2px 6px rgba(0,0,0,0.3) !important;
-		        white-space: nowrap !important;
-		        text-align: center;
+		        background-color: #ffffff !important; /* 글씨를 감싸는 흰색 배경 */
+		        border: 2px solid #3388ff !important; /* 파란색 테두리 */
+		        border-radius: 8px !important;       /* 모서리 둥글게 */
+		        padding: 8px 12px !important;        /* 안쪽 여백 */
+		        box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important; /* 부드러운 그림자 */
+		        white-space: nowrap !important;      /* 줄바꿈 방지 */
+		        opacity: 1 !important;               /* 불투명도 100% */
 		    }
 		
-		    /* 토글 기능과 연동 (전체 라벨 숨길 때 같이 숨김) */
+		    /* 텍스트(라벨) 체크 해제 시 같이 사라지도록 설정 */
 		    .labels-hidden .css_map_data_B {
 		        display: none !important;
 		    }
 		
-		    /* 꼬리표 화살표 색상 */
+		    /* 화살표(꼬리) 디자인 */
 		    .leaflet-tooltip-top.css_map_data_B:before {
 		        border-top-color: #3388ff !important;
 		    }
@@ -519,27 +519,33 @@
         layer_labels_map_data.addTo(map);
 
 		var layer_B_data_0 = new L.geoJson(json_B_data_0, {
-		    onEachFeature: function(feature, layer) {
-		        // [1] 기존 팝업 함수 연결
-		        if (typeof pop_map_data === 'function') {
-		            pop_map_data(feature, layer);
-		        }
-		
-		        // [2] 라벨 디자인 적용
-		        var p = feature.properties;
-		        // buildLabelContent_B_data 대신 직접 가독성 좋은 HTML을 넣습니다.
-		        var customLabel = `
-		            <div style="font-weight:bold; color:#333; font-size:12px;">${p['소재지(통'] || ''}</div>
-		            <div style="color:#e53e3e; font-size:11px; font-weight:bold; margin-top:2px;">${p['의뢰금액('] || ''}</div>
-		        `;
-		
-		        layer.bindTooltip(customLabel, {
-		            permanent: true,
-		            direction: 'top',
-		            className: 'css_map_data_B', // B데이터 전용 클래스명으로 변경!
-		            offset: [0, -5]
-		        });
-		    },
+            onEachFeature: function(feature, layer) {
+                if (typeof pop_map_data === 'function') {
+                    pop_map_data(feature, layer);
+                }
+                
+                var p = feature.properties;
+                // [수정된 라벨 디자인]
+                var customLabel = `
+                    <div style="text-align: center;">
+                        <div style="font-weight:bold; color:#1a202c; font-size:13px; margin-bottom:2px;">${p['소재지(통'] || ''}</div>
+                        <div style="font-weight:900; color:#e53e3e; font-size:14px; margin-bottom:5px;">${p['의뢰금액('] || ''}</div>
+                        
+                        <div style="color:#4a5568; font-size:11px; line-height:1.4; border-top: 1px solid #edf2f7; pt: 4px;">
+                            <div>${p['구분'] || ''} | ${p['세부용도'] || ''}</div>
+                            <div>보증/월: ${p['보증금/월'] || '-'}</div>
+                            <div style="font-style: italic;">예상: ${p['(단순)예상'] || '-'}</div>
+                        </div>
+                    </div>
+                `;
+
+                layer.bindTooltip(customLabel, {
+                    permanent: true,
+                    direction: 'top',
+                    className: 'css_map_data_B', // CSS에서 흰색 배경을 입힙니다.
+                    offset: [0, -7]
+                });
+            },
 		    pointToLayer: function (feature, latlng) {
 		        return L.circleMarker(latlng, {
 		            radius: 6,
