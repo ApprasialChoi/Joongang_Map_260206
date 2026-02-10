@@ -169,51 +169,69 @@
 		<style>
 
 		<style>
-		    /* 툴팁 외곽 박스 자체의 기본 배경과 테두리 제거 (박스 중복 방지) */
+		    /* 1. Leaflet 기본 툴팁 컨테이너 스타일 제거 */
 		    .leaflet-tooltip.css_map_data_B {
 		        background-color: transparent !important;
 		        border: none !important;
 		        box-shadow: none !important;
 		        padding: 0 !important;
+		        /* 내용이 아예 없을 때(체크 해제 시) 박스 테두리가 남는 현상 방지 */
+		        display: block !important; 
 		    }
 		
-		    /* 우리가 직접 만든 내부 박스 디자인 */
+		    /* 2. 내부 박스가 비어있으면 아예 숨김 처리 */
+		    .custom-tooltip-box:empty {
+		        display: none !important;
+		    }
+		
+		    /* 3. 우리가 만든 내부 박스 디자인 */
 		    .custom-tooltip-box {
-		        background-color: #ffffff !important; /* 순백색 배경 */
-		        border: 2px solid #3388ff !important; /* 파란색 테두리 */
+		        background-color: #ffffff !important;
+		        border: 2px solid #3388ff !important;
 		        border-radius: 8px !important;
 		        padding: 10px 14px !important;
-		        box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
+		        box-shadow: 0 4px 12px rgba(0,0,0,0.25) !important;
 		        text-align: center;
-		        min-width: 120px;
+		        min-width: 100px;
+		        /* 박스 안의 글자가 너무 많아지면 자동 줄바꿈 허용 (선택 사항) */
+		        max-width: 250px; 
 		    }
 		
-		    /* 주소~예상 필드 스타일 (진한 흑회색) */
+		    /* 4. 흑회색 텍스트 필드 스타일 */
 		    .text-main {
 		        font-weight: bold !important;
-		        color: #1a202c !important; /* 진한 흑회색 */
+		        color: #1a202c !important;
 		        font-size: 13px !important;
 		        margin-bottom: 2px;
 		        white-space: nowrap;
+		        overflow: hidden;
+		        text-overflow: ellipsis; /* 글자가 너무 길면 ... 처리 */
 		    }
 		
-		    /* 마지막 의뢰금액 스타일 (강렬한 레드) */
+		    /* 5. 금액 필드 스타일 (상단 구분선 포함) */
 		    .text-price {
 		        font-weight: 900 !important;
 		        color: #e53e3e !important;
 		        font-size: 15px !important;
 		        margin-top: 6px;
 		        border-top: 1px solid #edf2f7;
-		        padding-top: 4px;
+		        padding-top: 6px;
 		        white-space: nowrap;
 		    }
 		
-		    /* 토글 기능 연동 */
+		    /* 6. 금액만 켜져 있을 경우 상단 테두리 제거 (디테일) */
+		    .text-price:first-child {
+		        border-top: none !important;
+		        margin-top: 0 !important;
+		        padding-top: 0 !important;
+		    }
+		
+		    /* 7. 전체 라벨 숨김 토글 연동 */
 		    .labels-hidden .css_map_data_B {
 		        display: none !important;
 		    }
 		
-		    /* 화살표 제거 (박스가 깔끔해짐) */
+		    /* 8. 툴팁 화살표 숨김 */
 		    .leaflet-tooltip-top.css_map_data_B:before {
 		        display: none !important;
 		    }
@@ -318,22 +336,28 @@
 		};
 		
 		// B 데이터용 라벨 내용 생성 함수
-		function buildLabelContent_B_data(feature) {
+			function buildLabelContent_B_data(feature) {
 		    var cfg = labelFieldConfig_B_data;
-		    var props = feature.properties;
-		    var parts = [];
-		    for (var i = 0; i < cfg.fields.length; i++) {
-		        var key = cfg.fields[i];
-		        if (!cfg.visible[key]) continue;
-		        var v = props[key];
-		        if (v === null || v === undefined || v === '') continue;
-		        parts.push(String(v));
-		    }
-		    if (!parts.length) return '';
-		    return '<div class="q2w-label" style="color:#ffffff; font-size:10pt; font-family:sans-serif;">' +
-		           parts.join('<br>') + '</div>';
+		    var p = feature.properties;
+		    var activeFields = [];
+		
+		    // 요청하신 순서대로 체크박스가 켜져 있는지 확인하고 HTML 생성
+		    // 순서: 소재지 -> 구분 -> 세부용도 -> 보증금/월 -> (단순)예상 -> 의뢰금액
+		    if (cfg.visible["소재지(통"]) activeFields.push(`<div class="text-main">${p['소재지(통'] || ''}</div>`);
+		    if (cfg.visible["구분"])       activeFields.push(`<div class="text-main">${p['구분'] || ''}</div>`);
+		    if (cfg.visible["세부용도"])   activeFields.push(`<div class="text-main">${p['세부용도'] || ''}</div>`);
+		    if (cfg.visible["보증금/월"])  activeFields.push(`<div class="text-main">${p['보증금/월'] || ''}</div>`);
+		    if (cfg.visible["(단순)예상"]) activeFields.push(`<div class="text-main">${p['(단순)예상'] || ''}</div>`);
+		    
+		    // 마지막 의뢰금액만 빨간색 스타일 적용
+		    if (cfg.visible["의뢰금액("]) activeFields.push(`<div class="text-price">${p['의뢰금액('] || ''}</div>`);
+		
+		    // 선택된 필드가 없으면 빈 값 반환
+		    if (!activeFields.length) return '';
+		
+		    // 최종 박스 디자인으로 감싸서 반환
+		    return `<div class="custom-tooltip-box">${activeFields.join('')}</div>`;
 		}
-
 			
         // 라벨(지도 위 텍스트)에 표시할 필드별 토글 설정
         // - qgis2web 기본 라벨식: 제출처(Tar) / 담당자 / 의뢰일자 / 상태 / 주소
@@ -547,32 +571,21 @@
         layer_labels_map_data.addTo(map);
 
 		var layer_B_data_0 = new L.geoJson(json_B_data_0, {
-            onEachFeature: function(feature, layer) {
-                if (typeof pop_map_data === 'function') {
-                    pop_map_data(feature, layer);
-                }
-                
-                var p = feature.properties;
-                
-                // 요청하신 필드 순서: 소재지 -> 구분 -> 세부용도 -> 보증금/월 -> (단순)예상 -> 의뢰금액
-                var customLabel = `
-                    <div class="custom-tooltip-box">
-                        <div class="text-main">${p['소재지(통'] || ''}</div>
-                        <div class="text-main">${p['구분'] || ''}</div>
-                        <div class="text-main">${p['세부용도'] || ''}</div>
-                        <div class="text-main">${p['보증금/월'] || ''}</div>
-                        <div class="text-main">${p['(단순)예상'] || ''}</div>
-                        <div class="text-price">${p['의뢰금액('] || ''}</div>
-                    </div>
-                `;
-
-                layer.bindTooltip(customLabel, {
-                    permanent: true,
-                    direction: 'top',
-                    className: 'css_map_data_B', 
-                    offset: [0, -10]
-                });
-            },
+		    onEachFeature: function(feature, layer) {
+		        if (typeof pop_map_data === 'function') {
+		            pop_map_data(feature, layer);
+		        }
+		        
+		        // 우리가 새로 만든 디자인 함수 호출
+		        var labelContent = buildLabelContent_B_data(feature);
+		
+		        layer.bindTooltip(labelContent, {
+		            permanent: true,
+		            direction: 'top',
+		            className: 'css_map_data_B', // CSS 스타일 연결
+		            offset: [0, -10]
+		        });
+		    },
 		    pointToLayer: function (feature, latlng) {
 		        return L.circleMarker(latlng, {
 		            radius: 6,
