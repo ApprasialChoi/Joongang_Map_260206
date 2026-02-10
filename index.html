@@ -483,38 +483,48 @@
         // 기본값: 라벨 표시(체크된 상태)
         layer_labels_map_data.addTo(map);
 
-		// 1. B 데이터 전용 판(Pane) 만들기 (A보다 위에 보이게 zIndex 설정)
-		map.createPane('pane_B_data');
-		map.getPane('pane_B_data').style.zIndex = 405; // A 데이터(400)보다 살짝 위
-		
 		var layer_B_data_0 = new L.geoJson(json_B_data_0, {
-		    pane: 'pane_B_data', // [중요] 새로 만든 판에 그리기
 		    onEachFeature: function(feature, layer) {
+		        // [1] 기존 팝업 함수 연결 (클릭 시 창 띄우기)
 		        if (typeof pop_map_data === 'function') {
 		            pop_map_data(feature, layer);
 		        }
+		
+		        // [2] 라벨(텍스트) 연결 (지도 위에 글자 띄우기)
+		        // 우리가 만든 buildLabelContent_B_data 함수를 여기서 호출합니다.
 		        var labelContent = buildLabelContent_B_data(feature);
 		        layer.bindTooltip(labelContent, {
-		            permanent: true,
-		            direction: 'top',
-		            className: 'css_map_data'
+		            permanent: true,      // 항상 보이게 설정
+		            direction: 'top',     // 마커 위에 표시
+		            className: 'css_map_data' // A 데이터와 동일한 배경 스타일 적용
 		        });
 		    },
 		    pointToLayer: function (feature, latlng) {
 		        return L.circleMarker(latlng, {
-		            pane: 'pane_B_data', // [중요] 마커도 판에 고정
 		            radius: 6,
-		            fillColor: "#3388ff",
+		            fillColor: "#3388ff", // B 데이터는 파란색
 		            color: "#000",
 		            weight: 1,
 		            fillOpacity: 0.8
 		        });
 		    }
 		});
-		
-		// 2. [가장 중요] 지도에 실제로 추가하기
-		layer_B_data_0.addTo(map); 
-		bounds_group.addLayer(layer_B_data_0); // 자동 줌(bounds) 계산에 포함
+
+        // --- 2. 통합 컨트롤 설정 ---
+        // 기존에 '마커', '텍스트'만 있던 곳에 '매물 데이터 B'를 추가합니다.
+        var baseMaps = {}; // 배경 지도가 있다면 여기에 넣으세요 (보통 null)
+        var overlays = {
+            'A 데이터(마커)': layer_map_data,
+            'B 데이터(매물)': layer_B_data_0, // 새로 추가!
+            '텍스트(라벨)': layer_labels_map_data
+        };
+
+        // window 객체에 저장해두면 나중에 다른 함수에서 접근하기 좋습니다.
+        window.layerControl = L.control.layers(
+            baseMaps, 
+            overlays, 
+            { collapsed: false, position: 'topright' }
+        ).addTo(map);
 
 // [수정] 라벨 필드별 표시/숨김 토글 컨트롤 (동적 버전)
         (function addLabelFieldToggleControl() {
