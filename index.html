@@ -248,6 +248,15 @@
 		</div>
         <div id="kakao-map"></div>
 		<div id="map"></div>
+		<!-- 로드뷰 패널 -->
+		<div id="roadview-panel" style="display:none; position:fixed; bottom:0; left:350px; right:0; height:35%; z-index:2000; background:#000; border-top:3px solid #0051af;">
+		    <div style="position:absolute; top:0; left:0; right:0; height:32px; background:#0051af; display:flex; align-items:center; padding:0 12px; z-index:1;">
+		        <span style="color:white; font-size:13px; font-weight:bold;">📷 로드뷰</span>
+		        <span id="roadview-address" style="color:#cce4ff; font-size:12px; margin-left:10px;"></span>
+		        <button onclick="closeRoadview()" style="margin-left:auto; background:transparent; border:none; color:white; font-size:18px; cursor:pointer; line-height:1;">✕</button>
+		    </div>
+		    <div id="roadview" style="position:absolute; top:32px; left:0; right:0; bottom:0;"></div>
+		</div>
 
 		<div class="filter-panel" style="position: fixed; top: 20px; left: 370px; z-index: 2000; background: white; padding: 10px 14px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 700px; font-family: sans-serif;">
 		    
@@ -499,31 +508,33 @@
         function setBounds() {
         }
        function pop_map_data(feature, layer) {
-		    // 1. 팝업 연결 (가림판 관련 로직 삭제)
 		    layer.bindPopup(function(l) {
-		        return buildPopupContent_map_data(l.feature);
-		    }, { 
+		        var content = buildPopupContent_map_data(l.feature);
+		        
+		        // 로드뷰 버튼 추가
+		        var latlng = l.getLatLng();
+		        var address = l.feature.properties['주소'] || l.feature.properties['소재지(통'] || '';
+		        content += '<div style="margin-top:8px; text-align:center;">' +
+		            '<button onclick="openRoadview({lat:' + latlng.lat + ',lng:' + latlng.lng + '},\'' + address.replace(/'/g, '') + '\')" ' +
+		            'style="padding:6px 16px; background:#0051af; color:white; border:none; border-radius:5px; cursor:pointer; font-size:12px; font-weight:bold;">' +
+		            '📷 이 위치 로드뷰 보기</button></div>';
+		        return content;
+		    }, {
 		        maxHeight: 500,
 		        minWidth: 400,
 		        maxWidth: 450,
-		        offset: [0, -10], // 마커에서 살짝 위로 띄움
-		        className: 'custom-popup-styled' // 클래스명 변경
+		        offset: [0, -10],
+		        className: 'custom-popup-styled'
 		    });
 		
-		    // 2. 미디어 체크 로직만 유지
 		    layer.on('popupopen', function(e) {
 		        addClassToPopupIfMedia(e.popup.getContent(), e.popup);
-		        
-		        // 사진이 로드되면 팝업 위치를 다시 계산해주는 안전장치
 		        var img = e.popup._container.querySelector('img');
 		        if (img) {
-		            img.onload = function() {
-		                e.popup.update();
-		            };
+		            img.onload = function() { e.popup.update(); };
 		        }
 		    });
 		}
-
         function style_map_data_0() {
             return {
                 pane: 'pane_map_data',
@@ -849,6 +860,60 @@
 		
 		// 초기 1회 실행
 		buildFilterInputs('A');
+		// -----------------------------------------------
+		// 로드뷰 관련 변수 및 함수
+		// -----------------------------------------------
+		var roadviewObj = null;
+		var roadviewClient = null;
+		var roadviewOpen = false;
+		
+		function openRoadview(latlng, addressText) {
+		    var panel = document.getElementById('roadview-panel');
+		    
+		    // 1. 패널 표시
+		    panel.style.display = 'block';
+		    roadviewOpen = true;
+		
+		    // 2. 지도 영역 줄이기
+		    document.getElementById('map').style.bottom = '35%';
+		    document.getElementById('kakao-map').style.bottom = '35%';
+		    map.invalidateSize(); // Leaflet 크기 재계산
+		
+		    // 3. 로드뷰 객체 초기화 (최초 1회만)
+		    if (!roadviewObj) {
+		        var container = document.getElementById('roadview');
+		        roadviewObj = new kakao.maps.Roadview(container);
+		        roadviewClient = new kakao.maps.RoadviewClient();
+		    }
+		
+		    // 4. 주소 표시
+		    if (addressText) {
+		        document.getElementById('roadview-address').innerText = '— ' + addressText;
+		    }
+		
+		    // 5. 해당 좌표 로드뷰 열기
+		    var kakaoLatLng = new kakao.maps.LatLng(latlng.lat, latlng.lng);
+		    roadviewClient.getNearestPanoId(kakaoLatLng, 50, function(panoId) {
+		        if (panoId) {
+		            roadviewObj.setPanoId(panoId, kakaoLatLng);
+		        } else {
+		            document.getElementById('roadview-address').innerText = '— 해당 위치의 로드뷰가 없습니다.';
+		        }
+		    });
+		}
+		
+		function closeRoadview() {
+		    var panel = document.getElementById('roadview-panel');
+		    panel.style.display = 'none';
+		    roadviewOpen = false;
+		
+		    // 지도 영역 원복
+		    document.getElementById('map').style.bottom = '0';
+		    document.getElementById('kakao-map').style.bottom = '0';
+		    map.invalidateSize();
+		}
+
+			
 		function exportToExcel() {
 		    // 현재 활성 레이어 및 헤더 동적 결정
 		    var isTypeB = (activeFilterType === 'B');
