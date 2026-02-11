@@ -248,52 +248,46 @@
 		</div>
         <div id="kakao-map"></div>
 		<div id="map"></div>
-				/* 통합 상세 필터 패널 */
-		<div class="filter-panel" style="position: fixed; top: 20px; left: 370px; z-index: 2000; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 140px; font-family: sans-serif;">
-		    <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #333;">상세 필터</h4>
-		    
-		    <div style="margin-bottom: 8px;">
-		        <label style="font-size: 11px; color: #666;">제출처</label>
-		        <input type="text" class="multi-filter-input" data-field="제출처" placeholder="예: 기업은행" style="width: 100%; padding: 6px 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;">
+		<!-- ① 상세 필터 패널 -->
+		<div class="filter-panel" style="position: fixed; top: 20px; left: 370px; z-index: 2000; background: white; padding: 12px 16px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 500px; font-family: sans-serif;">
+		    <div style="display: flex; align-items: center; margin-bottom: 10px;">
+		        <h4 style="margin: 0; font-size: 14px; color: #333;">상세 필터</h4>
+		        <span id="filter-layer-badge" style="font-size:11px; color:#fff; background:#0051af; padding:2px 7px; border-radius:10px; margin-left:8px;">A 데이터</span>
+		        <span id="filter-result-count" style="font-size:12px; color:#0051af; font-weight:bold; margin-left:auto;"></span>
 		    </div>
-		    
-		    <div style="margin-bottom: 8px;">
-		        <label style="font-size: 11px; color: #666;">주소</label>
-		        <input type="text" class="multi-filter-input" data-field="주소" placeholder="예: 서울" style="width: 100%; padding: 6px 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;">
+		    <div id="dynamic-filter-inputs" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+		    <button onclick="exportToExcel()" style="width:100%; margin-top:10px; padding:8px; background-color:#28a745; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold; font-size:12px;">
+		        📊 현재 검색결과 엑셀 저장
+		    </button>
+		</div>
+		
+		<!-- ② 지도 부가 기능 + 외부 GeoJSON (나란히 배치) -->
+		<div style="position: fixed; top: 135px; left: 370px; z-index: 2000; display: flex; gap: 10px; font-family: sans-serif;">
+		
+		    <!-- 지도 부가 기능 -->
+		    <div style="background:white; padding:12px 14px; border-radius:15px; box-shadow:0 4px 15px rgba(0,0,0,0.2); font-size:12px; min-width:160px;">
+		        <div style="font-size:11px; font-weight:bold; margin-bottom:8px; color:#555;">🗺️ 지도 부가 기능</div>
+		        <label style="display:block; margin-bottom:5px; cursor:pointer;">
+		            <input type="checkbox" class="kakao-layer-toggle" data-type="USE_DISTRICT"> 지적편집도
+		        </label>
+		        <label style="display:block; margin-bottom:5px; cursor:pointer;">
+		            <input type="checkbox" class="kakao-layer-toggle" data-type="TRAFFIC"> 🚦 실시간 교통
+		        </label>
+		        <label style="display:block; cursor:pointer;">
+		            <input type="checkbox" class="kakao-layer-toggle" data-type="ROADVIEW"> 📷 로드뷰 확인
+		        </label>
 		    </div>
 		
-		    <div style="margin-bottom: 8px;">
-		        <label style="font-size: 11px; color: #666;">담당자</label>
-		        <input type="text" class="multi-filter-input" data-field="담당자" placeholder="담당자 이름" style="width: 100%; padding: 6px 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;">
+		    <!-- 외부 GeoJSON 불러오기 -->
+		    <div style="background:white; padding:12px 14px; border-radius:15px; box-shadow:0 4px 15px rgba(0,0,0,0.2); font-size:12px; min-width:200px;">
+		        <div style="font-size:11px; font-weight:bold; margin-bottom:8px; color:#0051af;">📂 외부 GeoJSON 불러오기</div>
+		        <input type="file" id="external-geojson-input" accept=".json,.geojson" style="font-size:11px; width:100%;">
+		        <div id="external-label-controls"></div>
 		    </div>
+		
+		</div>	
+		    
 
-			<div class="filter-panel" style="position: fixed; top: 20px; left: 370px; z-index: 2000; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 280px; font-family: sans-serif;">
-			    <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #333;">상세 필터 <span id="filter-layer-badge" style="font-size:11px; color:#fff; background:#0051af; padding:2px 7px; border-radius:10px; margin-left:5px;">A 데이터</span></h4>
-			
-			    <!-- 동적으로 채워질 필터 입력창 영역 -->
-			    <div id="dynamic-filter-inputs"></div>
-			
-			    <div style="margin-top: 10px; padding: 10px; background: #f9f9f9; border-radius: 10px; border: 1px dashed #ccc;">
-			        <div style="font-size: 11px; font-weight: bold; margin-bottom: 5px; color: #555;">지도 부가 기능</div>
-			        <label style="display: block; font-size: 12px; margin-bottom: 5px; cursor: pointer;">
-			            <input type="checkbox" class="kakao-layer-toggle" data-type="USE_DISTRICT"> 🗺️ 지적편집도
-			        </label>
-			        <label style="display: block; font-size: 12px; margin-bottom: 5px; cursor: pointer;">
-			            <input type="checkbox" class="kakao-layer-toggle" data-type="TRAFFIC"> 🚦 실시간 교통
-			        </label>
-			        <label style="display: block; font-size: 12px; cursor: pointer;">
-			            <input type="checkbox" class="kakao-layer-toggle" data-type="ROADVIEW"> 📷 로드뷰 도로 확인
-			        </label>
-			    </div>
-			    <div style="margin-top: 10px; padding: 10px; background: #eef7ff; border-radius: 10px; border: 1px solid #abd4ff;">
-			        <div style="font-size: 11px; font-weight: bold; margin-bottom: 5px; color: #0051af;">📂 외부 GeoJSON 불러오기</div>
-			        <input type="file" id="external-geojson-input" accept=".json,.geojson" style="font-size: 11px; width: 100%;">
-			    </div>
-			    <div id="filter-result-count" style="font-size: 12px; color: #0051af; font-weight: bold; margin-top: 10px; text-align: right;"></div>
-			    <button onclick="exportToExcel()" style="width: 100%; margin-top: 10px; padding: 8px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px;">
-			        📊 현재 검색결과 엑셀 저장
-			    </button>
-			</div>
         <script src="js/qgis2web_expressions.js"></script>
         <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=231190ac1aca72ada0b739110d8a0eb4"></script>
         <script src="js/leaflet.js"></script>
@@ -766,7 +760,6 @@
 		    var badge = document.getElementById('filter-layer-badge');
 		    if (!container) return;
 		
-		    // 배지 색상 변경
 		    if (type === 'B') {
 		        badge.textContent = 'B 데이터';
 		        badge.style.background = '#3182ce';
@@ -775,27 +768,23 @@
 		        badge.style.background = '#0051af';
 		    }
 		
-		    // 입력창 초기화 후 재생성
 		    container.innerHTML = '';
 		    var fields = filterFieldConfig[type] || [];
 		
 		    fields.forEach(function(item) {
 		        var wrapper = document.createElement('div');
-		        wrapper.style.marginBottom = '8px';
+		        wrapper.style.cssText = 'flex: 1 1 calc(33% - 8px); min-width: 130px;';
 		        wrapper.innerHTML =
-		            '<label style="font-size:11px; color:#666;">' + item.field + '</label>' +
+		            '<label style="font-size:11px; color:#666; display:block; margin-bottom:3px;">' + item.field + '</label>' +
 		            '<input type="text"' +
 		            '       class="multi-filter-input"' +
 		            '       data-field="' + item.field + '"' +
 		            '       placeholder="' + item.placeholder + '"' +
-		            '       style="width:100%; padding:6px 10px; border:1px solid #ddd; border-radius:5px; box-sizing:border-box;">';
+		            '       style="width:100%; padding:5px 8px; border:1px solid #ddd; border-radius:5px; box-sizing:border-box; font-size:12px;">';
 		        container.appendChild(wrapper);
-		
-		        // 입력 이벤트 연결
 		        wrapper.querySelector('input').addEventListener('input', applyMultiFilter);
 		    });
 		
-		    // 입력창이 바뀌었으니 필터 결과도 초기화
 		    document.getElementById('filter-result-count').innerText = '';
 		}
 		
