@@ -779,14 +779,14 @@
 		
 		    fields.forEach(function(item) {
 		        var wrapper = document.createElement('div');
-		        wrapper.style.cssText = 'flex: 1 1 calc(33% - 8px); min-width: 130px;';
+		        wrapper.style.cssText = 'flex: 1 1 0; min-width: 80px;';
 		        wrapper.innerHTML =
-		            '<label style="font-size:11px; color:#666; display:block; margin-bottom:3px;">' + item.field + '</label>' +
+		            '<label style="font-size:10px; color:#888; display:block; margin-bottom:2px;">' + item.field + '</label>' +
 		            '<input type="text"' +
 		            '       class="multi-filter-input"' +
 		            '       data-field="' + item.field + '"' +
 		            '       placeholder="' + item.placeholder + '"' +
-		            '       style="width:100%; padding:5px 8px; border:1px solid #ddd; border-radius:5px; box-sizing:border-box; font-size:12px;">';
+		            '       style="width:100%; padding:4px 7px; border:1px solid #ddd; border-radius:5px; box-sizing:border-box; font-size:11px;">';
 		        container.appendChild(wrapper);
 		        wrapper.querySelector('input').addEventListener('input', applyMultiFilter);
 		    });
