@@ -249,7 +249,7 @@
         <div id="kakao-map"></div>
 		<div id="map"></div>
 				/* 통합 상세 필터 패널 */
-		<div class="filter-panel" style="position: fixed; top: 20px; left: 70px; z-index: 2000; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 280px; font-family: sans-serif;">
+		<div class="filter-panel" style="position: fixed; top: 20px; left: 370px; z-index: 2000; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 140px; font-family: sans-serif;">
 		    <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #333;">상세 필터</h4>
 		    
 		    <div style="margin-bottom: 8px;">
@@ -267,27 +267,33 @@
 		        <input type="text" class="multi-filter-input" data-field="담당자" placeholder="담당자 이름" style="width: 100%; padding: 6px 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;">
 		    </div>
 
-			<div style="margin-top: 10px; padding: 10px; background: #f9f9f9; border-radius: 10px; border: 1px dashed #ccc;">
-		        <div style="font-size: 11px; font-weight: bold; margin-bottom: 5px; color: #555;">지도 부가 기능</div>
-		        <label style="display: block; font-size: 12px; margin-bottom: 5px; cursor: pointer;">
-		            <input type="checkbox" class="kakao-layer-toggle" data-type="USE_DISTRICT"> 🗺️ 지적편집도
-		        </label>
-		        <label style="display: block; font-size: 12px; margin-bottom: 5px; cursor: pointer;">
-		            <input type="checkbox" class="kakao-layer-toggle" data-type="TRAFFIC"> 🚦 실시간 교통
-		        </label>
-		        <label style="display: block; font-size: 12px; cursor: pointer;">
-		            <input type="checkbox" class="kakao-layer-toggle" data-type="ROADVIEW"> 📷 로드뷰 도로 확인
-		        </label>
-		    </div>
-			<div style="margin-top: 10px; padding: 10px; background: #eef7ff; border-radius: 10px; border: 1px solid #abd4ff;">
-			    <div style="font-size: 11px; font-weight: bold; margin-bottom: 5px; color: #0051af;">📂 외부 GeoJSON 불러오기</div>
-			    <input type="file" id="external-geojson-input" accept=".json,.geojson" style="font-size: 11px; width: 100%;">
+			<div class="filter-panel" style="position: fixed; top: 20px; left: 370px; z-index: 2000; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 280px; font-family: sans-serif;">
+			    <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #333;">상세 필터 <span id="filter-layer-badge" style="font-size:11px; color:#fff; background:#0051af; padding:2px 7px; border-radius:10px; margin-left:5px;">A 데이터</span></h4>
+			
+			    <!-- 동적으로 채워질 필터 입력창 영역 -->
+			    <div id="dynamic-filter-inputs"></div>
+			
+			    <div style="margin-top: 10px; padding: 10px; background: #f9f9f9; border-radius: 10px; border: 1px dashed #ccc;">
+			        <div style="font-size: 11px; font-weight: bold; margin-bottom: 5px; color: #555;">지도 부가 기능</div>
+			        <label style="display: block; font-size: 12px; margin-bottom: 5px; cursor: pointer;">
+			            <input type="checkbox" class="kakao-layer-toggle" data-type="USE_DISTRICT"> 🗺️ 지적편집도
+			        </label>
+			        <label style="display: block; font-size: 12px; margin-bottom: 5px; cursor: pointer;">
+			            <input type="checkbox" class="kakao-layer-toggle" data-type="TRAFFIC"> 🚦 실시간 교통
+			        </label>
+			        <label style="display: block; font-size: 12px; cursor: pointer;">
+			            <input type="checkbox" class="kakao-layer-toggle" data-type="ROADVIEW"> 📷 로드뷰 도로 확인
+			        </label>
+			    </div>
+			    <div style="margin-top: 10px; padding: 10px; background: #eef7ff; border-radius: 10px; border: 1px solid #abd4ff;">
+			        <div style="font-size: 11px; font-weight: bold; margin-bottom: 5px; color: #0051af;">📂 외부 GeoJSON 불러오기</div>
+			        <input type="file" id="external-geojson-input" accept=".json,.geojson" style="font-size: 11px; width: 100%;">
+			    </div>
+			    <div id="filter-result-count" style="font-size: 12px; color: #0051af; font-weight: bold; margin-top: 10px; text-align: right;"></div>
+			    <button onclick="exportToExcel()" style="width: 100%; margin-top: 10px; padding: 8px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px;">
+			        📊 현재 검색결과 엑셀 저장
+			    </button>
 			</div>
-		    <div id="filter-result-count" style="font-size: 12px; color: #0051af; font-weight: bold; margin-top: 10px; text-align: right;"></div>
-			<button onclick="exportToExcel()" style="width: 100%; margin-top: 10px; padding: 8px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px;">
-			    📊 현재 검색결과 엑셀 저장
-			</button>
-		</div>
         <script src="js/qgis2web_expressions.js"></script>
         <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=231190ac1aca72ada0b739110d8a0eb4"></script>
         <script src="js/leaflet.js"></script>
@@ -729,15 +735,79 @@
               i++;
         });
 
-		// --- 동적 검색 필터 로직 시작 ---
-       function applyMultiFilter() {
-		    // 모든 입력창 요소를 가져옴
+		// -----------------------------------------------
+		// 데이터별 필터 필드 정의
+		// -----------------------------------------------
+		var filterFieldConfig = {
+		    A: [
+		        { field: '제출처',  placeholder: '예: 기업은행' },
+		        { field: '주소',    placeholder: '예: 서울' },
+		        { field: '담당자',  placeholder: '담당자 이름' },
+		        { field: '물건종류', placeholder: '예: 아파트' },
+		        { field: '상태',    placeholder: '예: 완료' }
+		    ],
+		    B: [
+		        { field: '소재지(통', placeholder: '예: 서울 강남' },
+		        { field: '구분',      placeholder: '예: 상가' },
+		        { field: '세부용도',  placeholder: '예: 근린상가' },
+		        { field: '보증금/월', placeholder: '예: 1000/50' },
+		        { field: '의뢰금액(', placeholder: '금액 입력' }
+		    ]
+		};
+		
+		// 현재 활성 데이터 타입 ('A' 또는 'B')
+		var activeFilterType = 'A';
+		
+		// -----------------------------------------------
+		// 필터 입력창 동적 생성 함수
+		// -----------------------------------------------
+		function buildFilterInputs(type) {
+		    var container = document.getElementById('dynamic-filter-inputs');
+		    var badge = document.getElementById('filter-layer-badge');
+		    if (!container) return;
+		
+		    // 배지 색상 변경
+		    if (type === 'B') {
+		        badge.textContent = 'B 데이터';
+		        badge.style.background = '#3182ce';
+		    } else {
+		        badge.textContent = 'A 데이터';
+		        badge.style.background = '#0051af';
+		    }
+		
+		    // 입력창 초기화 후 재생성
+		    container.innerHTML = '';
+		    var fields = filterFieldConfig[type] || [];
+		
+		    fields.forEach(function(item) {
+		        var wrapper = document.createElement('div');
+		        wrapper.style.marginBottom = '8px';
+		        wrapper.innerHTML =
+		            '<label style="font-size:11px; color:#666;">' + item.field + '</label>' +
+		            '<input type="text"' +
+		            '       class="multi-filter-input"' +
+		            '       data-field="' + item.field + '"' +
+		            '       placeholder="' + item.placeholder + '"' +
+		            '       style="width:100%; padding:6px 10px; border:1px solid #ddd; border-radius:5px; box-sizing:border-box;">';
+		        container.appendChild(wrapper);
+		
+		        // 입력 이벤트 연결
+		        wrapper.querySelector('input').addEventListener('input', applyMultiFilter);
+		    });
+		
+		    // 입력창이 바뀌었으니 필터 결과도 초기화
+		    document.getElementById('filter-result-count').innerText = '';
+		}
+		
+		// -----------------------------------------------
+		// 필터 적용 함수 (활성 레이어 자동 판별)
+		// -----------------------------------------------
+		function applyMultiFilter() {
 		    var filterInputs = document.querySelectorAll('.multi-filter-input');
 		    var activeFilters = [];
 		
-		    // 현재 입력값이 있는 필터들만 추출
 		    filterInputs.forEach(function(input) {
-		        if (input.value.trim() !== "") {
+		        if (input.value.trim() !== '') {
 		            activeFilters.push({
 		                field: input.getAttribute('data-field'),
 		                value: input.value.toLowerCase().trim()
@@ -745,14 +815,15 @@
 		        }
 		    });
 		
+		    // 현재 활성 레이어 선택
+		    var targetLayer = (activeFilterType === 'B') ? layer_B_data_0 : layer_map_data;
 		    var visibleCount = 0;
 		
-		    layer_map_data.eachLayer(function(layer) {
+		    targetLayer.eachLayer(function(layer) {
 		        var props = layer.feature.properties;
-		        
-		        // every() 함수는 모든 조건이 참(true)일 때만 true를 반환합니다 (AND 조건)
+		
 		        var isMatch = activeFilters.every(function(filter) {
-		            var dataValue = String(props[filter.field] || "").toLowerCase();
+		            var dataValue = String(props[filter.field] || '').toLowerCase();
 		            return dataValue.includes(filter.value);
 		        });
 		
@@ -764,31 +835,47 @@
 		        }
 		    });
 		
-		    // 결과 건수 업데이트
-		    document.getElementById('filter-result-count').innerText = "검색 결과: " + visibleCount + "건";
-		
-		
+		    document.getElementById('filter-result-count').innerText = '검색 결과: ' + visibleCount + '건';
+		    updateDashboard();
 		}
 		
-		// 모든 입력창에 이벤트 연결
-		document.querySelectorAll('.multi-filter-input').forEach(function(input) {
-		    input.addEventListener('input', applyMultiFilter);
+		// -----------------------------------------------
+		// 레이어 체크박스 변경 시 → 필터 패널 동적 갱신
+		// -----------------------------------------------
+		map.on('overlayadd overlayremove', function(e) {
+		    // B 데이터가 켜져 있으면 B 모드, 아니면 A 모드
+		    if (map.hasLayer(layer_B_data_0)) {
+		        activeFilterType = 'B';
+		    } else {
+		        activeFilterType = 'A';
+		    }
+		    buildFilterInputs(activeFilterType);
 		});
+		
+		// 초기 1회 실행
+		buildFilterInputs('A');
 		function exportToExcel() {
+		    // 현재 활성 레이어 및 헤더 동적 결정
+		    var isTypeB = (activeFilterType === 'B');
+		    
+		    var targetLayer = isTypeB ? layer_B_data_0 : layer_map_data;
+		    var headers = isTypeB 
+		        ? ['소재지(통', '구분', '세부용도', '보증금/월', '의뢰금액(', '(단순)예상']
+		        : ['감정서번호', '담당자', '제출처', '주소', '물건종류', '상태'];
+		    var fileName = isTypeB ? 'B매물_검색결과' : 'A데이터_검색결과';
+		
 		    var data = [];
-		    var headers = ['감정서번호', '담당자', '제출처', '주소', '물건종류', '상태']; // 엑셀에 포함할 필드명들
 		
 		    // 1. 헤더 추가
 		    data.push(headers.join(','));
 		
 		    // 2. 현재 지도에 보이는 마커들의 데이터 추출
-		    layer_map_data.eachLayer(function(layer) {
+		    targetLayer.eachLayer(function(layer) {
 		        if (map.hasLayer(layer)) {
 		            var props = layer.feature.properties;
 		            var row = headers.map(function(header) {
-		                // 데이터 내에 쉼표(,)가 있으면 엑셀 형식이 깨지므로 제거하거나 큰따옴표 처리
 		                var val = String(props[header] || "").replace(/,/g, " ");
-		                return '"' + val + '"'; 
+		                return '"' + val + '"';
 		            });
 		            data.push(row.join(','));
 		        }
@@ -799,14 +886,14 @@
 		        return;
 		    }
 		
-		    // 3. 파일 생성 및 다운로드 (한글 깨짐 방지를 위해 BOM 추가)
+		    // 3. 파일 생성 및 다운로드
 		    var csvContent = "\uFEFF" + data.join("\n");
 		    var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
 		    var url = URL.createObjectURL(blob);
-		    
+		
 		    var link = document.createElement("a");
 		    link.setAttribute("href", url);
-		    link.setAttribute("download", "검색결과_" + new Date().toLocaleDateString() + ".csv");
+		    link.setAttribute("download", fileName + "_" + new Date().toLocaleDateString() + ".csv");
 		    document.body.appendChild(link);
 		    link.click();
 		    document.body.removeChild(link);
