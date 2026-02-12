@@ -1,5 +1,4 @@
-const logisticsData =
-{
+var json_C_data_0 = {
 "type": "FeatureCollection",
 "name": "geoJSON",
 "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
