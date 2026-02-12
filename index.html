@@ -354,12 +354,18 @@
 		    }
 		};
 
-		// C 데이터용 필드 설정 (C_data.js의 실제 필드명에 맞게 수정 필요)
+		// C 데이터용 필드 설정
 		var labelFieldConfig_C_data = {
-		    fields: ["물류센터명", "소재지", "구분", "연면적(Py)", "상온 계약월임대료(원/Py)", "주요 임차인"],
+		    fields: ["물류센터명", "소재지", "구분", "연면적(Py)", "사용승인일", "접안여부", 
+		             "상온 계약월임대료(원/Py)", "상온 계약월관리비(원/Py)", 
+		             "저온 계약월임대료(원/Py)", "저온 계약월관리비(원/Py)", 
+		             "임대료상승률", "렌트프리기간"],
 		    visible: {
 		        "물류센터명": true, "소재지": true, "구분": true, 
-		        "연면적(Py)": true, "상온 계약월임대료(원/Py)": true, "주요 임차인": true
+		        "연면적(Py)": true, "사용승인일": false, "접안여부": false,
+		        "상온 계약월임대료(원/Py)": true, "상온 계약월관리비(원/Py)": false,
+		        "저온 계약월임대료(원/Py)": false, "저온 계약월관리비(원/Py)": false,
+		        "임대료상승률": false, "렌트프리기간": false
 		    }
 		};
 		
@@ -387,13 +393,37 @@
 		    var p = feature.properties;
 		    var activeFields = [];
 		
-		    if (cfg.visible["물류센터명"]) activeFields.push(`<div class="text-main">${p['물류센터명'] || ''}</div>`);
-		    if (cfg.visible["소재지"])     activeFields.push(`<div class="text-main">${p['소재지'] || ''}</div>`);
-		    if (cfg.visible["구분"])       activeFields.push(`<div class="text-main">${p['구분'] || ''}</div>`);
-		    if (cfg.visible["연면적(Py)"]) activeFields.push(`<div class="text-main">${p['연면적(Py)'] || ''}</div>`);
-		    if (cfg.visible["주요 임차인"]) activeFields.push(`<div class="text-main">${p['주요 임차인'] || ''}</div>`);
+		    // 일반 필드들 (필드명 포함)
+		    if (cfg.visible["물류센터명"] && p['물류센터명']) 
+		        activeFields.push(`<div class="text-main"><span style="color:#888; font-size:11px;">센터:</span> ${p['물류센터명']}</div>`);
+		    if (cfg.visible["소재지"] && p['소재지']) 
+		        activeFields.push(`<div class="text-main"><span style="color:#888; font-size:11px;">위치:</span> ${p['소재지']}</div>`);
+		    if (cfg.visible["구분"] && p['구분']) 
+		        activeFields.push(`<div class="text-main"><span style="color:#888; font-size:11px;">구분:</span> ${p['구분']}</div>`);
+		    if (cfg.visible["연면적(Py)"] && p['연면적(Py)']) 
+		        activeFields.push(`<div class="text-main"><span style="color:#888; font-size:11px;">면적:</span> ${p['연면적(Py)']} Py</div>`);
+		    if (cfg.visible["사용승인일"] && p['사용승인일']) 
+		        activeFields.push(`<div class="text-main"><span style="color:#888; font-size:11px;">승인:</span> ${p['사용승인일']}</div>`);
+		    if (cfg.visible["접안여부"] && p['접안여부']) 
+		        activeFields.push(`<div class="text-main"><span style="color:#888; font-size:11px;">접안:</span> ${p['접안여부']}</div>`);
 		    
-		    if (cfg.visible["상온 계약월임대료(원/Py)"]) activeFields.push(`<div class="text-price">${p['상온 계약월임대료(원/Py)'] || ''}</div>`);
+		    // 상온 임대료 (빨간색)
+		    if (cfg.visible["상온 계약월임대료(원/Py)"] && p['상온 계약월임대료(원/Py)']) 
+		        activeFields.push(`<div class="text-price"><span style="color:#888; font-size:11px;">상온 임대:</span> ${p['상온 계약월임대료(원/Py)']}원</div>`);
+		    if (cfg.visible["상온 계약월관리비(원/Py)"] && p['상온 계약월관리비(원/Py)']) 
+		        activeFields.push(`<div class="text-price"><span style="color:#888; font-size:11px;">상온 관리:</span> ${p['상온 계약월관리비(원/Py)']}원</div>`);
+		    
+		    // 저온 임대료 (파란색)
+		    if (cfg.visible["저온 계약월임대료(원/Py)"] && p['저온 계약월임대료(원/Py)']) 
+		        activeFields.push(`<div style="font-weight:900; color:#3182ce; font-size:15px; margin-top:6px; border-top:1px solid #edf2f7; padding-top:6px;"><span style="color:#888; font-size:11px;">저온 임대:</span> ${p['저온 계약월임대료(원/Py)']}원</div>`);
+		    if (cfg.visible["저온 계약월관리비(원/Py)"] && p['저온 계약월관리비(원/Py)']) 
+		        activeFields.push(`<div style="font-weight:900; color:#3182ce; font-size:15px; margin-top:6px; border-top:1px solid #edf2f7; padding-top:6px;"><span style="color:#888; font-size:11px;">저온 관리:</span> ${p['저온 계약월관리비(원/Py)']}원</div>`);
+		    
+		    // 기타 정보
+		    if (cfg.visible["임대료상승률"] && p['임대료상승률']) 
+		        activeFields.push(`<div class="text-main"><span style="color:#888; font-size:11px;">상승률:</span> ${p['임대료상승률']}</div>`);
+		    if (cfg.visible["렌트프리기간"] && p['렌트프리기간']) 
+		        activeFields.push(`<div class="text-main"><span style="color:#888; font-size:11px;">렌트프리:</span> ${p['렌트프리기간']}</div>`);
 		
 		    if (!activeFields.length) return '';
 		    return `<div class="custom-tooltip-box">${activeFields.join('')}</div>`;
