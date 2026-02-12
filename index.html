@@ -170,7 +170,8 @@
 
 		<style>
 		    /* 1. Leaflet 기본 툴팁 컨테이너 스타일 제거 */
-		    .leaflet-tooltip.css_map_data_B {
+		    .leaflet-tooltip.css_map_data_B,
+		    .leaflet-tooltip.css_map_data_C {
 		        background-color: transparent !important;
 		        border: none !important;
 		        box-shadow: none !important;
@@ -227,12 +228,14 @@
 		    }
 		
 		    /* 7. 전체 라벨 숨김 토글 연동 */
-		    .labels-hidden .css_map_data_B {
+		    .labels-hidden .css_map_data_B,
+		    .labels-hidden .css_map_data_C {
 		        display: none !important;
 		    }
 		
 		    /* 8. 툴팁 화살표 숨김 */
-		    .leaflet-tooltip-top.css_map_data_B:before {
+		    .leaflet-tooltip-top.css_map_data_B:before,
+		    .leaflet-tooltip-top.css_map_data_C:before {
 		        display: none !important;
 		    }
 		</style>
@@ -318,6 +321,7 @@
         <script src="js/leaflet.photon.js"></script>
         <script src="data/map_data.js"></script>
 		<script src="data/B_data.js"></script>
+		<script src="data/C_data.js"></script>
         <script>
         var map = L.map('map', {
             zoomControl:false, maxZoom:28, minZoom:1
@@ -349,33 +353,53 @@
 		        "보증금/월": true, "의뢰금액(": true, "(단순)예상": true
 		    }
 		};
+
+		// C 데이터용 필드 설정 (C_data.js의 실제 필드명에 맞게 수정 필요)
+		var labelFieldConfig_C_data = {
+		    fields: ["물류센터명", "소재지", "구분", "연면적(Py)", "상온 계약월임대료(원/Py)", "주요 임차인"],
+		    visible: {
+		        "물류센터명": true, "소재지": true, "구분": true, 
+		        "연면적(Py)": true, "상온 계약월임대료(원/Py)": true, "주요 임차인": true
+		    }
+		};
 		
 		// B 데이터용 라벨 내용 생성 함수
-			function buildLabelContent_B_data(feature) {
+		function buildLabelContent_B_data(feature) {
 		    var cfg = labelFieldConfig_B_data;
 		    var p = feature.properties;
 		    var activeFields = [];
 		
-		    // 요청하신 순서대로 체크박스가 켜져 있는지 확인하고 HTML 생성
-		    // 순서: 소재지 -> 구분 -> 세부용도 -> 보증금/월 -> (단순)예상 -> 의뢰금액
 		    if (cfg.visible["소재지(통"]) activeFields.push(`<div class="text-main">${p['소재지(통'] || ''}</div>`);
 		    if (cfg.visible["구분"])       activeFields.push(`<div class="text-main">${p['구분'] || ''}</div>`);
 		    if (cfg.visible["세부용도"])   activeFields.push(`<div class="text-main">${p['세부용도'] || ''}</div>`);
 		    if (cfg.visible["보증금/월"])  activeFields.push(`<div class="text-main">${p['보증금/월'] || ''}</div>`);
 		    if (cfg.visible["(단순)예상"]) activeFields.push(`<div class="text-main">${p['(단순)예상'] || ''}</div>`);
 		    
-		    // 마지막 의뢰금액만 빨간색 스타일 적용
 		    if (cfg.visible["의뢰금액("]) activeFields.push(`<div class="text-price">${p['의뢰금액('] || ''}</div>`);
 		
-		    // 선택된 필드가 없으면 빈 값 반환
 		    if (!activeFields.length) return '';
+		    return `<div class="custom-tooltip-box">${activeFields.join('')}</div>`;
+		}
+
+		// C 데이터용 라벨 내용 생성 함수
+		function buildLabelContent_C_data(feature) {
+		    var cfg = labelFieldConfig_C_data;
+		    var p = feature.properties;
+		    var activeFields = [];
 		
-		    // 최종 박스 디자인으로 감싸서 반환
+		    if (cfg.visible["물류센터명"]) activeFields.push(`<div class="text-main">${p['물류센터명'] || ''}</div>`);
+		    if (cfg.visible["소재지"])     activeFields.push(`<div class="text-main">${p['소재지'] || ''}</div>`);
+		    if (cfg.visible["구분"])       activeFields.push(`<div class="text-main">${p['구분'] || ''}</div>`);
+		    if (cfg.visible["연면적(Py)"]) activeFields.push(`<div class="text-main">${p['연면적(Py)'] || ''}</div>`);
+		    if (cfg.visible["주요 임차인"]) activeFields.push(`<div class="text-main">${p['주요 임차인'] || ''}</div>`);
+		    
+		    if (cfg.visible["상온 계약월임대료(원/Py)"]) activeFields.push(`<div class="text-price">${p['상온 계약월임대료(원/Py)'] || ''}</div>`);
+		
+		    if (!activeFields.length) return '';
 		    return `<div class="custom-tooltip-box">${activeFields.join('')}</div>`;
 		}
 			
         // 라벨(지도 위 텍스트)에 표시할 필드별 토글 설정
-        // - qgis2web 기본 라벨식: 제출처(Tar) / 담당자 / 의뢰일자 / 상태 / 주소
         var labelFieldConfig_map_data = (function() {
             var fields = ['제출처(Tar', '담당자', '의뢰일자', '상태', '주소'];
             var vis = {};
@@ -389,14 +413,11 @@
 		        return autolinker.link(String(v).replace(/'/g, '\'').toLocaleString());
 		    }
 		    
-		    // 변수 선언을 맨 위로 올립니다.
 		    var props = feature.properties || {};
 		    var rows = '';
 		
-		    // 사진 로직 (감정서번호 기준)
 		    if (props['감정서번호']) { 
 		        var id = String(props['감정서번호']).trim();
-		        // .jpg와 .png 둘 다 시도하게 하거나, 변환하신 .jpg로 고정합니다.
 		        var imgPath = "images/" + id + ".jpg"; 
 		        
 		        rows += '<tr><td colspan="2" class="popup-image-container" style="text-align:center;">' +
@@ -440,7 +461,7 @@
                 parts.join(sep) +
                 '</div>';
         }
-        // remove popup's row if "visible-with-data"
+        
         function removeEmptyRowsFromPopupContent(content, feature) {
          var tempDiv = document.createElement('div');
          tempDiv.innerHTML = content;
@@ -454,7 +475,7 @@
          }
          return tempDiv.innerHTML;
         }
-        // modify popup if contains media
+        
         function addClassToPopupIfMedia(content, popup) {
             var tempDiv = document.createElement('div');
             tempDiv.innerHTML = content;
@@ -486,7 +507,6 @@
                     video.style.maxWidth = "60vw";
                     imgTd.parentNode.replaceChild(video, imgTd);
                     popup._contentNode.classList.add('media');
-                    // Aggiorna il popup quando il video carica i metadati
                     video.addEventListener('loadedmetadata', function() {
                         popup.update();
                     });
@@ -511,9 +531,8 @@
 		    layer.bindPopup(function(l) {
 		        var content = buildPopupContent_map_data(l.feature);
 		        
-		        // 로드뷰 버튼 추가
 		        var latlng = l.getLatLng();
-		        var address = l.feature.properties['주소'] || l.feature.properties['소재지(통'] || '';
+		        var address = l.feature.properties['주소'] || l.feature.properties['소재지(통'] || l.feature.properties['소재지'] || '';
 		        content += '<div style="margin-top:8px; text-align:center;">' +
 		            '<button onclick="openRoadview({lat:' + latlng.lat + ',lng:' + latlng.lng + '},\'' + address.replace(/'/g, '') + '\')" ' +
 		            'style="padding:6px 16px; background:#0051af; color:white; border:none; border-radius:5px; cursor:pointer; font-size:12px; font-weight:bold;">' +
@@ -572,9 +591,6 @@
         bounds_group.addLayer(layer_map_data);
         map.addLayer(layer_map_data);
         
-        // QGIS 데이터(오버레이) 토글 컨트롤
-        // - 마커(피처)와 텍스트(라벨)를 분리 토글합니다.
-        // - 라벨은 Leaflet tooltip pane을 숨기는 "토글용 레이어"로 구현합니다.
         var LabelToggleLayer = L.Layer.extend({
             onAdd: function(m) {
                 m.getContainer().classList.remove('labels-hidden');
@@ -584,22 +600,21 @@
             }
         });
         var layer_labels_map_data = new LabelToggleLayer();
-        // 기본값: 라벨 표시(체크된 상태)
         layer_labels_map_data.addTo(map);
 
+		// B 데이터 레이어
 		var layer_B_data_0 = new L.geoJson(json_B_data_0, {
 		    onEachFeature: function(feature, layer) {
 		        if (typeof pop_map_data === 'function') {
 		            pop_map_data(feature, layer);
 		        }
 		        
-		        // 우리가 새로 만든 디자인 함수 호출
 		        var labelContent = buildLabelContent_B_data(feature);
 		
 		        layer.bindTooltip(labelContent, {
 		            permanent: true,
 		            direction: 'top',
-		            className: 'css_map_data_B', // CSS 스타일 연결
+		            className: 'css_map_data_B',
 		            offset: [0, -10]
 		        });
 		    },
@@ -614,29 +629,55 @@
 		    }
 		});
 
-        // --- 2. 통합 컨트롤 설정 ---
-        // 기존에 '마커', '텍스트'만 있던 곳에 '매물 데이터 B'를 추가합니다.
-        var baseMaps = {}; // 배경 지도가 있다면 여기에 넣으세요 (보통 null)
+		// C 데이터 레이어 (새로 추가)
+		var layer_C_data_0 = new L.geoJson(json_C_data_0, {
+		    onEachFeature: function(feature, layer) {
+		        if (typeof pop_map_data === 'function') {
+		            pop_map_data(feature, layer);
+		        }
+		        
+		        var labelContent = buildLabelContent_C_data(feature);
+		
+		        layer.bindTooltip(labelContent, {
+		            permanent: true,
+		            direction: 'top',
+		            className: 'css_map_data_C',
+		            offset: [0, -10]
+		        });
+		    },
+		    pointToLayer: function (feature, latlng) {
+		        return L.circleMarker(latlng, {
+		            radius: 6,
+		            fillColor: "#ff6b35", // 주황색으로 구분
+		            color: "#000",
+		            weight: 1,
+		            fillOpacity: 0.8
+		        });
+		    }
+		});
+
+        // --- 통합 컨트롤 설정 ---
+        var baseMaps = {};
         var overlays = {
             'A 데이터(마커)': layer_map_data,
-            'B 데이터(매물)': layer_B_data_0, // 새로 추가!
+            'B 데이터(매물)': layer_B_data_0,
+            'C 데이터(물류)': layer_C_data_0, // 새로 추가!
             '텍스트(라벨)': layer_labels_map_data
         };
 
-        // window 객체에 저장해두면 나중에 다른 함수에서 접근하기 좋습니다.
         window.layerControl = L.control.layers(
             baseMaps, 
             overlays, 
             { collapsed: false, position: 'topright' }
         ).addTo(map);
 
-// [수정] 라벨 필드별 표시/숨김 토글 컨트롤 (동적 버전)
+		// 라벨 필드별 표시/숨김 토글 컨트롤 (동적 버전)
         (function addLabelFieldToggleControl() {
             var Control = L.Control.extend({
                 options: { position: 'topright' },
                 onAdd: function(m) {
                     var div = L.DomUtil.create('div', 'popup-field-toggle');
-                    div.id = 'dynamic-label-toggle'; // ID 부여
+                    div.id = 'dynamic-label-toggle';
                     div.innerHTML = [
                         '<div class="title" style="font-weight:bold; margin-bottom:5px;">라벨 필드 토글</div>',
                         '<div class="actions" style="margin-bottom:5px;">',
@@ -649,14 +690,16 @@
                     L.DomEvent.disableClickPropagation(div);
                     L.DomEvent.disableScrollPropagation(div);
 
-                    // 리스트를 새로 그려주는 핵심 함수
                     div.updateUI = function() {
                         var list = div.querySelector('.list');
                         list.innerHTML = '';
                         
-                        // 현재 지도에 있는 레이어 판별
                         var cfg, targetLayer, buildFunc;
-                        if (map.hasLayer(layer_B_data_0)) {
+                        if (map.hasLayer(layer_C_data_0)) {
+                            cfg = labelFieldConfig_C_data;
+                            targetLayer = layer_C_data_0;
+                            buildFunc = buildLabelContent_C_data;
+                        } else if (map.hasLayer(layer_B_data_0)) {
                             cfg = labelFieldConfig_B_data;
                             targetLayer = layer_B_data_0;
                             buildFunc = buildLabelContent_B_data;
@@ -673,23 +716,23 @@
 						        var newContent = buildFunc(lyr.feature);
 						        
 						        if (newContent) {
+						            var className = 'css_map_data';
+						            if (targetLayer === layer_B_data_0) className = 'css_map_data_B';
+						            if (targetLayer === layer_C_data_0) className = 'css_map_data_C';
+						            
 						            lyr.bindTooltip(newContent, {
 						                permanent: true,
 						                direction: 'top',
-						                className: (targetLayer === layer_B_data_0) ? 'css_map_data_B' : 'css_map_data',
+						                className: className,
 						                offset: [0, -10],
-						                // --- 아래 옵션들을 추가/수정하세요 ---
-						                sticky: false,        // 마우스 따라다니지 않게 고정
-						                opacity: 1,           // 투명도 유지
-						                interactive: false    // 라벨이 마우스 클릭 방해하지 않게
+						                sticky: false,
+						                opacity: 1,
+						                interactive: false
 						            });
 						        }
 						    });
 						
-						    // qgis2web 특유의 라벨 충돌 방지 로직 강제 종료
 						    if (typeof resetLabels === 'function') {
-						        // 이 함수가 실행되면서 겹치는걸 숨길 수 있으므로, 
-						        // 아예 호출하지 않거나 모든 레이어를 강제로 보이게 처리해야 합니다.
 						        resetLabels([targetLayer]); 
 						    }
 						}
@@ -707,7 +750,6 @@
                             list.appendChild(row);
                         });
 
-                        // 전체/해제 버튼 이벤트 다시 연결
                         div.querySelector('[data-action="all"]').onclick = function() {
                             cfg.fields.forEach(function(k) { cfg.visible[k] = true; });
                             div.updateUI(); refresh();
@@ -718,18 +760,17 @@
                         };
                     };
 
-                    // 레이어가 추가/삭제될 때 UI 갱신 이벤트 등록
                     m.on('overlayadd overlayremove', function() {
                         div.updateUI();
                     });
 
-                    // 초기 1회 실행
                     setTimeout(function() { div.updateUI(); }, 100);
                     return div;
                 }
             });
             map.addControl(new Control());
         })();
+        
         setBounds();
         var i = 0;
         layer_map_data.eachLayer(function(layer) {
@@ -737,7 +778,6 @@
                 feature: layer.feature,
                 variables: {}
             };
-            // 라벨은 필드별 토글 설정을 반영해 생성
             layer.bindTooltip(buildLabelContent_map_data(layer.feature), {permanent: true, offset: [-0, -16], className: 'css_map_data'});
             labels.push(layer);
             totalMarkers += 1;
@@ -746,9 +786,7 @@
               i++;
         });
 
-		// -----------------------------------------------
 		// 데이터별 필터 필드 정의
-		// -----------------------------------------------
 		var filterFieldConfig = {
 		    A: [
 		        { field: '제출처',  placeholder: '예: 기업은행' },
@@ -763,21 +801,27 @@
 		        { field: '세부용도',  placeholder: '예: 근린상가' },
 		        { field: '보증금/월', placeholder: '예: 1000/50' },
 		        { field: '의뢰금액(', placeholder: '금액 입력' }
+		    ],
+		    C: [
+		        { field: '물류센터명', placeholder: '예: 쿠팡' },
+		        { field: '소재지',     placeholder: '예: 경기 이천' },
+		        { field: '구분',       placeholder: '예: 복합' },
+		        { field: '주요 임차인', placeholder: '예: 쿠팡' },
+		        { field: '상온 계약월임대료(원/Py)', placeholder: '금액 입력' }
 		    ]
 		};
 		
-		// 현재 활성 데이터 타입 ('A' 또는 'B')
 		var activeFilterType = 'A';
 		
-		// -----------------------------------------------
-		// 필터 입력창 동적 생성 함수
-		// -----------------------------------------------
 		function buildFilterInputs(type) {
 		    var container = document.getElementById('dynamic-filter-inputs');
 		    var badge = document.getElementById('filter-layer-badge');
 		    if (!container) return;
 		
-		    if (type === 'B') {
+		    if (type === 'C') {
+		        badge.textContent = 'C 데이터';
+		        badge.style.background = '#ff6b35';
+		    } else if (type === 'B') {
 		        badge.textContent = 'B 데이터';
 		        badge.style.background = '#3182ce';
 		    } else {
@@ -805,9 +849,6 @@
 		    document.getElementById('filter-result-count').innerText = '';
 		}
 		
-		// -----------------------------------------------
-		// 필터 적용 함수 (활성 레이어 자동 판별)
-		// -----------------------------------------------
 		function applyMultiFilter() {
 		    var filterInputs = document.querySelectorAll('.multi-filter-input');
 		    var activeFilters = [];
@@ -821,8 +862,11 @@
 		        }
 		    });
 		
-		    // 현재 활성 레이어 선택
-		    var targetLayer = (activeFilterType === 'B') ? layer_B_data_0 : layer_map_data;
+		    var targetLayer;
+		    if (activeFilterType === 'C') targetLayer = layer_C_data_0;
+		    else if (activeFilterType === 'B') targetLayer = layer_B_data_0;
+		    else targetLayer = layer_map_data;
+		    
 		    var visibleCount = 0;
 		
 		    targetLayer.eachLayer(function(layer) {
@@ -845,12 +889,10 @@
 		    updateDashboard();
 		}
 		
-		// -----------------------------------------------
-		// 레이어 체크박스 변경 시 → 필터 패널 동적 갱신
-		// -----------------------------------------------
 		map.on('overlayadd overlayremove', function(e) {
-		    // B 데이터가 켜져 있으면 B 모드, 아니면 A 모드
-		    if (map.hasLayer(layer_B_data_0)) {
+		    if (map.hasLayer(layer_C_data_0)) {
+		        activeFilterType = 'C';
+		    } else if (map.hasLayer(layer_B_data_0)) {
 		        activeFilterType = 'B';
 		    } else {
 		        activeFilterType = 'A';
@@ -858,40 +900,31 @@
 		    buildFilterInputs(activeFilterType);
 		});
 		
-		// 초기 1회 실행
 		buildFilterInputs('A');
-		// -----------------------------------------------
-		// 로드뷰 관련 변수 및 함수
-		// -----------------------------------------------
+		
 		var roadviewObj = null;
 		var roadviewClient = null;
 		var roadviewOpen = false;
 		
 		function openRoadview(latlng, addressText) {
 		    var panel = document.getElementById('roadview-panel');
-		    
-		    // 1. 패널 표시
 		    panel.style.display = 'block';
 		    roadviewOpen = true;
 		
-		    // 2. 지도 영역 줄이기
 		    document.getElementById('map').style.bottom = '35%';
 		    document.getElementById('kakao-map').style.bottom = '35%';
-		    map.invalidateSize(); // Leaflet 크기 재계산
+		    map.invalidateSize();
 		
-		    // 3. 로드뷰 객체 초기화 (최초 1회만)
 		    if (!roadviewObj) {
 		        var container = document.getElementById('roadview');
 		        roadviewObj = new kakao.maps.Roadview(container);
 		        roadviewClient = new kakao.maps.RoadviewClient();
 		    }
 		
-		    // 4. 주소 표시
 		    if (addressText) {
 		        document.getElementById('roadview-address').innerText = '— ' + addressText;
 		    }
 		
-		    // 5. 해당 좌표 로드뷰 열기
 		    var kakaoLatLng = new kakao.maps.LatLng(latlng.lat, latlng.lng);
 		    roadviewClient.getNearestPanoId(kakaoLatLng, 50, function(panoId) {
 		        if (panoId) {
@@ -907,7 +940,6 @@
 		    panel.style.display = 'none';
 		    roadviewOpen = false;
 		
-		    // 지도 영역 원복
 		    document.getElementById('map').style.bottom = '0';
 		    document.getElementById('kakao-map').style.bottom = '0';
 		    map.invalidateSize();
@@ -915,21 +947,28 @@
 
 			
 		function exportToExcel() {
-		    // 현재 활성 레이어 및 헤더 동적 결정
+		    var isTypeC = (activeFilterType === 'C');
 		    var isTypeB = (activeFilterType === 'B');
 		    
-		    var targetLayer = isTypeB ? layer_B_data_0 : layer_map_data;
-		    var headers = isTypeB 
-		        ? ['소재지(통', '구분', '세부용도', '보증금/월', '의뢰금액(', '(단순)예상']
-		        : ['감정서번호', '담당자', '제출처', '주소', '물건종류', '상태'];
-		    var fileName = isTypeB ? 'B매물_검색결과' : 'A데이터_검색결과';
+		    var targetLayer, headers, fileName;
+		    
+		    if (isTypeC) {
+		        targetLayer = layer_C_data_0;
+		        headers = ['물류센터명', '소재지', '구분', '연면적(Py)', '상온 계약월임대료(원/Py)', '주요 임차인'];
+		        fileName = 'C물류_검색결과';
+		    } else if (isTypeB) {
+		        targetLayer = layer_B_data_0;
+		        headers = ['소재지(통', '구분', '세부용도', '보증금/월', '의뢰금액(', '(단순)예상'];
+		        fileName = 'B매물_검색결과';
+		    } else {
+		        targetLayer = layer_map_data;
+		        headers = ['감정서번호', '담당자', '제출처', '주소', '물건종류', '상태'];
+		        fileName = 'A데이터_검색결과';
+		    }
 		
 		    var data = [];
-		
-		    // 1. 헤더 추가
 		    data.push(headers.join(','));
 		
-		    // 2. 현재 지도에 보이는 마커들의 데이터 추출
 		    targetLayer.eachLayer(function(layer) {
 		        if (map.hasLayer(layer)) {
 		            var props = layer.feature.properties;
@@ -946,7 +985,6 @@
 		        return;
 		    }
 		
-		    // 3. 파일 생성 및 다운로드
 		    var csvContent = "\uFEFF" + data.join("\n");
 		    var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
 		    var url = URL.createObjectURL(blob);
@@ -958,13 +996,10 @@
 		    link.click();
 		    document.body.removeChild(link);
 		}
-		// 카카오 레이어 토글 로직 (수정 버전)
+		
 		document.querySelectorAll('.kakao-layer-toggle').forEach(function(checkbox) {
 		    checkbox.addEventListener('change', function(e) {
 		        var layerType = e.target.getAttribute('data-type');
-		        
-		        // 1. 전역 변수에서 카카오 지도 객체 후보들을 찾습니다.
-		        // qgis2web 커스텀 설정에 따라 k_map, kakao_map, map 등으로 생성됩니다.
 		        var targetMap = window.kakaoMap || window.k_map || window.kakao_map;
 		
 		        if (targetMap && targetMap.addOverlayMapTypeId) {
@@ -974,12 +1009,11 @@
 		                targetMap.removeOverlayMapTypeId(kakao.maps.MapTypeId[layerType]);
 		            }
 		        } else {
-		            console.error("카카오 지도 객체를 찾을 수 없습니다. 현재 변수명을 확인해야 합니다.");
-		            // 팁: 만약 그래도 안된다면 콘솔창에 'window'라고 쳐서 k로 시작하는 객체를 찾아보세요.
+		            console.error("카카오 지도 객체를 찾을 수 없습니다.");
 		        }
 		    });
 		});
-		// [1] 전역 변수 설정
+		
 		var externalLabelConfig = { fields: [], visible: {} };
 		var currentExternalLayer = null;
 		var externalLayerGroup = L.featureGroup().addTo(map);
@@ -993,42 +1027,33 @@
 		        try {
 		            var geojsonData = JSON.parse(event.target.result);
 		            
-		            // 기존 데이터 및 UI 청소
 		            externalLayerGroup.clearLayers();
 		            var oldUI = document.getElementById('external-label-controls');
 		            if (oldUI) oldUI.remove();
 		
-		            // [2] 데이터 추출 (보여주신 데이터의 features 경로 인식)
 		            var features = geojsonData.features || [];
 		            if (features.length === 0) {
 		                alert("파일 내에 유효한 매물 데이터가 없습니다.");
 		                return;
 		            }
 		
-		            // [3] 필드명 자동 추출 (데이터의 properties 내부 키값들을 가져옴)
 		            var sampleProps = features[0].properties;
 		            externalLabelConfig.fields = Object.keys(sampleProps);
 		            externalLabelConfig.fields.forEach(function(f) {
-		                // 초기값 설정: "소재지(통", "구분", "세부용도" 같은 주요 필드만 우선 켜기 (선택사항)
 		                externalLabelConfig.visible[f] = (f.indexOf('소재지') !== -1 || f === '구분' || f === '세부용도');
 		            });
 		            
-		            // 토글 UI 생성
 		            createExternalToggleUI(file.name);
 		
-		            // [4] GeoJSON 레이어 생성
 		            currentExternalLayer = L.geoJson(geojsonData, {
 		                onEachFeature: function(feature, layer) {
-		                    // 기존 팝업 함수 호출 (내용이 있으면 팝업도 뜸)
 		                    if (typeof pop_map_data === 'function') pop_map_data(feature, layer);
-		                    
-		                    // 외부 데이터 전용 라벨 렌더링
 		                    renderExternalLabel(layer);
 		                },
 		                pointToLayer: function (feature, latlng) {
 		                    return L.circleMarker(latlng, {
 		                        radius: 8,
-		                        fillColor: "#ff4500", // 주황빛 빨간색으로 강조
+		                        fillColor: "#ff4500",
 		                        color: "#ffffff",
 		                        weight: 2,
 		                        fillOpacity: 0.9
@@ -1038,13 +1063,10 @@
 		
 		            externalLayerGroup.addLayer(currentExternalLayer);
 		            
-		            // [5] 레이어 컨트롤에 등록
 		            var lControl = window.layerControl || window.controlLayers || window.control;
 		            if (lControl) lControl.addOverlay(externalLayerGroup, "📂 " + file.name);
 		
-		            // [6] 지도 위치 이동
 		            map.fitBounds(externalLayerGroup.getBounds());
-		            
 		            alert("'" + file.name + "' 데이터를 성공적으로 불러왔습니다!");
 		
 		        } catch (err) {
@@ -1055,7 +1077,6 @@
 		    reader.readAsText(file);
 		});
 		
-		// --- [함수] 필드 선택에 따른 라벨 생성 ---
 		function renderExternalLabel(layer) {
 		    var props = layer.feature.properties;
 		    var labelParts = [];
@@ -1072,14 +1093,13 @@
 		            permanent: true,
 		            offset: [0, -12],
 		            direction: 'top',
-		            className: 'css_map_data' // 기존 CSS 스타일 적용
+		            className: 'css_map_data'
 		        }).openTooltip();
 		    } else {
 		        layer.unbindTooltip();
 		    }
 		}
 		
-		// --- [함수] 외부 데이터용 체크박스 UI 생성 ---
 		function createExternalToggleUI(fileName) {
 		    var parent = document.getElementById('external-geojson-input').parentNode;
 		    var ui = document.createElement('div');
@@ -1097,7 +1117,6 @@
 		    ui.innerHTML = title + listHtml;
 		    parent.appendChild(ui);
 		
-		    // 체크박스 클릭 시 라벨 즉시 업데이트
 		    ui.querySelectorAll('.ext-chk').forEach(function(chk) {
 		        chk.addEventListener('change', function() {
 		            externalLabelConfig.visible[this.dataset.field] = this.checked;
@@ -1123,11 +1142,31 @@
 		            var p = layer.feature.properties;
 		            count++;
 		
-		            // [체크] B데이터인지 판별 (B데이터에만 있는 필드 '소재지(통' 존재 여부 확인)
-		            var isTypeB = p.hasOwnProperty('소재지(통'); 
+		            var isTypeC = p.hasOwnProperty('물류센터명');
+		            var isTypeB = p.hasOwnProperty('소재지(통');
 		
-		           if (isTypeB) {
-		                // --- B데이터(매물) 디자인: 정보 항목 보강 ---
+		            if (isTypeC) {
+		                // C데이터(물류) 디자인
+		                listHtml += `
+		                    <div class="list-item type-c" onclick="focusAnyMarker(${layer._leaflet_id})" 
+		                         style="padding:16px; border-bottom:1px solid #edf2f7; border-left:4px solid #ff6b35; background:#fff; cursor:pointer; margin-bottom:4px;">
+		                        <div style="font-size:11px; color:#ff6b35; font-weight:bold; margin-bottom:4px;">물류센터</div>
+		                        <div class="title" style="font-weight:bold; font-size:15px; color:#2d3748; line-height:1.4;">${p['물류센터명'] || '정보 없음'}</div>
+		                        
+		                        <div class="price" style="color:#e53e3e; font-weight:800; font-size:16px; margin-top:6px;">
+		                            ${p['상온 계약월임대료(원/Py)'] ? p['상온 계약월임대료(원/Py)'] + '원/Py' : '금액 미정'}
+		                        </div>
+		
+		                        <div class="info" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;">
+		                            ${p['소재지'] ? `<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">${p['소재지']}</span>` : ''}
+		                            ${p['구분'] ? `<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">${p['구분']}</span>` : ''}
+		                            ${p['연면적(Py)'] ? `<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">${p['연면적(Py)']} Py</span>` : ''}
+		                            ${p['주요 임차인'] ? `<span style="background:#f8fafc; color:#64748b; padding:2px 6px; border-radius:4px; font-size:11px; border:1px dashed #cbd5e1;">임차: ${p['주요 임차인']}</span>` : ''}
+		                        </div>
+		                    </div>
+		                `;
+		            } else if (isTypeB) {
+		                // B데이터(매물) 디자인
 		                listHtml += `
 		                    <div class="list-item type-b" onclick="focusAnyMarker(${layer._leaflet_id})" 
 		                         style="padding:16px; border-bottom:1px solid #edf2f7; border-left:4px solid #3182ce; background:#fff; cursor:pointer; margin-bottom:4px;">
@@ -1147,7 +1186,7 @@
 		                    </div>
 		                `;
 		            } else {
-		                // --- A데이터(기본) 디자인 ---
+		                // A데이터(기본) 디자인
 		                listHtml += `
 		                    <div class="list-item type-a" onclick="focusAnyMarker(${layer._leaflet_id})" 
 		                         style="padding:16px; border-bottom:1px solid #edf2f7; border-left:4px solid #718096; background:#f7fafc; cursor:pointer; margin-bottom:4px;">
@@ -1166,7 +1205,6 @@
 		    countElement.innerText = count;
 		}
 		
-		// 통합 포커스 함수 (그대로 유지)
 		window.focusAnyMarker = function(leaflet_id) {
 		    map.eachLayer(function(layer) {
 		        if (layer._leaflet_id === leaflet_id) {
@@ -1176,7 +1214,6 @@
 		    });
 		};
 		
-		// 모든 이벤트 리스너 통합 (레이어 켜고 끌 때 리스트가 즉시 반응함)
 		map.on('overlayadd overlayremove moveend zoomend', updateDashboard);
 
 		var lControl = window.layerControl || window.controlLayers || window.control;
