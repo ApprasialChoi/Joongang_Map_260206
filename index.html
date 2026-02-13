@@ -673,7 +673,7 @@
             },
         });
         bounds_group.addLayer(layer_map_data);
-        map.addLayer(layer_map_data);
+        // map.addLayer(layer_map_data); //
         
         var LabelToggleLayer = L.Layer.extend({
             onAdd: function(m) {
@@ -728,6 +728,7 @@
 		            className: 'css_map_data_C',
 		            offset: [0, -10]
 		        });
+				map.addLayer(layer_C_data_0);
 		    },
 		    pointToLayer: function (feature, latlng) {
 		        return L.circleMarker(latlng, {
@@ -935,7 +936,7 @@
 		    ]
 		};
 		
-		var activeFilterType = 'A';
+		var activeFilterType = 'C';
 		
 		function buildFilterInputs(type) {
 		    var container = document.getElementById('dynamic-filter-inputs');
@@ -1030,7 +1031,7 @@
 		    buildFilterInputs(activeFilterType);
 		});
 		
-		buildFilterInputs('A');
+		buildFilterInputs('C');
 		
 		var roadviewObj = null;
 		var roadviewClient = null;
