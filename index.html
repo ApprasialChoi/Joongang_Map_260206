@@ -171,7 +171,8 @@
 		<style>
 		    /* 1. Leaflet 기본 툴팁 컨테이너 스타일 제거 */
 		    .leaflet-tooltip.css_map_data_B,
-		    .leaflet-tooltip.css_map_data_C {
+		    .leaflet-tooltip.css_map_data_C,
+		    .leaflet-tooltip.css_map_data_D {
 		        background-color: transparent !important;
 		        border: none !important;
 		        box-shadow: none !important;
@@ -229,13 +230,15 @@
 		
 		    /* 7. 전체 라벨 숨김 토글 연동 */
 		    .labels-hidden .css_map_data_B,
-		    .labels-hidden .css_map_data_C {
+		    .labels-hidden .css_map_data_C,
+		    .labels-hidden .css_map_data_D {
 		        display: none !important;
 		    }
 		
 		    /* 8. 툴팁 화살표 숨김 */
 		    .leaflet-tooltip-top.css_map_data_B:before,
-		    .leaflet-tooltip-top.css_map_data_C:before {
+		    .leaflet-tooltip-top.css_map_data_C:before,
+		    .leaflet-tooltip-top.css_map_data_D:before {
 		        display: none !important;
 		    }
 		</style>
@@ -322,6 +325,7 @@
         <script src="data/map_data.js"></script>
 		<script src="data/B_data.js"></script>
 		<script src="data/C_data.js"></script>
+		<script src="data/D_data.js"></script>
         <script>
         var map = L.map('map', {
             zoomControl:false, maxZoom:28, minZoom:1
@@ -366,6 +370,26 @@
 		        "상온 계약월임대료(원/Py)": true, "상온 계약월관리비(원/Py)": false,
 		        "저온 계약월임대료(원/Py)": false, "저온 계약월관리비(원/Py)": false,
 		        "임대료상승률": false, "렌트프리기간": false
+		    }
+		};
+
+		// D 데이터용 필드 설정 (거래사례)
+		var labelFieldConfig_D_data = {
+		    fields: ["명칭", "소재지", "창고종류", "연면적(평)", "거래시점", "거래금액(총액)", "평당가격(원/평)"],
+		    visible: {
+		        "명칭": true, "소재지": true, "창고종류": true,
+		        "연면적(평)": true, "거래시점": false,
+		        "거래금액(총액)": false, "평당가격(원/평)": true
+		    }
+		};
+		
+		// D 데이터용 필드 설정 (거래사례)
+		var labelFieldConfig_D_data = {
+		    fields: ["명칭", "소재지", "창고종류", "연면적(평)", "거래시점", "거래금액(총액)", "평당가격(원/평)"],
+		    visible: {
+		        "명칭": true, "소재지": true, "창고종류": true,
+		        "연면적(평)": true, "거래시점": false,
+		        "거래금액(총액)": false, "평당가격(원/평)": true
 		    }
 		};
 		
@@ -424,6 +448,36 @@
 		        activeFields.push(`<div class="text-main"><span style="color:#888; font-size:11px;">상승률:</span> ${p['임대료상승률']}</div>`);
 		    if (cfg.visible["렌트프리기간"] && p['렌트프리기간']) 
 		        activeFields.push(`<div class="text-main"><span style="color:#888; font-size:11px;">렌트프리:</span> ${p['렌트프리기간']}</div>`);
+		
+		    if (!activeFields.length) return '';
+		    return `<div class="custom-tooltip-box">${activeFields.join('')}</div>`;
+		}
+
+		// D 데이터용 라벨 내용 생성 함수 (거래사례)
+		function buildLabelContent_D_data(feature) {
+		    var cfg = labelFieldConfig_D_data;
+		    var p = feature.properties;
+		    var activeFields = [];
+		
+		    // 일반 필드들 (필드명 포함)
+		    if (cfg.visible["명칭"] && p['명칭']) 
+		        activeFields.push(`<div class="text-main"><span style="color:#888; font-size:11px;">명칭:</span> ${p['명칭']}</div>`);
+		    if (cfg.visible["소재지"] && p['소재지']) 
+		        activeFields.push(`<div class="text-main"><span style="color:#888; font-size:11px;">위치:</span> ${p['소재지']}</div>`);
+		    if (cfg.visible["창고종류"] && p['창고종류']) 
+		        activeFields.push(`<div class="text-main"><span style="color:#888; font-size:11px;">종류:</span> ${p['창고종류']}</div>`);
+		    if (cfg.visible["연면적(평)"] && p['연면적(평)']) 
+		        activeFields.push(`<div class="text-main"><span style="color:#888; font-size:11px;">면적:</span> ${p['연면적(평)']}평</div>`);
+		    if (cfg.visible["거래시점"] && p['거래시점']) 
+		        activeFields.push(`<div class="text-main"><span style="color:#888; font-size:11px;">거래:</span> ${p['거래시점']}</div>`);
+		    
+		    // 거래금액 (빨간색)
+		    if (cfg.visible["거래금액(총액)"] && p['거래금액(총액)']) 
+		        activeFields.push(`<div class="text-price"><span style="color:#888; font-size:11px;">총액:</span> ${p['거래금액(총액)']}</div>`);
+		    
+		    // 평당가격 (초록색 - 거래사례 특화)
+		    if (cfg.visible["평당가격(원/평)"] && p['평당가격(원/평)']) 
+		        activeFields.push(`<div style="font-weight:900; color:#16a34a; font-size:15px; margin-top:6px; border-top:1px solid #edf2f7; padding-top:6px;"><span style="color:#888; font-size:11px;">평당:</span> ${p['평당가격(원/평)']}</div>`);
 		
 		    if (!activeFields.length) return '';
 		    return `<div class="custom-tooltip-box">${activeFields.join('')}</div>`;
@@ -659,7 +713,7 @@
 		    }
 		});
 
-		// C 데이터 레이어 (새로 추가)
+		// C 데이터 레이어
 		var layer_C_data_0 = new L.geoJson(json_C_data_0, {
 		    onEachFeature: function(feature, layer) {
 		        if (typeof pop_map_data === 'function') {
@@ -686,12 +740,40 @@
 		    }
 		});
 
+		// D 데이터 레이어 (거래사례 - 새로 추가)
+		var layer_D_data_0 = new L.geoJson(json_D_data_0, {
+		    onEachFeature: function(feature, layer) {
+		        if (typeof pop_map_data === 'function') {
+		            pop_map_data(feature, layer);
+		        }
+		        
+		        var labelContent = buildLabelContent_D_data(feature);
+		
+		        layer.bindTooltip(labelContent, {
+		            permanent: true,
+		            direction: 'top',
+		            className: 'css_map_data_D',
+		            offset: [0, -10]
+		        });
+		    },
+		    pointToLayer: function (feature, latlng) {
+		        return L.circleMarker(latlng, {
+		            radius: 7,
+		            fillColor: "#9333ea", // 보라색으로 구분 (거래사례)
+		            color: "#000",
+		            weight: 1,
+		            fillOpacity: 0.8
+		        });
+		    }
+		});
+
         // --- 통합 컨트롤 설정 ---
         var baseMaps = {};
         var overlays = {
             'A 데이터(마커)': layer_map_data,
             'B 데이터(매물)': layer_B_data_0,
-            'C 데이터(물류)': layer_C_data_0, // 새로 추가!
+            'C 데이터(물류)': layer_C_data_0,
+            'D 데이터(거래사례)': layer_D_data_0, // 새로 추가!
             '텍스트(라벨)': layer_labels_map_data
         };
 
@@ -725,7 +807,11 @@
                         list.innerHTML = '';
                         
                         var cfg, targetLayer, buildFunc;
-                        if (map.hasLayer(layer_C_data_0)) {
+                        if (map.hasLayer(layer_D_data_0)) {
+                            cfg = labelFieldConfig_D_data;
+                            targetLayer = layer_D_data_0;
+                            buildFunc = buildLabelContent_D_data;
+                        } else if (map.hasLayer(layer_C_data_0)) {
                             cfg = labelFieldConfig_C_data;
                             targetLayer = layer_C_data_0;
                             buildFunc = buildLabelContent_C_data;
@@ -749,6 +835,7 @@
 						            var className = 'css_map_data';
 						            if (targetLayer === layer_B_data_0) className = 'css_map_data_B';
 						            if (targetLayer === layer_C_data_0) className = 'css_map_data_C';
+						            if (targetLayer === layer_D_data_0) className = 'css_map_data_D';
 						            
 						            lyr.bindTooltip(newContent, {
 						                permanent: true,
@@ -838,6 +925,13 @@
 		        { field: '구분',       placeholder: '예: 복합' },
 		        { field: '주요 임차인', placeholder: '예: 쿠팡' },
 		        { field: '상온 계약월임대료(원/Py)', placeholder: '금액 입력' }
+		    ],
+		    D: [
+		        { field: '명칭',       placeholder: '예: 오뚜기물류' },
+		        { field: '소재지',     placeholder: '예: 경기 이천' },
+		        { field: '창고종류',   placeholder: '예: 복합' },
+		        { field: '연면적(평)', placeholder: '면적 입력' },
+		        { field: '평당가격(원/평)', placeholder: '평당가 입력' }
 		    ]
 		};
 		
@@ -848,7 +942,10 @@
 		    var badge = document.getElementById('filter-layer-badge');
 		    if (!container) return;
 		
-		    if (type === 'C') {
+		    if (type === 'D') {
+		        badge.textContent = 'D 데이터';
+		        badge.style.background = '#9333ea';
+		    } else if (type === 'C') {
 		        badge.textContent = 'C 데이터';
 		        badge.style.background = '#ff6b35';
 		    } else if (type === 'B') {
@@ -893,7 +990,8 @@
 		    });
 		
 		    var targetLayer;
-		    if (activeFilterType === 'C') targetLayer = layer_C_data_0;
+		    if (activeFilterType === 'D') targetLayer = layer_D_data_0;
+		    else if (activeFilterType === 'C') targetLayer = layer_C_data_0;
 		    else if (activeFilterType === 'B') targetLayer = layer_B_data_0;
 		    else targetLayer = layer_map_data;
 		    
@@ -920,7 +1018,9 @@
 		}
 		
 		map.on('overlayadd overlayremove', function(e) {
-		    if (map.hasLayer(layer_C_data_0)) {
+		    if (map.hasLayer(layer_D_data_0)) {
+		        activeFilterType = 'D';
+		    } else if (map.hasLayer(layer_C_data_0)) {
 		        activeFilterType = 'C';
 		    } else if (map.hasLayer(layer_B_data_0)) {
 		        activeFilterType = 'B';
@@ -977,12 +1077,17 @@
 
 			
 		function exportToExcel() {
+		    var isTypeD = (activeFilterType === 'D');
 		    var isTypeC = (activeFilterType === 'C');
 		    var isTypeB = (activeFilterType === 'B');
 		    
 		    var targetLayer, headers, fileName;
 		    
-		    if (isTypeC) {
+		    if (isTypeD) {
+		        targetLayer = layer_D_data_0;
+		        headers = ['명칭', '소재지', '창고종류', '연면적(평)', '거래시점', '평당가격(원/평)'];
+		        fileName = 'D거래사례_검색결과';
+		    } else if (isTypeC) {
 		        targetLayer = layer_C_data_0;
 		        headers = ['물류센터명', '소재지', '구분', '연면적(Py)', '상온 계약월임대료(원/Py)', '주요 임차인'];
 		        fileName = 'C물류_검색결과';
@@ -1172,10 +1277,31 @@
 		            var p = layer.feature.properties;
 		            count++;
 		
+		            var isTypeD = p.hasOwnProperty('명칭') && p.hasOwnProperty('평당가격(원/평)');
 		            var isTypeC = p.hasOwnProperty('물류센터명');
 		            var isTypeB = p.hasOwnProperty('소재지(통');
 		
-		            if (isTypeC) {
+		            if (isTypeD) {
+		                // D데이터(거래사례) 디자인
+		                listHtml += `
+		                    <div class="list-item type-d" onclick="focusAnyMarker(${layer._leaflet_id})" 
+		                         style="padding:16px; border-bottom:1px solid #edf2f7; border-left:4px solid #9333ea; background:#fff; cursor:pointer; margin-bottom:4px;">
+		                        <div style="font-size:11px; color:#9333ea; font-weight:bold; margin-bottom:4px;">거래사례</div>
+		                        <div class="title" style="font-weight:bold; font-size:15px; color:#2d3748; line-height:1.4;">${p['명칭'] || '정보 없음'}</div>
+		                        
+		                        <div class="price" style="color:#16a34a; font-weight:800; font-size:16px; margin-top:6px;">
+		                            평당 ${p['평당가격(원/평)'] || '금액 미정'}
+		                        </div>
+		
+		                        <div class="info" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;">
+		                            ${p['소재지'] ? `<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">${p['소재지']}</span>` : ''}
+		                            ${p['창고종류'] ? `<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">${p['창고종류']}</span>` : ''}
+		                            ${p['연면적(평)'] ? `<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">${p['연면적(평)']}평</span>` : ''}
+		                            ${p['거래시점'] ? `<span style="background:#f8fafc; color:#64748b; padding:2px 6px; border-radius:4px; font-size:11px; border:1px dashed #cbd5e1;">거래: ${p['거래시점']}</span>` : ''}
+		                        </div>
+		                    </div>
+		                `;
+		            } else if (isTypeC) {
 		                // C데이터(물류) 디자인
 		                listHtml += `
 		                    <div class="list-item type-c" onclick="focusAnyMarker(${layer._leaflet_id})" 
