@@ -311,10 +311,10 @@
         })();
 
 		var labelFieldConfig_B_data = {
-		    fields: ["연번", "소재지(통", "구분", "세부용도", "보증금/월", "의뢰금액(", "(단순)예상"],
+		    fields: ["연번", "소재지(통", "구분", "세부용도", "보증금/월", "의뢰금액", "(단순)예상수익률"],
 		    visible: {
 		        "연번": false, "소재지(통": true, "구분": true, "세부용도": true, 
-		        "보증금/월": true, "의뢰금액(": true, "(단순)예상": true
+		        "보증금/월": true, "의뢰금액": true, "(단순)예상수익률": true
 		    }
 		};
 
@@ -333,22 +333,22 @@
 		};
 
 		var labelFieldConfig_D_data = {
-		    fields: ["명칭", "소재지", "창고종류", "연면적(평)", "거래시점", "거래금액(총액)", "평당가격(원/평)"],
+		    fields: ["명칭", "소재지", "창고종류", "사용승인일", "거래시점", "연면적(평)", "거래금액(총액)", "평당가격(원/평)"],
 		    visible: {
 		        "명칭": true, "소재지": true, "창고종류": true,
-		        "연면적(평)": true, "거래시점": false,
-		        "거래금액(총액)": false, "평당가격(원/평)": true
+		        "사용승인일": false, "거래시점": false,
+		        "연면적(평)": true, "거래금액(총액)": false, "평당가격(원/평)": true
 		    }
 		};
 
 		// E 데이터용 필드 설정 (오피스 거래사례)
 		var labelFieldConfig_E_data = {
-		    fields: ["빌딩명", "권역", "소재지", "거래면적(평)", "거래가격(원)", "평당 거래가격(원)", "매도자", "매수자", "평당 임대료", "연면적(㎡)", "지상층수"],
+		    fields: ["빌딩명", "권역", "지번주소", "사용승인일", "거래면적(평)", "거래가격(원)", "평당 거래가격(원)", "매도자", "매수자", "평당 보증금", "평당 임대료", "평당 관리비"],
 		    visible: {
-		        "빌딩명": true, "권역": true, "소재지": true,
-		        "거래면적(평)": false, "거래가격(원)": false,
+		        "빌딩명": true, "권역": true, "지번주소": true,
+		        "사용승인일": false, "거래면적(평)": false, "거래가격(원)": false,
 		        "평당 거래가격(원)": true, "매도자": false, "매수자": false,
-		        "평당 임대료": true, "연면적(㎡)": false, "지상층수": false
+		        "평당 보증금": false, "평당 임대료": true, "평당 관리비": false
 		    }
 		};
 
@@ -363,11 +363,12 @@
 
 		// G 데이터용 필드 설정 (골프장 거래사례)
 		var labelFieldConfig_G_data = {
-		    fields: ["골프장명(인수 후 명칭)", "대권역", "소권역", "세부주소", "운영방식", "홀수", "거래금액", "홀당단가", "매도자", "매수자", "거래방식"],
+		    fields: ["골프장명(인수 후 명칭)", "대권역", "소권역", "세부주소", "운영방식", "홀수", "거래 월", "거래금액", "홀당단가", "매도자", "매수자", "거래방식"],
 		    visible: {
 		        "골프장명(인수 후 명칭)": true, "대권역": true, "소권역": false,
 		        "세부주소": true, "운영방식": true, "홀수": true,
-		        "거래금액": true, "홀당단가": true, "매도자": false, "매수자": false, "거래방식": false
+		        "거래 월": false, "거래금액": true, "홀당단가": true,
+		        "매도자": false, "매수자": false, "거래방식": false
 		    }
 		};
 		
@@ -380,8 +381,8 @@
 		    if (cfg.visible["구분"])       activeFields.push('<div class="text-main">' + (p['구분'] || '') + '</div>');
 		    if (cfg.visible["세부용도"])   activeFields.push('<div class="text-main">' + (p['세부용도'] || '') + '</div>');
 		    if (cfg.visible["보증금/월"])  activeFields.push('<div class="text-main">' + (p['보증금/월'] || '') + '</div>');
-		    if (cfg.visible["(단순)예상"]) activeFields.push('<div class="text-main">' + (p['(단순)예상'] || '') + '</div>');
-		    if (cfg.visible["의뢰금액("]) activeFields.push('<div class="text-price">' + (p['의뢰금액('] || '') + '</div>');
+		    if (cfg.visible["(단순)예상수익률"]) activeFields.push('<div class="text-main">' + (p['(단순)예상수익률'] || p['(단순)예상'] || '') + '</div>');
+		    if (cfg.visible["의뢰금액"]) activeFields.push('<div class="text-price">' + (p['의뢰금액'] || p['의뢰금액('] || '') + '</div>');
 		    if (!activeFields.length) return '';
 		    return '<div class="custom-tooltip-box">' + activeFields.join('') + '</div>';
 		}
@@ -428,10 +429,12 @@
 		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">위치:</span> ' + p['소재지'] + '</div>');
 		    if (cfg.visible["창고종류"] && p['창고종류']) 
 		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">종류:</span> ' + p['창고종류'] + '</div>');
-		    if (cfg.visible["연면적(평)"] && p['연면적(평)']) 
-		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">면적:</span> ' + p['연면적(평)'] + '평</div>');
+		    if (cfg.visible["사용승인일"] && p['사용승인일']) 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">승인:</span> ' + p['사용승인일'] + '</div>');
 		    if (cfg.visible["거래시점"] && p['거래시점']) 
 		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">거래:</span> ' + p['거래시점'] + '</div>');
+		    if (cfg.visible["연면적(평)"] && p['연면적(평)']) 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">면적:</span> ' + p['연면적(평)'] + '평</div>');
 		    if (cfg.visible["거래금액(총액)"] && p['거래금액(총액)']) 
 		        activeFields.push('<div class="text-price"><span style="color:#888; font-size:11px;">총액:</span> ' + p['거래금액(총액)'] + '</div>');
 		    if (cfg.visible["평당가격(원/평)"] && p['평당가격(원/평)']) 
@@ -449,8 +452,10 @@
 		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">빌딩:</span> ' + p['빌딩명'] + '</div>');
 		    if (cfg.visible["권역"] && p['권역']) 
 		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">권역:</span> ' + p['권역'] + '</div>');
-		    if (cfg.visible["소재지"] && p['소재지']) 
-		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">위치:</span> ' + p['소재지'] + '</div>');
+		    if (cfg.visible["지번주소"] && p['지번주소']) 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">주소:</span> ' + p['지번주소'] + '</div>');
+		    if (cfg.visible["사용승인일"] && p['사용승인일']) 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">승인:</span> ' + p['사용승인일'] + '</div>');
 		    if (cfg.visible["거래면적(평)"] && p['거래면적(평)']) 
 		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">면적:</span> ' + p['거래면적(평)'] + '평</div>');
 		    if (cfg.visible["거래가격(원)"] && p['거래가격(원)']) 
@@ -461,12 +466,12 @@
 		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">매도:</span> ' + p['매도자'] + '</div>');
 		    if (cfg.visible["매수자"] && p['매수자']) 
 		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">매수:</span> ' + p['매수자'] + '</div>');
+		    if (cfg.visible["평당 보증금"] && p['평당 보증금'] && p['평당 보증금'] !== '-') 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">보증금:</span> ' + p['평당 보증금'] + '</div>');
 		    if (cfg.visible["평당 임대료"] && p['평당 임대료'] && p['평당 임대료'] !== '-') 
 		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">임대료:</span> ' + p['평당 임대료'] + '</div>');
-		    if (cfg.visible["연면적(㎡)"] && p['연면적(㎡)']) 
-		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">연면적:</span> ' + p['연면적(㎡)'] + '㎡</div>');
-		    if (cfg.visible["지상층수"] && p['지상층수']) 
-		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">층수:</span> ' + p['지상층수'] + '층</div>');
+		    if (cfg.visible["평당 관리비"] && p['평당 관리비'] && p['평당 관리비'] !== '-') 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">관리비:</span> ' + p['평당 관리비'] + '</div>');
 		    if (!activeFields.length) return '';
 		    return '<div class="custom-tooltip-box">' + activeFields.join('') + '</div>';
 		}
@@ -511,6 +516,8 @@
 		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">운영:</span> ' + p['운영방식'] + '</div>');
 		    if (cfg.visible["홀수"] && p['홀수']) 
 		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">홀수:</span> ' + p['홀수'] + 'H</div>');
+		    if (cfg.visible["거래 월"] && p['거래 월']) 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">거래월:</span> ' + p['거래 월'] + '</div>');
 		    if (cfg.visible["거래금액"] && p['거래금액'] && p['거래금액'] !== '-') 
 		        activeFields.push('<div style="font-weight:900; color:#b45309; font-size:15px; margin-top:6px; border-top:1px solid #edf2f7; padding-top:6px;"><span style="color:#888; font-size:11px;">금액:</span> ' + p['거래금액'] + '</div>');
 		    if (cfg.visible["홀당단가"] && p['홀당단가'] && p['홀당단가'] !== '-') 
@@ -675,7 +682,7 @@
         
         var LabelToggleLayer = L.Layer.extend({
             onAdd: function(m) { m.getContainer().classList.remove('labels-hidden'); },
-            onRemove: function(m) { m.getContainer().classList.add('labels-hidden'); }
+            onRemove: function(m) { /* labels always visible - do not hide */ }
         });
         var layer_labels_map_data = new LabelToggleLayer();
         layer_labels_map_data.addTo(map);
@@ -747,14 +754,13 @@
         // ========== 통합 컨트롤 ==========
         var baseMaps = {};
         var overlays = {
-            'A 데이터(마커)': layer_map_data,
-            'B 데이터(매물)': layer_B_data_0,
-            'C 데이터(물류)': layer_C_data_0,
-            'D 데이터(거래사례)': layer_D_data_0,
-            'E 데이터(오피스)': layer_E_data_0,
-            'F 데이터(호텔)': layer_F_data_0,
-            'G 데이터(골프장)': layer_G_data_0,
-            '텍스트(라벨)': layer_labels_map_data
+            '중앙 공통접수건': layer_map_data,
+            'CRA 중개매물': layer_B_data_0,
+            '물류창고 임대료': layer_C_data_0,
+            '물류창고 거래사례': layer_D_data_0,
+            '오피스 임대료 및 거래사례': layer_E_data_0,
+            '호텔 거래사례': layer_F_data_0,
+            '골프장 거래사례': layer_G_data_0
         };
 
         window.layerControl = L.control.layers(
@@ -863,6 +869,7 @@
         });
 
 		// ========== 필터 설정 ==========
+		// type: 'text' (기본, 포함검색), type: 'range' (숫자 범위, 최소~최대)
 		var filterFieldConfig = {
 		    A: [
 		        { field: '제출처',  placeholder: '예: 기업은행' },
@@ -873,45 +880,48 @@
 		    ],
 		    B: [
 		        { field: '소재지(통', placeholder: '예: 서울 강남' },
-		        { field: '구분',      placeholder: '예: 상가' },
+		        { field: '구분',      placeholder: '예: 토지건물' },
 		        { field: '세부용도',  placeholder: '예: 근린상가' },
-		        { field: '보증금/월', placeholder: '예: 1000/50' },
-		        { field: '의뢰금액(', placeholder: '금액 입력' }
+		        { field: '의뢰금액', placeholder: '금액 입력' },
+		        { field: '(단순)예상수익률', placeholder: '예: 5%', altField: '(단순)예상' }
 		    ],
 		    C: [
 		        { field: '물류센터명', placeholder: '예: 쿠팡' },
 		        { field: '소재지',     placeholder: '예: 경기 이천' },
 		        { field: '구분',       placeholder: '예: 복합' },
 		        { field: '주요 임차인', placeholder: '예: 쿠팡' },
-		        { field: '상온 계약월임대료(원/Py)', placeholder: '금액 입력' }
+		        { field: '상온 계약월임대료(원/Py)', type: 'range', placeholderMin: '최저', placeholderMax: '최고' },
+		        { field: '상온 계약월관리비(원/Py)', type: 'range', placeholderMin: '최저', placeholderMax: '최고' },
+		        { field: '저온 계약월임대료(원/Py)', type: 'range', placeholderMin: '최저', placeholderMax: '최고' },
+		        { field: '저온 계약월관리비(원/Py)', type: 'range', placeholderMin: '최저', placeholderMax: '최고' }
 		    ],
 		    D: [
 		        { field: '명칭',       placeholder: '예: 오뚜기물류' },
 		        { field: '소재지',     placeholder: '예: 경기 이천' },
 		        { field: '창고종류',   placeholder: '예: 복합' },
-		        { field: '연면적(평)', placeholder: '면적 입력' },
-		        { field: '평당가격(원/평)', placeholder: '평당가 입력' }
+		        { field: '연면적(평)', type: 'range', placeholderMin: '최저', placeholderMax: '최고' },
+		        { field: '평당가격(원/평)', type: 'range', placeholderMin: '최저', placeholderMax: '최고' }
 		    ],
 		    E: [
 		        { field: '빌딩명',     placeholder: '예: 아크플레이스' },
 		        { field: '권역',       placeholder: '예: GBD' },
-		        { field: '소재지',     placeholder: '예: 강남구' },
-		        { field: '평당 거래가격(원)', placeholder: '평당가 입력' },
-		        { field: '매수자',     placeholder: '매수자 입력' }
+		        { field: '평당 거래가격(원)', type: 'range', placeholderMin: '최저', placeholderMax: '최고' },
+		        { field: '평당 보증금', type: 'range', placeholderMin: '최저', placeholderMax: '최고' },
+		        { field: '평당 임대료', type: 'range', placeholderMin: '최저', placeholderMax: '최고' },
+		        { field: '평당 관리비', type: 'range', placeholderMin: '최저', placeholderMax: '최고' }
 		    ],
 		    F: [
 		        { field: '호텔명',     placeholder: '예: 콘래드' },
 		        { field: '소재지',     placeholder: '예: 서울 중구' },
 		        { field: '성급',       placeholder: '예: 5' },
-		        { field: '매매금액',   placeholder: '금액 입력' },
-		        { field: '비고',       placeholder: '예: 컨버전' }
+		        { field: '매매금액',   type: 'range', placeholderMin: '최저(억)', placeholderMax: '최고(억)' }
 		    ],
 		    G: [
 		        { field: '골프장명(인수 후 명칭)', placeholder: '예: 잭니클라우스' },
-		        { field: '대권역',     placeholder: '예: 수도권' },
 		        { field: '운영방식',   placeholder: '예: 대중제' },
-		        { field: '거래금액',   placeholder: '금액 입력' },
-		        { field: '홀당단가',   placeholder: '홀당단가 입력' }
+		        { field: '홀수',       placeholder: '예: 18' },
+		        { field: '거래금액',   type: 'range', placeholderMin: '최저(억)', placeholderMax: '최고(억)' },
+		        { field: '홀당단가',   type: 'range', placeholderMin: '최저(억)', placeholderMax: '최고(억)' }
 		    ]
 		};
 		
@@ -923,13 +933,13 @@
 		    if (!container) return;
 
 		    var badgeMap = {
-		        G: { text: 'G 골프장', bg: '#d97706' },
-		        F: { text: 'F 호텔', bg: '#db2777' },
-		        E: { text: 'E 오피스', bg: '#0891b2' },
-		        D: { text: 'D 데이터', bg: '#9333ea' },
-		        C: { text: 'C 데이터', bg: '#ff6b35' },
-		        B: { text: 'B 데이터', bg: '#3182ce' },
-		        A: { text: 'A 데이터', bg: '#0051af' }
+		        G: { text: '골프장 거래사례', bg: '#d97706' },
+		        F: { text: '호텔 거래사례', bg: '#db2777' },
+		        E: { text: '오피스 임대료/거래', bg: '#0891b2' },
+		        D: { text: '물류창고 거래사례', bg: '#9333ea' },
+		        C: { text: '물류창고 임대료', bg: '#ff6b35' },
+		        B: { text: 'CRA 중개매물', bg: '#3182ce' },
+		        A: { text: '중앙 공통접수건', bg: '#0051af' }
 		    };
 		    var b = badgeMap[type] || badgeMap.A;
 		    badge.textContent = b.text;
@@ -939,25 +949,75 @@
 		    var fields = filterFieldConfig[type] || [];
 		    fields.forEach(function(item) {
 		        var wrapper = document.createElement('div');
-		        wrapper.style.cssText = 'flex: 1 1 0; min-width: 80px;';
-		        wrapper.innerHTML =
-		            '<label style="font-size:10px; color:#888; display:block; margin-bottom:2px;">' + item.field + '</label>' +
-		            '<input type="text" class="multi-filter-input" data-field="' + item.field + '"' +
-		            ' placeholder="' + item.placeholder + '"' +
-		            ' style="width:100%; padding:4px 7px; border:1px solid #ddd; border-radius:5px; box-sizing:border-box; font-size:11px;">';
+		        if (item.type === 'range') {
+		            wrapper.style.cssText = 'flex: 1 1 0; min-width: 110px;';
+		            wrapper.innerHTML =
+		                '<label style="font-size:10px; color:#888; display:block; margin-bottom:2px;">' + item.field + '</label>' +
+		                '<div style="display:flex; gap:2px; align-items:center;">' +
+		                '<input type="text" class="range-filter-min" data-field="' + item.field + '"' +
+		                ' placeholder="' + (item.placeholderMin || '최저') + '"' +
+		                ' style="width:50%; padding:4px 5px; border:1px solid #ddd; border-radius:5px; box-sizing:border-box; font-size:10px;">' +
+		                '<span style="font-size:10px; color:#aaa;">~</span>' +
+		                '<input type="text" class="range-filter-max" data-field="' + item.field + '"' +
+		                ' placeholder="' + (item.placeholderMax || '최고') + '"' +
+		                ' style="width:50%; padding:4px 5px; border:1px solid #ddd; border-radius:5px; box-sizing:border-box; font-size:10px;">' +
+		                '</div>';
+		            wrapper.querySelectorAll('input').forEach(function(inp) {
+		                inp.addEventListener('input', applyMultiFilter);
+		            });
+		        } else {
+		            wrapper.style.cssText = 'flex: 1 1 0; min-width: 80px;';
+		            wrapper.innerHTML =
+		                '<label style="font-size:10px; color:#888; display:block; margin-bottom:2px;">' + item.field + '</label>' +
+		                '<input type="text" class="multi-filter-input" data-field="' + item.field + '"' +
+		                (item.altField ? ' data-alt-field="' + item.altField + '"' : '') +
+		                ' placeholder="' + (item.placeholder || '') + '"' +
+		                ' style="width:100%; padding:4px 7px; border:1px solid #ddd; border-radius:5px; box-sizing:border-box; font-size:11px;">';
+		            wrapper.querySelector('input').addEventListener('input', applyMultiFilter);
+		        }
 		        container.appendChild(wrapper);
-		        wrapper.querySelector('input').addEventListener('input', applyMultiFilter);
 		    });
 		    document.getElementById('filter-result-count').innerText = '';
 		}
 		
+		// 숫자 파싱 헬퍼: 콤마 제거 후 숫자 추출
+		function parseFilterNumber(str) {
+		    if (!str || str === '-') return null;
+		    var cleaned = String(str).replace(/[,\s원평억Py㎡]/g, '');
+		    var num = parseFloat(cleaned);
+		    return isNaN(num) ? null : num;
+		}
+		
 		function applyMultiFilter() {
-		    var filterInputs = document.querySelectorAll('.multi-filter-input');
-		    var activeFilters = [];
-		    filterInputs.forEach(function(input) {
+		    var textInputs = document.querySelectorAll('.multi-filter-input');
+		    var rangeMinInputs = document.querySelectorAll('.range-filter-min');
+		    var rangeMaxInputs = document.querySelectorAll('.range-filter-max');
+		    
+		    var textFilters = [];
+		    textInputs.forEach(function(input) {
 		        if (input.value.trim() !== '') {
-		            activeFilters.push({ field: input.getAttribute('data-field'), value: input.value.toLowerCase().trim() });
+		            textFilters.push({ 
+		                field: input.getAttribute('data-field'), 
+		                altField: input.getAttribute('data-alt-field') || null,
+		                value: input.value.toLowerCase().trim() 
+		            });
 		        }
+		    });
+		    
+		    var rangeFilters = {};
+		    rangeMinInputs.forEach(function(input) {
+		        var field = input.getAttribute('data-field');
+		        if (!rangeFilters[field]) rangeFilters[field] = {};
+		        if (input.value.trim() !== '') rangeFilters[field].min = parseFloat(input.value.replace(/[,\s]/g, ''));
+		    });
+		    rangeMaxInputs.forEach(function(input) {
+		        var field = input.getAttribute('data-field');
+		        if (!rangeFilters[field]) rangeFilters[field] = {};
+		        if (input.value.trim() !== '') rangeFilters[field].max = parseFloat(input.value.replace(/[,\s]/g, ''));
+		    });
+		    // 빈 범위 필터 제거
+		    Object.keys(rangeFilters).forEach(function(k) {
+		        if (rangeFilters[k].min === undefined && rangeFilters[k].max === undefined) delete rangeFilters[k];
 		    });
 
 		    var layerMap = { G: layer_G_data_0, F: layer_F_data_0, E: layer_E_data_0, D: layer_D_data_0, C: layer_C_data_0, B: layer_B_data_0, A: layer_map_data };
@@ -966,11 +1026,28 @@
 
 		    targetLayer.eachLayer(function(layer) {
 		        var props = layer.feature.properties;
-		        var isMatch = activeFilters.every(function(filter) {
+		        
+		        // 텍스트 필터 체크
+		        var textMatch = textFilters.every(function(filter) {
 		            var dataValue = String(props[filter.field] || '').toLowerCase();
+		            if (filter.altField) {
+		                var altValue = String(props[filter.altField] || '').toLowerCase();
+		                return dataValue.includes(filter.value) || altValue.includes(filter.value);
+		            }
 		            return dataValue.includes(filter.value);
 		        });
-		        if (isMatch) {
+		        
+		        // 범위 필터 체크
+		        var rangeMatch = Object.keys(rangeFilters).every(function(field) {
+		            var rf = rangeFilters[field];
+		            var numVal = parseFilterNumber(props[field]);
+		            if (numVal === null) return false; // 숫자가 아니면 제외
+		            if (rf.min !== undefined && !isNaN(rf.min) && numVal < rf.min) return false;
+		            if (rf.max !== undefined && !isNaN(rf.max) && numVal > rf.max) return false;
+		            return true;
+		        });
+		        
+		        if (textMatch && rangeMatch) {
 		            if (!map.hasLayer(layer)) map.addLayer(layer);
 		            visibleCount++;
 		        } else {
@@ -1034,7 +1111,7 @@
 		        E: { layer: layer_E_data_0, headers: ['빌딩명', '권역', '소재지', '거래면적(평)', '거래가격(원)', '평당 거래가격(원)', '매수자'], fileName: 'E오피스_검색결과' },
 		        D: { layer: layer_D_data_0, headers: ['명칭', '소재지', '창고종류', '연면적(평)', '거래시점', '평당가격(원/평)'], fileName: 'D거래사례_검색결과' },
 		        C: { layer: layer_C_data_0, headers: ['물류센터명', '소재지', '구분', '연면적(Py)', '상온 계약월임대료(원/Py)', '주요 임차인'], fileName: 'C물류_검색결과' },
-		        B: { layer: layer_B_data_0, headers: ['소재지(통', '구분', '세부용도', '보증금/월', '의뢰금액(', '(단순)예상'], fileName: 'B매물_검색결과' },
+		        B: { layer: layer_B_data_0, headers: ['소재지(통', '구분', '세부용도', '보증금/월', '의뢰금액', '(단순)예상수익률'], fileName: 'B매물_검색결과' },
 		        A: { layer: layer_map_data, headers: ['감정서번호', '담당자', '제출처', '주소', '물건종류', '상태'], fileName: 'A데이터_검색결과' }
 		    };
 		    var c = config[activeFilterType] || config.A;
@@ -1232,7 +1309,7 @@
 		                    'style="padding:16px; border-bottom:1px solid #edf2f7; border-left:4px solid #3182ce; background:#fff; cursor:pointer; margin-bottom:4px;">' +
 		                    '<div style="font-size:11px; color:#3182ce; font-weight:bold; margin-bottom:4px;">실시간 매물</div>' +
 		                    '<div class="title" style="font-weight:bold; font-size:15px; color:#2d3748;">' + (p['소재지(통'] || '주소 정보 없음') + '</div>' +
-		                    '<div class="price" style="color:#e53e3e; font-weight:800; font-size:16px; margin-top:6px;">' + (p['의뢰금액('] || '금액 미정') + '</div>' +
+		                    '<div class="price" style="color:#e53e3e; font-weight:800; font-size:16px; margin-top:6px;">' + (p['의뢰금액'] || p['의뢰금액('] || '금액 미정') + '</div>' +
 		                    '<div class="info" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;">' +
 		                    (p['세부용도'] ? '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">' + p['세부용도'] + '</span>' : '') +
 		                    (p['보증금/월'] ? '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">보증/월: ' + p['보증금/월'] + '</span>' : '') +
