@@ -245,7 +245,7 @@
 		            📊 엑셀 저장
 		        </button>
 		    </div>
-		    <div id="dynamic-filter-inputs" style="display:flex; flex-wrap:nowrap; gap:6px; align-items:flex-end;"></div>
+		    <div id="dynamic-filter-inputs" style="display:flex; flex-wrap:wrap; gap:6px; align-items:flex-end;"></div>
 		    <div style="display:flex; align-items:center; gap:16px; margin-top:8px; padding-top:8px; border-top:1px solid #eee; flex-wrap:wrap;">
 		        <div style="display:flex; align-items:center; gap:10px; font-size:12px;">
 		            <span style="font-size:11px; font-weight:bold; color:#555; white-space:nowrap;">🗺️ 지도</span>
@@ -363,10 +363,10 @@
 
 		// G 데이터용 필드 설정 (골프장 거래사례)
 		var labelFieldConfig_G_data = {
-		    fields: ["골프장명(인수 후 명칭)", "대권역", "소권역", "세부주소", "운영방식", "홀수", "거래 월", "거래금액", "홀당단가", "매도자", "매수자", "거래방식"],
+		    fields: ["골프장명(인수 후 명칭)", "세부주소", "운영방식", "홀수", "거래 월", "거래금액", "홀당단가", "매도자", "매수자", "거래방식"],
 		    visible: {
-		        "골프장명(인수 후 명칭)": true, "대권역": true, "소권역": false,
-		        "세부주소": true, "운영방식": true, "홀수": true,
+		        "골프장명(인수 후 명칭)": true, "세부주소": true,
+		        "운영방식": true, "홀수": true,
 		        "거래 월": false, "거래금액": true, "홀당단가": true,
 		        "매도자": false, "매수자": false, "거래방식": false
 		    }
@@ -506,10 +506,6 @@
 		    var activeFields = [];
 		    if (cfg.visible["골프장명(인수 후 명칭)"] && p['골프장명(인수 후 명칭)']) 
 		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">골프장:</span> ' + p['골프장명(인수 후 명칭)'] + '</div>');
-		    if (cfg.visible["대권역"] && p['대권역']) 
-		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">권역:</span> ' + p['대권역'] + '</div>');
-		    if (cfg.visible["소권역"] && p['소권역']) 
-		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">소권역:</span> ' + p['소권역'] + '</div>');
 		    if (cfg.visible["세부주소"] && p['세부주소']) 
 		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">주소:</span> ' + p['세부주소'] + '</div>');
 		    if (cfg.visible["운영방식"] && p['운영방식']) 
@@ -882,8 +878,8 @@
 		        { field: '소재지(통', placeholder: '예: 서울 강남' },
 		        { field: '구분',      placeholder: '예: 토지건물' },
 		        { field: '세부용도',  placeholder: '예: 근린상가' },
-		        { field: '의뢰금액', placeholder: '금액 입력' },
-		        { field: '(단순)예상수익률', placeholder: '예: 5%', altField: '(단순)예상' }
+		        { field: '의뢰금액', type: 'range', placeholderMin: '최저(억)', placeholderMax: '최고(억)', altField: '의뢰금액(' },
+		        { field: '(단순)예상수익률', type: 'range', placeholderMin: '최저(%)', placeholderMax: '최고(%)', altField: '(단순)예상' }
 		    ],
 		    C: [
 		        { field: '물류센터명', placeholder: '예: 쿠팡' },
@@ -955,10 +951,12 @@
 		                '<label style="font-size:10px; color:#888; display:block; margin-bottom:2px;">' + item.field + '</label>' +
 		                '<div style="display:flex; gap:2px; align-items:center;">' +
 		                '<input type="text" class="range-filter-min" data-field="' + item.field + '"' +
+		                (item.altField ? ' data-alt-field="' + item.altField + '"' : '') +
 		                ' placeholder="' + (item.placeholderMin || '최저') + '"' +
 		                ' style="width:50%; padding:4px 5px; border:1px solid #ddd; border-radius:5px; box-sizing:border-box; font-size:10px;">' +
 		                '<span style="font-size:10px; color:#aaa;">~</span>' +
 		                '<input type="text" class="range-filter-max" data-field="' + item.field + '"' +
+		                (item.altField ? ' data-alt-field="' + item.altField + '"' : '') +
 		                ' placeholder="' + (item.placeholderMax || '최고') + '"' +
 		                ' style="width:50%; padding:4px 5px; border:1px solid #ddd; border-radius:5px; box-sizing:border-box; font-size:10px;">' +
 		                '</div>';
@@ -1007,12 +1005,14 @@
 		    var rangeFilters = {};
 		    rangeMinInputs.forEach(function(input) {
 		        var field = input.getAttribute('data-field');
-		        if (!rangeFilters[field]) rangeFilters[field] = {};
+		        var altField = input.getAttribute('data-alt-field') || null;
+		        if (!rangeFilters[field]) rangeFilters[field] = { altField: altField };
 		        if (input.value.trim() !== '') rangeFilters[field].min = parseFloat(input.value.replace(/[,\s]/g, ''));
 		    });
 		    rangeMaxInputs.forEach(function(input) {
 		        var field = input.getAttribute('data-field');
-		        if (!rangeFilters[field]) rangeFilters[field] = {};
+		        var altField = input.getAttribute('data-alt-field') || null;
+		        if (!rangeFilters[field]) rangeFilters[field] = { altField: altField };
 		        if (input.value.trim() !== '') rangeFilters[field].max = parseFloat(input.value.replace(/[,\s]/g, ''));
 		    });
 		    // 빈 범위 필터 제거
@@ -1041,7 +1041,8 @@
 		        var rangeMatch = Object.keys(rangeFilters).every(function(field) {
 		            var rf = rangeFilters[field];
 		            var numVal = parseFilterNumber(props[field]);
-		            if (numVal === null) return false; // 숫자가 아니면 제외
+		            if (numVal === null && rf.altField) numVal = parseFilterNumber(props[rf.altField]);
+		            if (numVal === null) return false;
 		            if (rf.min !== undefined && !isNaN(rf.min) && numVal < rf.min) return false;
 		            if (rf.max !== undefined && !isNaN(rf.max) && numVal > rf.max) return false;
 		            return true;
@@ -1105,28 +1106,47 @@
 
 		// ========== 엑셀 내보내기 ==========
 		function exportToExcel() {
-		    var config = {
-		        G: { layer: layer_G_data_0, headers: ['골프장명(인수 후 명칭)', '대권역', '세부주소', '운영방식', '홀수', '거래금액', '홀당단가'], fileName: 'G골프장_검색결과' },
-		        F: { layer: layer_F_data_0, headers: ['호텔명', '소재지', '성급', '거래일자', '매매금액', '비고'], fileName: 'F호텔_검색결과' },
-		        E: { layer: layer_E_data_0, headers: ['빌딩명', '권역', '소재지', '거래면적(평)', '거래가격(원)', '평당 거래가격(원)', '매수자'], fileName: 'E오피스_검색결과' },
-		        D: { layer: layer_D_data_0, headers: ['명칭', '소재지', '창고종류', '연면적(평)', '거래시점', '평당가격(원/평)'], fileName: 'D거래사례_검색결과' },
-		        C: { layer: layer_C_data_0, headers: ['물류센터명', '소재지', '구분', '연면적(Py)', '상온 계약월임대료(원/Py)', '주요 임차인'], fileName: 'C물류_검색결과' },
-		        B: { layer: layer_B_data_0, headers: ['소재지(통', '구분', '세부용도', '보증금/월', '의뢰금액', '(단순)예상수익률'], fileName: 'B매물_검색결과' },
-		        A: { layer: layer_map_data, headers: ['감정서번호', '담당자', '제출처', '주소', '물건종류', '상태'], fileName: 'A데이터_검색결과' }
+		    var layerMap = {
+		        G: { layer: layer_G_data_0, fileName: '골프장거래사례_검색결과' },
+		        F: { layer: layer_F_data_0, fileName: '호텔거래사례_검색결과' },
+		        E: { layer: layer_E_data_0, fileName: '오피스_검색결과' },
+		        D: { layer: layer_D_data_0, fileName: '물류창고거래사례_검색결과' },
+		        C: { layer: layer_C_data_0, fileName: '물류창고임대료_검색결과' },
+		        B: { layer: layer_B_data_0, fileName: 'CRA중개매물_검색결과' },
+		        A: { layer: layer_map_data, fileName: '공통접수건_검색결과' }
 		    };
-		    var c = config[activeFilterType] || config.A;
-		    var data = [c.headers.join(',')];
+		    var c = layerMap[activeFilterType] || layerMap.A;
 
+		    // 1) 화면에 보이는(필터 통과) 피처 수집
+		    var visibleFeatures = [];
 		    c.layer.eachLayer(function(layer) {
 		        if (map.hasLayer(layer)) {
-		            var props = layer.feature.properties;
-		            var row = c.headers.map(function(h) { return '"' + String(props[h] || "").replace(/,/g, " ") + '"'; });
-		            data.push(row.join(','));
+		            visibleFeatures.push(layer.feature.properties);
 		        }
 		    });
+		    if (visibleFeatures.length === 0) { alert("내보낼 데이터가 없습니다."); return; }
 
-		    if (data.length <= 1) { alert("내보낼 데이터가 없습니다."); return; }
-		    var blob = new Blob(["\uFEFF" + data.join("\n")], { type: 'text/csv;charset=utf-8;' });
+		    // 2) 전체 프로퍼티 키 수집 (원본 순서 최대한 보존)
+		    var allKeys = [];
+		    var keySet = {};
+		    visibleFeatures.forEach(function(props) {
+		        Object.keys(props).forEach(function(k) {
+		            if (!keySet[k]) { keySet[k] = true; allKeys.push(k); }
+		        });
+		    });
+
+		    // 3) CSV 생성 (모든 필드 포함)
+		    var csvRows = [allKeys.map(function(k) { return '"' + k.replace(/"/g, '""') + '"'; }).join(',')];
+		    visibleFeatures.forEach(function(props) {
+		        var row = allKeys.map(function(k) {
+		            var val = props[k];
+		            if (val === null || val === undefined) val = '';
+		            return '"' + String(val).replace(/"/g, '""') + '"';
+		        });
+		        csvRows.push(row.join(','));
+		    });
+
+		    var blob = new Blob(["\uFEFF" + csvRows.join("\n")], { type: 'text/csv;charset=utf-8;' });
 		    var link = document.createElement("a");
 		    link.setAttribute("href", URL.createObjectURL(blob));
 		    link.setAttribute("download", c.fileName + "_" + new Date().toLocaleDateString() + ".csv");
