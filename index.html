@@ -18,7 +18,6 @@
             padding: 0;
             margin: 0;
         }
-        /* 카카오지도를 배경으로 두고, Leaflet은 그 위에 오버레이로 올립니다. */
         #kakao-map, #map {
             position: absolute;
             top: 0;
@@ -33,7 +32,6 @@
             z-index: 1;
             background: transparent;
         }
-        /* 팝업(속성표) 가독성 개선 */
         .leaflet-popup-content table {
             border-collapse: collapse;
             width: 100%;
@@ -51,7 +49,6 @@
             white-space: nowrap;
             opacity: 0.85;
         }
-        /* 팝업 필드 토글 컨트롤 UI */
         .popup-field-toggle {
             background: rgba(255, 255, 255, 0.95);
             padding: 8px 10px;
@@ -83,16 +80,13 @@
             cursor: pointer;
             user-select: none;
         }
-        /* 라벨(툴팁) 폭/줄바꿈 제어 */
         .leaflet-tooltip.css_map_data {
-            /* 기본 leaflet max-width 때문에 글자가 세로로 꺾이는 현상 방지 */
             max-width: none !important;
-            width: max-content; /* 가능하면 내용만큼 가로로 확장 */
-            white-space: normal; /* 실제 줄바꿈은 내부 .q2w-label이 제어 */
-
-			color: #000000 !important;      /* 글자색을 검정으로 */
-        	font-weight: bold;              /* (선택) 글자를 더 진하게 하려면 추가 */
-    		text-shadow: 1px 1px 2px white; /* (선택) 검은 글씨가 더 잘 보이게 흰색 외곽선 추가 */
+            width: max-content;
+            white-space: normal;
+			color: #000000 !important;
+        	font-weight: bold;
+    		text-shadow: 1px 1px 2px white;
         }
         .leaflet-tooltip.css_map_data .q2w-label {
 			color : #000000 !important;
@@ -100,35 +94,29 @@
             max-width: none !important;
         }
         .q2w-label.q2w-label--single {
-            white-space: nowrap; /* 1개 필드일 때는 가로로 */
+            white-space: nowrap;
         }
         .q2w-label.q2w-label--multi {
-            white-space: pre-line; /* 2개 이상이면 줄바꿈 유지 */
+            white-space: pre-line;
         }
-        /* 라벨(툴팁) 토글을 위한 CSS */
         .labels-hidden .leaflet-tooltip-pane {
             display: none;
         }
-		/* 팝업 가로 넓이 및 디자인 수정 */
 		.leaflet-popup-content-wrapper {
-		    width: 450px !important;    /* 상자 전체 너비 (원하는 수치로 조정) */
-		    border: 2px solid #0000ff;  /* 아까 원하셨던 파란 테두리 추가 */
+		    width: 450px !important;
+		    border: 2px solid #0000ff;
 		}
-		
 		.leaflet-popup-content {
-		    width: 420px !important;    /* 실제 내용이 들어가는 너비 (wrapper보다 약간 작게) */
+		    width: 420px !important;
 		}
-
-				/* 검색창 컨테이너 디자인 */
 		.search-filter-container {
 		    position: absolute;
-		    top: 15px;      /* 위치 조정 */
-		    left: 60px;     /* 줌 컨트롤 옆 */
+		    top: 15px;
+		    left: 60px;
 		    z-index: 1000;
 		    display: flex;
 		    gap: 5px;
 		}
-		
 		.search-filter-input {
 		    width: 200px;
 		    padding: 8px 12px;
@@ -138,27 +126,20 @@
 		    outline: none;
 		    font-size: 14px;
 		}
-		
 		.search-filter-input:focus {
 		    background-color: #f0f7ff;
 		}
-		
-		/* 팝업 화면 중앙 고정 */
 		.custom-central-popup.leaflet-popup {
-			z-index: 10000 !important; /* 가림판(1000)보다 높게 설정 */
+			z-index: 10000 !important;
 		}
-		
-		
-		/* 팝업 내 이미지 스타일 */
 		.popup-image-container img {
 		    width: 100%;
 		    max-height: 300px;
-		    object-fit: contain; /* 이미지가 잘리지 않게 */
+		    object-fit: contain;
 		    border-radius: 8px;
 		    margin-bottom: 10px;
 		}
-
-
+        </style>
 		<style>
 		    #map, #kakao-map { left: 350px !important; width: calc(100% - 350px) !important; }
 		    .list-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; transition: background 0.2s; }
@@ -166,27 +147,23 @@
 		    .list-item .title { font-weight: bold; font-size: 15px; margin-bottom: 5px; }
 		    .list-item .price { color: #d32f2f; font-weight: bold; }
 		    .list-item .info { font-size: 13px; color: #666; margin-top: 5px; }
+		</style>
 		<style>
-
-		<style>
-		    /* 1. Leaflet 기본 툴팁 컨테이너 스타일 제거 */
 		    .leaflet-tooltip.css_map_data_B,
 		    .leaflet-tooltip.css_map_data_C,
-		    .leaflet-tooltip.css_map_data_D {
+		    .leaflet-tooltip.css_map_data_D,
+		    .leaflet-tooltip.css_map_data_E,
+		    .leaflet-tooltip.css_map_data_F,
+		    .leaflet-tooltip.css_map_data_G {
 		        background-color: transparent !important;
 		        border: none !important;
 		        box-shadow: none !important;
 		        padding: 0 !important;
-		        /* 내용이 아예 없을 때(체크 해제 시) 박스 테두리가 남는 현상 방지 */
 		        display: block !important; 
 		    }
-		
-		    /* 2. 내부 박스가 비어있으면 아예 숨김 처리 */
 		    .custom-tooltip-box:empty {
 		        display: none !important;
 		    }
-		
-		    /* 3. 우리가 만든 내부 박스 디자인 */
 		    .custom-tooltip-box {
 		        background-color: #ffffff !important;
 		        border: 2px solid #3388ff !important;
@@ -195,11 +172,8 @@
 		        box-shadow: 0 4px 12px rgba(0,0,0,0.25) !important;
 		        text-align: center;
 		        min-width: 100px;
-		        /* 박스 안의 글자가 너무 많아지면 자동 줄바꿈 허용 (선택 사항) */
 		        max-width: 250px; 
 		    }
-		
-		    /* 4. 흑회색 텍스트 필드 스타일 */
 		    .text-main {
 		        font-weight: bold !important;
 		        color: #1a202c !important;
@@ -207,10 +181,8 @@
 		        margin-bottom: 2px;
 		        white-space: nowrap;
 		        overflow: hidden;
-		        text-overflow: ellipsis; /* 글자가 너무 길면 ... 처리 */
+		        text-overflow: ellipsis;
 		    }
-		
-		    /* 5. 금액 필드 스타일 (상단 구분선 포함) */
 		    .text-price {
 		        font-weight: 900 !important;
 		        color: #e53e3e !important;
@@ -220,25 +192,25 @@
 		        padding-top: 6px;
 		        white-space: nowrap;
 		    }
-		
-		    /* 6. 금액만 켜져 있을 경우 상단 테두리 제거 (디테일) */
 		    .text-price:first-child {
 		        border-top: none !important;
 		        margin-top: 0 !important;
 		        padding-top: 0 !important;
 		    }
-		
-		    /* 7. 전체 라벨 숨김 토글 연동 */
 		    .labels-hidden .css_map_data_B,
 		    .labels-hidden .css_map_data_C,
-		    .labels-hidden .css_map_data_D {
+		    .labels-hidden .css_map_data_D,
+		    .labels-hidden .css_map_data_E,
+		    .labels-hidden .css_map_data_F,
+		    .labels-hidden .css_map_data_G {
 		        display: none !important;
 		    }
-		
-		    /* 8. 툴팁 화살표 숨김 */
 		    .leaflet-tooltip-top.css_map_data_B:before,
 		    .leaflet-tooltip-top.css_map_data_C:before,
-		    .leaflet-tooltip-top.css_map_data_D:before {
+		    .leaflet-tooltip-top.css_map_data_D:before,
+		    .leaflet-tooltip-top.css_map_data_E:before,
+		    .leaflet-tooltip-top.css_map_data_F:before,
+		    .leaflet-tooltip-top.css_map_data_G:before {
 		        display: none !important;
 		    }
 		</style>
@@ -265,8 +237,6 @@
 		</div>
 
 		<div class="filter-panel" style="position: fixed; top: 20px; left: 370px; z-index: 2000; background: white; padding: 10px 14px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 700px; font-family: sans-serif;">
-		    
-		    <!-- 타이틀 행 -->
 		    <div style="display: flex; align-items: center; margin-bottom: 8px;">
 		        <h4 style="margin: 0; font-size: 13px; color: #333;">상세 필터</h4>
 		        <span id="filter-layer-badge" style="font-size:11px; color:#fff; background:#0051af; padding:2px 7px; border-radius:10px; margin-left:8px;">A 데이터</span>
@@ -275,14 +245,8 @@
 		            📊 엑셀 저장
 		        </button>
 		    </div>
-		
-		    <!-- 필터 입력창 (한 줄 가로 배치) -->
 		    <div id="dynamic-filter-inputs" style="display:flex; flex-wrap:nowrap; gap:6px; align-items:flex-end;"></div>
-		
-		    <!-- 부가 기능 행 (한 줄) -->
 		    <div style="display:flex; align-items:center; gap:16px; margin-top:8px; padding-top:8px; border-top:1px solid #eee; flex-wrap:wrap;">
-		        
-		        <!-- 지도 부가 기능 -->
 		        <div style="display:flex; align-items:center; gap:10px; font-size:12px;">
 		            <span style="font-size:11px; font-weight:bold; color:#555; white-space:nowrap;">🗺️ 지도</span>
 		            <label style="display:flex; align-items:center; gap:3px; cursor:pointer; white-space:nowrap;">
@@ -295,16 +259,11 @@
 		                <input type="checkbox" class="kakao-layer-toggle" data-type="ROADVIEW"> 📷 로드뷰
 		            </label>
 		        </div>
-		
-		        <!-- 구분선 -->
 		        <div style="width:1px; height:18px; background:#ddd;"></div>
-		
-		        <!-- 외부 GeoJSON -->
 		        <div style="display:flex; align-items:center; gap:6px; font-size:12px;">
 		            <span style="font-size:11px; font-weight:bold; color:#0051af; white-space:nowrap;">📂 GeoJSON</span>
 		            <input type="file" id="external-geojson-input" accept=".json,.geojson" style="font-size:11px;">
 		        </div>
-		
 		    </div>
 		    <div id="external-label-controls"></div>
 		</div>
@@ -326,17 +285,19 @@
 		<script src="data/B_data.js"></script>
 		<script src="data/C_data.js"></script>
 		<script src="data/D_data.js"></script>
+		<script src="data/E_data.js"></script>
+		<script src="data/F_data.js"></script>
+		<script src="data/G_data.js"></script>
         <script>
         var map = L.map('map', {
             zoomControl:false, maxZoom:28, minZoom:1
         }).fitBounds([[37.43966984122166,126.86818683641245],[37.6101521616503,127.1412179712234]]);
-        // Kakao Roadmap(일반지도/Street) 배경지도 초기화 + Leaflet 뷰 동기화
         initKakaoBaseMap(map, { mapTypeId: 'ROADMAP' });
         var hash = new L.Hash(map);
         map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
         var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
 
-        // 팝업에 표시할 필드(속성)별 토글 설정
+        // ========== 팝업/라벨 필드 설정 ==========
         var popupFieldConfig_map_data = (function() {
             var fields = [
                 '감정서번호', '본사/지사', '담당자', '평가사', '건명', '거래처명', '의뢰인', '상태',
@@ -345,11 +306,10 @@
                 '주소', '지번주소', '위도', '경도', '지번주소(2', '위도(2)', '경도(2)'
             ];
             var vis = {};
-            for (var i = 0; i < fields.length; i++) vis[fields[i]] = true; // 기본: 모두 표시
+            for (var i = 0; i < fields.length; i++) vis[fields[i]] = true;
             return { fields: fields, visible: vis };
         })();
 
-		// B 데이터용 필드 설정
 		var labelFieldConfig_B_data = {
 		    fields: ["연번", "소재지(통", "구분", "세부용도", "보증금/월", "의뢰금액(", "(단순)예상"],
 		    visible: {
@@ -358,7 +318,6 @@
 		    }
 		};
 
-		// C 데이터용 필드 설정
 		var labelFieldConfig_C_data = {
 		    fields: ["물류센터명", "소재지", "구분", "연면적(Py)", "사용승인일", "접안여부", 
 		             "상온 계약월임대료(원/Py)", "상온 계약월관리비(원/Py)", 
@@ -373,7 +332,6 @@
 		    }
 		};
 
-		// D 데이터용 필드 설정 (거래사례)
 		var labelFieldConfig_D_data = {
 		    fields: ["명칭", "소재지", "창고종류", "연면적(평)", "거래시점", "거래금액(총액)", "평당가격(원/평)"],
 		    visible: {
@@ -382,108 +340,191 @@
 		        "거래금액(총액)": false, "평당가격(원/평)": true
 		    }
 		};
-		
-		// D 데이터용 필드 설정 (거래사례)
-		var labelFieldConfig_D_data = {
-		    fields: ["명칭", "소재지", "창고종류", "연면적(평)", "거래시점", "거래금액(총액)", "평당가격(원/평)"],
+
+		// E 데이터용 필드 설정 (오피스 거래사례)
+		var labelFieldConfig_E_data = {
+		    fields: ["빌딩명", "권역", "소재지", "거래면적(평)", "거래가격(원)", "평당 거래가격(원)", "매도자", "매수자", "평당 임대료", "연면적(㎡)", "지상층수"],
 		    visible: {
-		        "명칭": true, "소재지": true, "창고종류": true,
-		        "연면적(평)": true, "거래시점": false,
-		        "거래금액(총액)": false, "평당가격(원/평)": true
+		        "빌딩명": true, "권역": true, "소재지": true,
+		        "거래면적(평)": false, "거래가격(원)": false,
+		        "평당 거래가격(원)": true, "매도자": false, "매수자": false,
+		        "평당 임대료": true, "연면적(㎡)": false, "지상층수": false
+		    }
+		};
+
+		// F 데이터용 필드 설정 (호텔 거래사례)
+		var labelFieldConfig_F_data = {
+		    fields: ["호텔명", "소재지", "성급", "거래일자", "매매금액", "비고", "등기"],
+		    visible: {
+		        "호텔명": true, "소재지": true, "성급": true,
+		        "거래일자": false, "매매금액": true, "비고": false, "등기": false
+		    }
+		};
+
+		// G 데이터용 필드 설정 (골프장 거래사례)
+		var labelFieldConfig_G_data = {
+		    fields: ["골프장명(인수 후 명칭)", "대권역", "소권역", "세부주소", "운영방식", "홀수", "거래금액", "홀당단가", "매도자", "매수자", "거래방식"],
+		    visible: {
+		        "골프장명(인수 후 명칭)": true, "대권역": true, "소권역": false,
+		        "세부주소": true, "운영방식": true, "홀수": true,
+		        "거래금액": true, "홀당단가": true, "매도자": false, "매수자": false, "거래방식": false
 		    }
 		};
 		
-		// B 데이터용 라벨 내용 생성 함수
+		// ========== 라벨 빌드 함수 ==========
 		function buildLabelContent_B_data(feature) {
 		    var cfg = labelFieldConfig_B_data;
 		    var p = feature.properties;
 		    var activeFields = [];
-		
-		    if (cfg.visible["소재지(통"]) activeFields.push(`<div class="text-main">${p['소재지(통'] || ''}</div>`);
-		    if (cfg.visible["구분"])       activeFields.push(`<div class="text-main">${p['구분'] || ''}</div>`);
-		    if (cfg.visible["세부용도"])   activeFields.push(`<div class="text-main">${p['세부용도'] || ''}</div>`);
-		    if (cfg.visible["보증금/월"])  activeFields.push(`<div class="text-main">${p['보증금/월'] || ''}</div>`);
-		    if (cfg.visible["(단순)예상"]) activeFields.push(`<div class="text-main">${p['(단순)예상'] || ''}</div>`);
-		    
-		    if (cfg.visible["의뢰금액("]) activeFields.push(`<div class="text-price">${p['의뢰금액('] || ''}</div>`);
-		
+		    if (cfg.visible["소재지(통"]) activeFields.push('<div class="text-main">' + (p['소재지(통'] || '') + '</div>');
+		    if (cfg.visible["구분"])       activeFields.push('<div class="text-main">' + (p['구분'] || '') + '</div>');
+		    if (cfg.visible["세부용도"])   activeFields.push('<div class="text-main">' + (p['세부용도'] || '') + '</div>');
+		    if (cfg.visible["보증금/월"])  activeFields.push('<div class="text-main">' + (p['보증금/월'] || '') + '</div>');
+		    if (cfg.visible["(단순)예상"]) activeFields.push('<div class="text-main">' + (p['(단순)예상'] || '') + '</div>');
+		    if (cfg.visible["의뢰금액("]) activeFields.push('<div class="text-price">' + (p['의뢰금액('] || '') + '</div>');
 		    if (!activeFields.length) return '';
-		    return `<div class="custom-tooltip-box">${activeFields.join('')}</div>`;
+		    return '<div class="custom-tooltip-box">' + activeFields.join('') + '</div>';
 		}
 
-		// C 데이터용 라벨 내용 생성 함수
 		function buildLabelContent_C_data(feature) {
 		    var cfg = labelFieldConfig_C_data;
 		    var p = feature.properties;
 		    var activeFields = [];
-		
-		    // 일반 필드들 (필드명 포함)
 		    if (cfg.visible["물류센터명"] && p['물류센터명']) 
-		        activeFields.push(`<div class="text-main"><span style="color:#888; font-size:11px;">센터:</span> ${p['물류센터명']}</div>`);
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">센터:</span> ' + p['물류센터명'] + '</div>');
 		    if (cfg.visible["소재지"] && p['소재지']) 
-		        activeFields.push(`<div class="text-main"><span style="color:#888; font-size:11px;">위치:</span> ${p['소재지']}</div>`);
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">위치:</span> ' + p['소재지'] + '</div>');
 		    if (cfg.visible["구분"] && p['구분']) 
-		        activeFields.push(`<div class="text-main"><span style="color:#888; font-size:11px;">구분:</span> ${p['구분']}</div>`);
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">구분:</span> ' + p['구분'] + '</div>');
 		    if (cfg.visible["연면적(Py)"] && p['연면적(Py)']) 
-		        activeFields.push(`<div class="text-main"><span style="color:#888; font-size:11px;">면적:</span> ${p['연면적(Py)']} Py</div>`);
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">면적:</span> ' + p['연면적(Py)'] + ' Py</div>');
 		    if (cfg.visible["사용승인일"] && p['사용승인일']) 
-		        activeFields.push(`<div class="text-main"><span style="color:#888; font-size:11px;">승인:</span> ${p['사용승인일']}</div>`);
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">승인:</span> ' + p['사용승인일'] + '</div>');
 		    if (cfg.visible["접안여부"] && p['접안여부']) 
-		        activeFields.push(`<div class="text-main"><span style="color:#888; font-size:11px;">접안:</span> ${p['접안여부']}</div>`);
-		    
-		    // 상온 임대료 (빨간색)
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">접안:</span> ' + p['접안여부'] + '</div>');
 		    if (cfg.visible["상온 계약월임대료(원/Py)"] && p['상온 계약월임대료(원/Py)']) 
-		        activeFields.push(`<div class="text-price"><span style="color:#888; font-size:11px;">상온 임대:</span> ${p['상온 계약월임대료(원/Py)']}원</div>`);
+		        activeFields.push('<div class="text-price"><span style="color:#888; font-size:11px;">상온 임대:</span> ' + p['상온 계약월임대료(원/Py)'] + '원</div>');
 		    if (cfg.visible["상온 계약월관리비(원/Py)"] && p['상온 계약월관리비(원/Py)']) 
-		        activeFields.push(`<div class="text-price"><span style="color:#888; font-size:11px;">상온 관리:</span> ${p['상온 계약월관리비(원/Py)']}원</div>`);
-		    
-		    // 저온 임대료 (파란색)
+		        activeFields.push('<div class="text-price"><span style="color:#888; font-size:11px;">상온 관리:</span> ' + p['상온 계약월관리비(원/Py)'] + '원</div>');
 		    if (cfg.visible["저온 계약월임대료(원/Py)"] && p['저온 계약월임대료(원/Py)']) 
-		        activeFields.push(`<div style="font-weight:900; color:#3182ce; font-size:15px; margin-top:6px; border-top:1px solid #edf2f7; padding-top:6px;"><span style="color:#888; font-size:11px;">저온 임대:</span> ${p['저온 계약월임대료(원/Py)']}원</div>`);
+		        activeFields.push('<div style="font-weight:900; color:#3182ce; font-size:15px; margin-top:6px; border-top:1px solid #edf2f7; padding-top:6px;"><span style="color:#888; font-size:11px;">저온 임대:</span> ' + p['저온 계약월임대료(원/Py)'] + '원</div>');
 		    if (cfg.visible["저온 계약월관리비(원/Py)"] && p['저온 계약월관리비(원/Py)']) 
-		        activeFields.push(`<div style="font-weight:900; color:#3182ce; font-size:15px; margin-top:6px; border-top:1px solid #edf2f7; padding-top:6px;"><span style="color:#888; font-size:11px;">저온 관리:</span> ${p['저온 계약월관리비(원/Py)']}원</div>`);
-		    
-		    // 기타 정보
+		        activeFields.push('<div style="font-weight:900; color:#3182ce; font-size:15px; margin-top:6px; border-top:1px solid #edf2f7; padding-top:6px;"><span style="color:#888; font-size:11px;">저온 관리:</span> ' + p['저온 계약월관리비(원/Py)'] + '원</div>');
 		    if (cfg.visible["임대료상승률"] && p['임대료상승률']) 
-		        activeFields.push(`<div class="text-main"><span style="color:#888; font-size:11px;">상승률:</span> ${p['임대료상승률']}</div>`);
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">상승률:</span> ' + p['임대료상승률'] + '</div>');
 		    if (cfg.visible["렌트프리기간"] && p['렌트프리기간']) 
-		        activeFields.push(`<div class="text-main"><span style="color:#888; font-size:11px;">렌트프리:</span> ${p['렌트프리기간']}</div>`);
-		
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">렌트프리:</span> ' + p['렌트프리기간'] + '</div>');
 		    if (!activeFields.length) return '';
-		    return `<div class="custom-tooltip-box">${activeFields.join('')}</div>`;
+		    return '<div class="custom-tooltip-box">' + activeFields.join('') + '</div>';
 		}
 
-		// D 데이터용 라벨 내용 생성 함수 (거래사례)
 		function buildLabelContent_D_data(feature) {
 		    var cfg = labelFieldConfig_D_data;
 		    var p = feature.properties;
 		    var activeFields = [];
-		
-		    // 일반 필드들 (필드명 포함)
 		    if (cfg.visible["명칭"] && p['명칭']) 
-		        activeFields.push(`<div class="text-main"><span style="color:#888; font-size:11px;">명칭:</span> ${p['명칭']}</div>`);
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">명칭:</span> ' + p['명칭'] + '</div>');
 		    if (cfg.visible["소재지"] && p['소재지']) 
-		        activeFields.push(`<div class="text-main"><span style="color:#888; font-size:11px;">위치:</span> ${p['소재지']}</div>`);
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">위치:</span> ' + p['소재지'] + '</div>');
 		    if (cfg.visible["창고종류"] && p['창고종류']) 
-		        activeFields.push(`<div class="text-main"><span style="color:#888; font-size:11px;">종류:</span> ${p['창고종류']}</div>`);
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">종류:</span> ' + p['창고종류'] + '</div>');
 		    if (cfg.visible["연면적(평)"] && p['연면적(평)']) 
-		        activeFields.push(`<div class="text-main"><span style="color:#888; font-size:11px;">면적:</span> ${p['연면적(평)']}평</div>`);
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">면적:</span> ' + p['연면적(평)'] + '평</div>');
 		    if (cfg.visible["거래시점"] && p['거래시점']) 
-		        activeFields.push(`<div class="text-main"><span style="color:#888; font-size:11px;">거래:</span> ${p['거래시점']}</div>`);
-		    
-		    // 거래금액 (빨간색)
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">거래:</span> ' + p['거래시점'] + '</div>');
 		    if (cfg.visible["거래금액(총액)"] && p['거래금액(총액)']) 
-		        activeFields.push(`<div class="text-price"><span style="color:#888; font-size:11px;">총액:</span> ${p['거래금액(총액)']}</div>`);
-		    
-		    // 평당가격 (초록색 - 거래사례 특화)
+		        activeFields.push('<div class="text-price"><span style="color:#888; font-size:11px;">총액:</span> ' + p['거래금액(총액)'] + '</div>');
 		    if (cfg.visible["평당가격(원/평)"] && p['평당가격(원/평)']) 
-		        activeFields.push(`<div style="font-weight:900; color:#16a34a; font-size:15px; margin-top:6px; border-top:1px solid #edf2f7; padding-top:6px;"><span style="color:#888; font-size:11px;">평당:</span> ${p['평당가격(원/평)']}</div>`);
-		
+		        activeFields.push('<div style="font-weight:900; color:#16a34a; font-size:15px; margin-top:6px; border-top:1px solid #edf2f7; padding-top:6px;"><span style="color:#888; font-size:11px;">평당:</span> ' + p['평당가격(원/평)'] + '</div>');
 		    if (!activeFields.length) return '';
-		    return `<div class="custom-tooltip-box">${activeFields.join('')}</div>`;
+		    return '<div class="custom-tooltip-box">' + activeFields.join('') + '</div>';
 		}
-			
-        // 라벨(지도 위 텍스트)에 표시할 필드별 토글 설정
+
+		// E 데이터용 라벨 (오피스 - 청록)
+		function buildLabelContent_E_data(feature) {
+		    var cfg = labelFieldConfig_E_data;
+		    var p = feature.properties;
+		    var activeFields = [];
+		    if (cfg.visible["빌딩명"] && p['빌딩명']) 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">빌딩:</span> ' + p['빌딩명'] + '</div>');
+		    if (cfg.visible["권역"] && p['권역']) 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">권역:</span> ' + p['권역'] + '</div>');
+		    if (cfg.visible["소재지"] && p['소재지']) 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">위치:</span> ' + p['소재지'] + '</div>');
+		    if (cfg.visible["거래면적(평)"] && p['거래면적(평)']) 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">면적:</span> ' + p['거래면적(평)'] + '평</div>');
+		    if (cfg.visible["거래가격(원)"] && p['거래가격(원)']) 
+		        activeFields.push('<div class="text-price"><span style="color:#888; font-size:11px;">거래가:</span> ' + p['거래가격(원)'] + '</div>');
+		    if (cfg.visible["평당 거래가격(원)"] && p['평당 거래가격(원)']) 
+		        activeFields.push('<div style="font-weight:900; color:#0891b2; font-size:15px; margin-top:6px; border-top:1px solid #edf2f7; padding-top:6px;"><span style="color:#888; font-size:11px;">평당:</span> ' + p['평당 거래가격(원)'] + '</div>');
+		    if (cfg.visible["매도자"] && p['매도자']) 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">매도:</span> ' + p['매도자'] + '</div>');
+		    if (cfg.visible["매수자"] && p['매수자']) 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">매수:</span> ' + p['매수자'] + '</div>');
+		    if (cfg.visible["평당 임대료"] && p['평당 임대료'] && p['평당 임대료'] !== '-') 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">임대료:</span> ' + p['평당 임대료'] + '</div>');
+		    if (cfg.visible["연면적(㎡)"] && p['연면적(㎡)']) 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">연면적:</span> ' + p['연면적(㎡)'] + '㎡</div>');
+		    if (cfg.visible["지상층수"] && p['지상층수']) 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">층수:</span> ' + p['지상층수'] + '층</div>');
+		    if (!activeFields.length) return '';
+		    return '<div class="custom-tooltip-box">' + activeFields.join('') + '</div>';
+		}
+
+		// F 데이터용 라벨 (호텔 - 핑크)
+		function buildLabelContent_F_data(feature) {
+		    var cfg = labelFieldConfig_F_data;
+		    var p = feature.properties;
+		    var activeFields = [];
+		    if (cfg.visible["호텔명"] && p['호텔명']) 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">호텔:</span> ' + p['호텔명'] + '</div>');
+		    if (cfg.visible["소재지"] && p['소재지']) 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">위치:</span> ' + p['소재지'] + '</div>');
+		    if (cfg.visible["성급"] && p['성급']) 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">성급:</span> ' + p['성급'] + '성</div>');
+		    if (cfg.visible["거래일자"] && p['거래일자']) 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">거래:</span> ' + p['거래일자'] + '</div>');
+		    if (cfg.visible["매매금액"] && p['매매금액']) 
+		        activeFields.push('<div style="font-weight:900; color:#db2777; font-size:15px; margin-top:6px; border-top:1px solid #edf2f7; padding-top:6px;"><span style="color:#888; font-size:11px;">금액:</span> ' + p['매매금액'] + '</div>');
+		    if (cfg.visible["비고"] && p['비고']) 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">비고:</span> ' + p['비고'] + '</div>');
+		    if (cfg.visible["등기"] && p['등기']) 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">등기:</span> ' + p['등기'] + '</div>');
+		    if (!activeFields.length) return '';
+		    return '<div class="custom-tooltip-box">' + activeFields.join('') + '</div>';
+		}
+
+		// G 데이터용 라벨 (골프장 - 황금)
+		function buildLabelContent_G_data(feature) {
+		    var cfg = labelFieldConfig_G_data;
+		    var p = feature.properties;
+		    var activeFields = [];
+		    if (cfg.visible["골프장명(인수 후 명칭)"] && p['골프장명(인수 후 명칭)']) 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">골프장:</span> ' + p['골프장명(인수 후 명칭)'] + '</div>');
+		    if (cfg.visible["대권역"] && p['대권역']) 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">권역:</span> ' + p['대권역'] + '</div>');
+		    if (cfg.visible["소권역"] && p['소권역']) 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">소권역:</span> ' + p['소권역'] + '</div>');
+		    if (cfg.visible["세부주소"] && p['세부주소']) 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">주소:</span> ' + p['세부주소'] + '</div>');
+		    if (cfg.visible["운영방식"] && p['운영방식']) 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">운영:</span> ' + p['운영방식'] + '</div>');
+		    if (cfg.visible["홀수"] && p['홀수']) 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">홀수:</span> ' + p['홀수'] + 'H</div>');
+		    if (cfg.visible["거래금액"] && p['거래금액'] && p['거래금액'] !== '-') 
+		        activeFields.push('<div style="font-weight:900; color:#b45309; font-size:15px; margin-top:6px; border-top:1px solid #edf2f7; padding-top:6px;"><span style="color:#888; font-size:11px;">금액:</span> ' + p['거래금액'] + '</div>');
+		    if (cfg.visible["홀당단가"] && p['홀당단가'] && p['홀당단가'] !== '-') 
+		        activeFields.push('<div style="font-weight:900; color:#b45309; font-size:14px;"><span style="color:#888; font-size:11px;">홀당:</span> ' + p['홀당단가'] + '</div>');
+		    if (cfg.visible["매도자"] && p['매도자']) 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">매도:</span> ' + p['매도자'] + '</div>');
+		    if (cfg.visible["매수자"] && p['매수자']) 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">매수:</span> ' + p['매수자'] + '</div>');
+		    if (cfg.visible["거래방식"] && p['거래방식']) 
+		        activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">방식:</span> ' + p['거래방식'] + '</div>');
+		    if (!activeFields.length) return '';
+		    return '<div class="custom-tooltip-box">' + activeFields.join('') + '</div>';
+		}
+
         var labelFieldConfig_map_data = (function() {
             var fields = ['제출처(Tar', '담당자', '의뢰일자', '상태', '주소'];
             var vis = {};
@@ -496,21 +537,17 @@
 		        if (v === null || v === undefined) return '';
 		        return autolinker.link(String(v).replace(/'/g, '\'').toLocaleString());
 		    }
-		    
 		    var props = feature.properties || {};
 		    var rows = '';
-		
 		    if (props['감정서번호']) { 
 		        var id = String(props['감정서번호']).trim();
 		        var imgPath = "images/" + id + ".jpg"; 
-		        
 		        rows += '<tr><td colspan="2" class="popup-image-container" style="text-align:center;">' +
 		                '<img src="' + imgPath + '" ' +
 		                'style="width:100%; max-height:250px; object-fit:contain; border-radius:8px; margin-bottom:10px;" ' +
 		                'onerror="this.src=\'images/' + id + '.png\'; this.onerror=function(){this.style.display=\'none\'};">' + 
 		                '</td></tr>';
 		    }
-		
 		    var cfg = popupFieldConfig_map_data;
 		    for (var i = 0; i < cfg.fields.length; i++) {
 		        var key = cfg.fields[i];
@@ -519,7 +556,6 @@
 		        if (val === null || val === undefined || val === '') continue;
 		        rows += '<tr><th style="min-width:80px; text-align:left;">' + key + '</th><td>' + fmt(val) + '</td></tr>';
 		    }
-		    
 		    return '<table style="width:100%; border-collapse:collapse;">' + 
 		           (rows || '<tr><td>데이터가 없습니다.</td></tr>') + 
 		           '</table>';
@@ -542,8 +578,7 @@
             var cls = multi ? 'q2w-label q2w-label--multi' : 'q2w-label q2w-label--single';
             var sep = multi ? '\n' : ' ';
             return '<div class="' + cls + '" style="color:#ffffff; font-size:10pt; font-family:\'Open Sans\', sans-serif;">' +
-                parts.join(sep) +
-                '</div>';
+                parts.join(sep) + '</div>';
         }
         
         function removeEmptyRowsFromPopupContent(content, feature) {
@@ -568,36 +603,22 @@
                 var src = imgTd.getAttribute('src');
                 if (/\.(jpg|jpeg|png|gif|bmp|webp|avif)$/i.test(src)) {
                     popup._contentNode.classList.add('media');
-                    setTimeout(function() {
-                        popup.update();
-                    }, 10);
+                    setTimeout(function() { popup.update(); }, 10);
                 } else if (/\.(mp3|wav|ogg|aac)$/i.test(src)) {
                     var audio = document.createElement('audio');
-                    audio.controls = true;
-                    audio.src = src;
+                    audio.controls = true; audio.src = src;
                     imgTd.parentNode.replaceChild(audio, imgTd);
                     popup._contentNode.classList.add('media');
-                    setTimeout(function() {
-                        popup.setContent(tempDiv.innerHTML);
-                        popup.update();
-                    }, 10);
+                    setTimeout(function() { popup.setContent(tempDiv.innerHTML); popup.update(); }, 10);
                 } else if (/\.(mp4|webm|ogg|mov)$/i.test(src)) {
                     var video = document.createElement('video');
-                    video.controls = true;
-                    video.src = src;
-                    video.style.width = "400px";
-                    video.style.height = "300px";
-                    video.style.maxHeight = "60vh";
-                    video.style.maxWidth = "60vw";
+                    video.controls = true; video.src = src;
+                    video.style.width = "400px"; video.style.height = "300px";
+                    video.style.maxHeight = "60vh"; video.style.maxWidth = "60vw";
                     imgTd.parentNode.replaceChild(video, imgTd);
                     popup._contentNode.classList.add('media');
-                    video.addEventListener('loadedmetadata', function() {
-                        popup.update();
-                    });
-                    setTimeout(function() {
-                        popup.setContent(tempDiv.innerHTML);
-                        popup.update();
-                    }, 10);
+                    video.addEventListener('loadedmetadata', function() { popup.update(); });
+                    setTimeout(function() { popup.setContent(tempDiv.innerHTML); popup.update(); }, 10);
                 } else {
                     popup._contentNode.classList.remove('media');
                 }
@@ -605,70 +626,47 @@
                 popup._contentNode.classList.remove('media');
             }
         }
-        var zoomControl = L.control.zoom({
-            position: 'topleft'
-        }).addTo(map);
+
+        var zoomControl = L.control.zoom({ position: 'topleft' }).addTo(map);
         var bounds_group = new L.featureGroup([]);
-        function setBounds() {
-        }
+        function setBounds() {}
+
        function pop_map_data(feature, layer) {
 		    layer.bindPopup(function(l) {
 		        var content = buildPopupContent_map_data(l.feature);
-		        
 		        var latlng = l.getLatLng();
-		        var address = l.feature.properties['주소'] || l.feature.properties['소재지(통'] || l.feature.properties['소재지'] || '';
+		        var address = l.feature.properties['주소'] || l.feature.properties['소재지(통'] || l.feature.properties['소재지'] || l.feature.properties['세부주소'] || '';
 		        content += '<div style="margin-top:8px; text-align:center;">' +
 		            '<button onclick="openRoadview({lat:' + latlng.lat + ',lng:' + latlng.lng + '},\'' + address.replace(/'/g, '') + '\')" ' +
 		            'style="padding:6px 16px; background:#0051af; color:white; border:none; border-radius:5px; cursor:pointer; font-size:12px; font-weight:bold;">' +
 		            '📷 이 위치 로드뷰 보기</button></div>';
 		        return content;
 		    }, {
-		        maxHeight: 500,
-		        minWidth: 400,
-		        maxWidth: 450,
-		        offset: [0, -10],
-		        className: 'custom-popup-styled'
+		        maxHeight: 500, minWidth: 400, maxWidth: 450,
+		        offset: [0, -10], className: 'custom-popup-styled'
 		    });
-		
 		    layer.on('popupopen', function(e) {
 		        addClassToPopupIfMedia(e.popup.getContent(), e.popup);
 		        var img = e.popup._container.querySelector('img');
-		        if (img) {
-		            img.onload = function() { e.popup.update(); };
-		        }
+		        if (img) { img.onload = function() { e.popup.update(); }; }
 		    });
 		}
+
         function style_map_data_0() {
             return {
-                pane: 'pane_map_data',
-                radius: 4.0,
-                opacity: 1,
-                color: 'rgba(35,35,35,1.0)',
-                dashArray: '',
-                lineCap: 'butt',
-                lineJoin: 'miter',
-                weight: 1,
-                fill: true,
-                fillOpacity: 1,
-                fillColor: 'rgba(133,182,111,1.0)',
-                interactive: true,
+                pane: 'pane_map_data', radius: 4.0, opacity: 1,
+                color: 'rgba(35,35,35,1.0)', dashArray: '', lineCap: 'butt', lineJoin: 'miter',
+                weight: 1, fill: true, fillOpacity: 1, fillColor: 'rgba(133,182,111,1.0)', interactive: true,
             }
         }
         map.createPane('pane_map_data');
         map.getPane('pane_map_data').style.zIndex = 400;
         map.getPane('pane_map_data').style['mix-blend-mode'] = 'normal';
         var layer_map_data = new L.geoJson(json_map_data, {
-            attribution: '',
-            interactive: true,
-            dataVar: 'json_map_data',
-            layerName: 'layer_map_data',
-            pane: 'pane_map_data',
+            attribution: '', interactive: true, dataVar: 'json_map_data',
+            layerName: 'layer_map_data', pane: 'pane_map_data',
             onEachFeature: pop_map_data,
             pointToLayer: function (feature, latlng) {
-                var context = {
-                    feature: feature,
-                    variables: {}
-                };
                 return L.circleMarker(latlng, style_map_data_0(feature));
             },
         });
@@ -676,114 +674,94 @@
         map.addLayer(layer_map_data);
         
         var LabelToggleLayer = L.Layer.extend({
-            onAdd: function(m) {
-                m.getContainer().classList.remove('labels-hidden');
-            },
-            onRemove: function(m) {
-                m.getContainer().classList.add('labels-hidden');
-            }
+            onAdd: function(m) { m.getContainer().classList.remove('labels-hidden'); },
+            onRemove: function(m) { m.getContainer().classList.add('labels-hidden'); }
         });
         var layer_labels_map_data = new LabelToggleLayer();
         layer_labels_map_data.addTo(map);
 
-		// B 데이터 레이어
+		// ========== B/C/D/E/F/G 레이어 생성 ==========
 		var layer_B_data_0 = new L.geoJson(json_B_data_0, {
 		    onEachFeature: function(feature, layer) {
-		        if (typeof pop_map_data === 'function') {
-		            pop_map_data(feature, layer);
-		        }
-		        
-		        var labelContent = buildLabelContent_B_data(feature);
-		
-		        layer.bindTooltip(labelContent, {
-		            permanent: true,
-		            direction: 'top',
-		            className: 'css_map_data_B',
-		            offset: [0, -10]
-		        });
+		        pop_map_data(feature, layer);
+		        layer.bindTooltip(buildLabelContent_B_data(feature), { permanent: true, direction: 'top', className: 'css_map_data_B', offset: [0, -10] });
 		    },
 		    pointToLayer: function (feature, latlng) {
-		        return L.circleMarker(latlng, {
-		            radius: 6,
-		            fillColor: "#3388ff", 
-		            color: "#000",
-		            weight: 1,
-		            fillOpacity: 0.8
-		        });
+		        return L.circleMarker(latlng, { radius: 6, fillColor: "#3388ff", color: "#000", weight: 1, fillOpacity: 0.8 });
 		    }
 		});
 
-		// C 데이터 레이어
 		var layer_C_data_0 = new L.geoJson(json_C_data_0, {
 		    onEachFeature: function(feature, layer) {
-		        if (typeof pop_map_data === 'function') {
-		            pop_map_data(feature, layer);
-		        }
-		        
-		        var labelContent = buildLabelContent_C_data(feature);
-		
-		        layer.bindTooltip(labelContent, {
-		            permanent: true,
-		            direction: 'top',
-		            className: 'css_map_data_C',
-		            offset: [0, -10]
-		        });
+		        pop_map_data(feature, layer);
+		        layer.bindTooltip(buildLabelContent_C_data(feature), { permanent: true, direction: 'top', className: 'css_map_data_C', offset: [0, -10] });
 		    },
 		    pointToLayer: function (feature, latlng) {
-		        return L.circleMarker(latlng, {
-		            radius: 6,
-		            fillColor: "#ff6b35", // 주황색으로 구분
-		            color: "#000",
-		            weight: 1,
-		            fillOpacity: 0.8
-		        });
+		        return L.circleMarker(latlng, { radius: 6, fillColor: "#ff6b35", color: "#000", weight: 1, fillOpacity: 0.8 });
 		    }
 		});
 
-		// D 데이터 레이어 (거래사례 - 새로 추가)
 		var layer_D_data_0 = new L.geoJson(json_D_data_0, {
 		    onEachFeature: function(feature, layer) {
-		        if (typeof pop_map_data === 'function') {
-		            pop_map_data(feature, layer);
-		        }
-		        
-		        var labelContent = buildLabelContent_D_data(feature);
-		
-		        layer.bindTooltip(labelContent, {
-		            permanent: true,
-		            direction: 'top',
-		            className: 'css_map_data_D',
-		            offset: [0, -10]
-		        });
+		        pop_map_data(feature, layer);
+		        layer.bindTooltip(buildLabelContent_D_data(feature), { permanent: true, direction: 'top', className: 'css_map_data_D', offset: [0, -10] });
 		    },
 		    pointToLayer: function (feature, latlng) {
-		        return L.circleMarker(latlng, {
-		            radius: 7,
-		            fillColor: "#9333ea", // 보라색으로 구분 (거래사례)
-		            color: "#000",
-		            weight: 1,
-		            fillOpacity: 0.8
-		        });
+		        return L.circleMarker(latlng, { radius: 7, fillColor: "#9333ea", color: "#000", weight: 1, fillOpacity: 0.8 });
 		    }
 		});
 
-        // --- 통합 컨트롤 설정 ---
+		// E 데이터 레이어 (오피스 - 청록)
+		var layer_E_data_0 = new L.geoJson(json_E_data_0, {
+		    onEachFeature: function(feature, layer) {
+		        pop_map_data(feature, layer);
+		        layer.bindTooltip(buildLabelContent_E_data(feature), { permanent: true, direction: 'top', className: 'css_map_data_E', offset: [0, -10] });
+		    },
+		    pointToLayer: function (feature, latlng) {
+		        return L.circleMarker(latlng, { radius: 7, fillColor: "#0891b2", color: "#000", weight: 1, fillOpacity: 0.8 });
+		    }
+		});
+
+		// F 데이터 레이어 (호텔 - 핑크)
+		var layer_F_data_0 = new L.geoJson(json_F_data_0, {
+		    onEachFeature: function(feature, layer) {
+		        pop_map_data(feature, layer);
+		        layer.bindTooltip(buildLabelContent_F_data(feature), { permanent: true, direction: 'top', className: 'css_map_data_F', offset: [0, -10] });
+		    },
+		    pointToLayer: function (feature, latlng) {
+		        return L.circleMarker(latlng, { radius: 7, fillColor: "#db2777", color: "#000", weight: 1, fillOpacity: 0.8 });
+		    }
+		});
+
+		// G 데이터 레이어 (골프장 - 황금)
+		var layer_G_data_0 = new L.geoJson(json_G_data_0, {
+		    onEachFeature: function(feature, layer) {
+		        pop_map_data(feature, layer);
+		        layer.bindTooltip(buildLabelContent_G_data(feature), { permanent: true, direction: 'top', className: 'css_map_data_G', offset: [0, -10] });
+		    },
+		    pointToLayer: function (feature, latlng) {
+		        return L.circleMarker(latlng, { radius: 7, fillColor: "#d97706", color: "#000", weight: 1, fillOpacity: 0.8 });
+		    }
+		});
+
+        // ========== 통합 컨트롤 ==========
         var baseMaps = {};
         var overlays = {
             'A 데이터(마커)': layer_map_data,
             'B 데이터(매물)': layer_B_data_0,
             'C 데이터(물류)': layer_C_data_0,
-            'D 데이터(거래사례)': layer_D_data_0, // 새로 추가!
+            'D 데이터(거래사례)': layer_D_data_0,
+            'E 데이터(오피스)': layer_E_data_0,
+            'F 데이터(호텔)': layer_F_data_0,
+            'G 데이터(골프장)': layer_G_data_0,
             '텍스트(라벨)': layer_labels_map_data
         };
 
         window.layerControl = L.control.layers(
-            baseMaps, 
-            overlays, 
-            { collapsed: false, position: 'topright' }
+            baseMaps, overlays, { collapsed: false, position: 'topright' }
         ).addTo(map);
 
-		// 라벨 필드별 표시/숨김 토글 컨트롤 (동적 버전)
+		// ========== 라벨 필드 토글 컨트롤 ==========
         (function addLabelFieldToggleControl() {
             var Control = L.Control.extend({
                 options: { position: 'topright' },
@@ -798,7 +776,6 @@
                         '</div>',
                         '<div class="list"></div>'
                     ].join('');
-
                     L.DomEvent.disableClickPropagation(div);
                     L.DomEvent.disableScrollPropagation(div);
 
@@ -807,51 +784,41 @@
                         list.innerHTML = '';
                         
                         var cfg, targetLayer, buildFunc;
-                        if (map.hasLayer(layer_D_data_0)) {
-                            cfg = labelFieldConfig_D_data;
-                            targetLayer = layer_D_data_0;
-                            buildFunc = buildLabelContent_D_data;
+                        if (map.hasLayer(layer_G_data_0)) {
+                            cfg = labelFieldConfig_G_data; targetLayer = layer_G_data_0; buildFunc = buildLabelContent_G_data;
+                        } else if (map.hasLayer(layer_F_data_0)) {
+                            cfg = labelFieldConfig_F_data; targetLayer = layer_F_data_0; buildFunc = buildLabelContent_F_data;
+                        } else if (map.hasLayer(layer_E_data_0)) {
+                            cfg = labelFieldConfig_E_data; targetLayer = layer_E_data_0; buildFunc = buildLabelContent_E_data;
+                        } else if (map.hasLayer(layer_D_data_0)) {
+                            cfg = labelFieldConfig_D_data; targetLayer = layer_D_data_0; buildFunc = buildLabelContent_D_data;
                         } else if (map.hasLayer(layer_C_data_0)) {
-                            cfg = labelFieldConfig_C_data;
-                            targetLayer = layer_C_data_0;
-                            buildFunc = buildLabelContent_C_data;
+                            cfg = labelFieldConfig_C_data; targetLayer = layer_C_data_0; buildFunc = buildLabelContent_C_data;
                         } else if (map.hasLayer(layer_B_data_0)) {
-                            cfg = labelFieldConfig_B_data;
-                            targetLayer = layer_B_data_0;
-                            buildFunc = buildLabelContent_B_data;
+                            cfg = labelFieldConfig_B_data; targetLayer = layer_B_data_0; buildFunc = buildLabelContent_B_data;
                         } else {
-                            cfg = labelFieldConfig_map_data;
-                            targetLayer = layer_map_data;
-                            buildFunc = buildLabelContent_map_data;
+                            cfg = labelFieldConfig_map_data; targetLayer = layer_map_data; buildFunc = buildLabelContent_map_data;
                         }
 
 						function refresh() {
 						    targetLayer.eachLayer(function(lyr) {
 						        lyr.unbindTooltip();
-						        
 						        var newContent = buildFunc(lyr.feature);
-						        
 						        if (newContent) {
 						            var className = 'css_map_data';
 						            if (targetLayer === layer_B_data_0) className = 'css_map_data_B';
 						            if (targetLayer === layer_C_data_0) className = 'css_map_data_C';
 						            if (targetLayer === layer_D_data_0) className = 'css_map_data_D';
-						            
+						            if (targetLayer === layer_E_data_0) className = 'css_map_data_E';
+						            if (targetLayer === layer_F_data_0) className = 'css_map_data_F';
+						            if (targetLayer === layer_G_data_0) className = 'css_map_data_G';
 						            lyr.bindTooltip(newContent, {
-						                permanent: true,
-						                direction: 'top',
-						                className: className,
-						                offset: [0, -10],
-						                sticky: false,
-						                opacity: 1,
-						                interactive: false
+						                permanent: true, direction: 'top', className: className,
+						                offset: [0, -10], sticky: false, opacity: 1, interactive: false
 						            });
 						        }
 						    });
-						
-						    if (typeof resetLabels === 'function') {
-						        resetLabels([targetLayer]); 
-						    }
+						    if (typeof resetLabels === 'function') { resetLabels([targetLayer]); }
 						}
 
                         cfg.fields.forEach(function(key, i) {
@@ -859,7 +826,6 @@
                             row.style.display = 'block';
                             var checked = cfg.visible[key] ? 'checked' : '';
                             row.innerHTML = '<input type="checkbox" ' + checked + '> <span style="font-size:11px;">' + key + '</span>';
-                            
                             row.querySelector('input').addEventListener('change', function() {
                                 cfg.visible[key] = !!this.checked;
                                 refresh();
@@ -877,10 +843,7 @@
                         };
                     };
 
-                    m.on('overlayadd overlayremove', function() {
-                        div.updateUI();
-                    });
-
+                    m.on('overlayadd overlayremove', function() { div.updateUI(); });
                     setTimeout(function() { div.updateUI(); }, 100);
                     return div;
                 }
@@ -891,19 +854,15 @@
         setBounds();
         var i = 0;
         layer_map_data.eachLayer(function(layer) {
-            var context = {
-                feature: layer.feature,
-                variables: {}
-            };
             layer.bindTooltip(buildLabelContent_map_data(layer.feature), {permanent: true, offset: [-0, -16], className: 'css_map_data'});
             labels.push(layer);
             totalMarkers += 1;
-              layer.added = true;
-              addLabel(layer, i);
-              i++;
+            layer.added = true;
+            addLabel(layer, i);
+            i++;
         });
 
-		// 데이터별 필터 필드 정의
+		// ========== 필터 설정 ==========
 		var filterFieldConfig = {
 		    A: [
 		        { field: '제출처',  placeholder: '예: 기업은행' },
@@ -932,6 +891,27 @@
 		        { field: '창고종류',   placeholder: '예: 복합' },
 		        { field: '연면적(평)', placeholder: '면적 입력' },
 		        { field: '평당가격(원/평)', placeholder: '평당가 입력' }
+		    ],
+		    E: [
+		        { field: '빌딩명',     placeholder: '예: 아크플레이스' },
+		        { field: '권역',       placeholder: '예: GBD' },
+		        { field: '소재지',     placeholder: '예: 강남구' },
+		        { field: '평당 거래가격(원)', placeholder: '평당가 입력' },
+		        { field: '매수자',     placeholder: '매수자 입력' }
+		    ],
+		    F: [
+		        { field: '호텔명',     placeholder: '예: 콘래드' },
+		        { field: '소재지',     placeholder: '예: 서울 중구' },
+		        { field: '성급',       placeholder: '예: 5' },
+		        { field: '매매금액',   placeholder: '금액 입력' },
+		        { field: '비고',       placeholder: '예: 컨버전' }
+		    ],
+		    G: [
+		        { field: '골프장명(인수 후 명칭)', placeholder: '예: 잭니클라우스' },
+		        { field: '대권역',     placeholder: '예: 수도권' },
+		        { field: '운영방식',   placeholder: '예: 대중제' },
+		        { field: '거래금액',   placeholder: '금액 입력' },
+		        { field: '홀당단가',   placeholder: '홀당단가 입력' }
 		    ]
 		};
 		
@@ -941,70 +921,55 @@
 		    var container = document.getElementById('dynamic-filter-inputs');
 		    var badge = document.getElementById('filter-layer-badge');
 		    if (!container) return;
-		
-		    if (type === 'D') {
-		        badge.textContent = 'D 데이터';
-		        badge.style.background = '#9333ea';
-		    } else if (type === 'C') {
-		        badge.textContent = 'C 데이터';
-		        badge.style.background = '#ff6b35';
-		    } else if (type === 'B') {
-		        badge.textContent = 'B 데이터';
-		        badge.style.background = '#3182ce';
-		    } else {
-		        badge.textContent = 'A 데이터';
-		        badge.style.background = '#0051af';
-		    }
-		
+
+		    var badgeMap = {
+		        G: { text: 'G 골프장', bg: '#d97706' },
+		        F: { text: 'F 호텔', bg: '#db2777' },
+		        E: { text: 'E 오피스', bg: '#0891b2' },
+		        D: { text: 'D 데이터', bg: '#9333ea' },
+		        C: { text: 'C 데이터', bg: '#ff6b35' },
+		        B: { text: 'B 데이터', bg: '#3182ce' },
+		        A: { text: 'A 데이터', bg: '#0051af' }
+		    };
+		    var b = badgeMap[type] || badgeMap.A;
+		    badge.textContent = b.text;
+		    badge.style.background = b.bg;
+
 		    container.innerHTML = '';
 		    var fields = filterFieldConfig[type] || [];
-		
 		    fields.forEach(function(item) {
 		        var wrapper = document.createElement('div');
 		        wrapper.style.cssText = 'flex: 1 1 0; min-width: 80px;';
 		        wrapper.innerHTML =
 		            '<label style="font-size:10px; color:#888; display:block; margin-bottom:2px;">' + item.field + '</label>' +
-		            '<input type="text"' +
-		            '       class="multi-filter-input"' +
-		            '       data-field="' + item.field + '"' +
-		            '       placeholder="' + item.placeholder + '"' +
-		            '       style="width:100%; padding:4px 7px; border:1px solid #ddd; border-radius:5px; box-sizing:border-box; font-size:11px;">';
+		            '<input type="text" class="multi-filter-input" data-field="' + item.field + '"' +
+		            ' placeholder="' + item.placeholder + '"' +
+		            ' style="width:100%; padding:4px 7px; border:1px solid #ddd; border-radius:5px; box-sizing:border-box; font-size:11px;">';
 		        container.appendChild(wrapper);
 		        wrapper.querySelector('input').addEventListener('input', applyMultiFilter);
 		    });
-		
 		    document.getElementById('filter-result-count').innerText = '';
 		}
 		
 		function applyMultiFilter() {
 		    var filterInputs = document.querySelectorAll('.multi-filter-input');
 		    var activeFilters = [];
-		
 		    filterInputs.forEach(function(input) {
 		        if (input.value.trim() !== '') {
-		            activeFilters.push({
-		                field: input.getAttribute('data-field'),
-		                value: input.value.toLowerCase().trim()
-		            });
+		            activeFilters.push({ field: input.getAttribute('data-field'), value: input.value.toLowerCase().trim() });
 		        }
 		    });
-		
-		    var targetLayer;
-		    if (activeFilterType === 'D') targetLayer = layer_D_data_0;
-		    else if (activeFilterType === 'C') targetLayer = layer_C_data_0;
-		    else if (activeFilterType === 'B') targetLayer = layer_B_data_0;
-		    else targetLayer = layer_map_data;
-		    
+
+		    var layerMap = { G: layer_G_data_0, F: layer_F_data_0, E: layer_E_data_0, D: layer_D_data_0, C: layer_C_data_0, B: layer_B_data_0, A: layer_map_data };
+		    var targetLayer = layerMap[activeFilterType] || layer_map_data;
 		    var visibleCount = 0;
-		
+
 		    targetLayer.eachLayer(function(layer) {
 		        var props = layer.feature.properties;
-		
 		        var isMatch = activeFilters.every(function(filter) {
 		            var dataValue = String(props[filter.field] || '').toLowerCase();
 		            return dataValue.includes(filter.value);
 		        });
-		
 		        if (isMatch) {
 		            if (!map.hasLayer(layer)) map.addLayer(layer);
 		            visibleCount++;
@@ -1012,26 +977,24 @@
 		            if (map.hasLayer(layer)) map.removeLayer(layer);
 		        }
 		    });
-		
 		    document.getElementById('filter-result-count').innerText = '검색 결과: ' + visibleCount + '건';
 		    updateDashboard();
 		}
 		
 		map.on('overlayadd overlayremove', function(e) {
-		    if (map.hasLayer(layer_D_data_0)) {
-		        activeFilterType = 'D';
-		    } else if (map.hasLayer(layer_C_data_0)) {
-		        activeFilterType = 'C';
-		    } else if (map.hasLayer(layer_B_data_0)) {
-		        activeFilterType = 'B';
-		    } else {
-		        activeFilterType = 'A';
-		    }
+		    if (map.hasLayer(layer_G_data_0)) activeFilterType = 'G';
+		    else if (map.hasLayer(layer_F_data_0)) activeFilterType = 'F';
+		    else if (map.hasLayer(layer_E_data_0)) activeFilterType = 'E';
+		    else if (map.hasLayer(layer_D_data_0)) activeFilterType = 'D';
+		    else if (map.hasLayer(layer_C_data_0)) activeFilterType = 'C';
+		    else if (map.hasLayer(layer_B_data_0)) activeFilterType = 'B';
+		    else activeFilterType = 'A';
 		    buildFilterInputs(activeFilterType);
 		});
 		
 		buildFilterInputs('A');
 		
+		// ========== 로드뷰 ==========
 		var roadviewObj = null;
 		var roadviewClient = null;
 		var roadviewOpen = false;
@@ -1040,115 +1003,72 @@
 		    var panel = document.getElementById('roadview-panel');
 		    panel.style.display = 'block';
 		    roadviewOpen = true;
-		
 		    document.getElementById('map').style.bottom = '35%';
 		    document.getElementById('kakao-map').style.bottom = '35%';
 		    map.invalidateSize();
-		
 		    if (!roadviewObj) {
-		        var container = document.getElementById('roadview');
-		        roadviewObj = new kakao.maps.Roadview(container);
+		        roadviewObj = new kakao.maps.Roadview(document.getElementById('roadview'));
 		        roadviewClient = new kakao.maps.RoadviewClient();
 		    }
-		
-		    if (addressText) {
-		        document.getElementById('roadview-address').innerText = '— ' + addressText;
-		    }
-		
+		    if (addressText) document.getElementById('roadview-address').innerText = '— ' + addressText;
 		    var kakaoLatLng = new kakao.maps.LatLng(latlng.lat, latlng.lng);
 		    roadviewClient.getNearestPanoId(kakaoLatLng, 50, function(panoId) {
-		        if (panoId) {
-		            roadviewObj.setPanoId(panoId, kakaoLatLng);
-		        } else {
-		            document.getElementById('roadview-address').innerText = '— 해당 위치의 로드뷰가 없습니다.';
-		        }
+		        if (panoId) { roadviewObj.setPanoId(panoId, kakaoLatLng); }
+		        else { document.getElementById('roadview-address').innerText = '— 해당 위치의 로드뷰가 없습니다.'; }
 		    });
 		}
 		
 		function closeRoadview() {
-		    var panel = document.getElementById('roadview-panel');
-		    panel.style.display = 'none';
+		    document.getElementById('roadview-panel').style.display = 'none';
 		    roadviewOpen = false;
-		
 		    document.getElementById('map').style.bottom = '0';
 		    document.getElementById('kakao-map').style.bottom = '0';
 		    map.invalidateSize();
 		}
 
-			
+		// ========== 엑셀 내보내기 ==========
 		function exportToExcel() {
-		    var isTypeD = (activeFilterType === 'D');
-		    var isTypeC = (activeFilterType === 'C');
-		    var isTypeB = (activeFilterType === 'B');
-		    
-		    var targetLayer, headers, fileName;
-		    
-		    if (isTypeD) {
-		        targetLayer = layer_D_data_0;
-		        headers = ['명칭', '소재지', '창고종류', '연면적(평)', '거래시점', '평당가격(원/평)'];
-		        fileName = 'D거래사례_검색결과';
-		    } else if (isTypeC) {
-		        targetLayer = layer_C_data_0;
-		        headers = ['물류센터명', '소재지', '구분', '연면적(Py)', '상온 계약월임대료(원/Py)', '주요 임차인'];
-		        fileName = 'C물류_검색결과';
-		    } else if (isTypeB) {
-		        targetLayer = layer_B_data_0;
-		        headers = ['소재지(통', '구분', '세부용도', '보증금/월', '의뢰금액(', '(단순)예상'];
-		        fileName = 'B매물_검색결과';
-		    } else {
-		        targetLayer = layer_map_data;
-		        headers = ['감정서번호', '담당자', '제출처', '주소', '물건종류', '상태'];
-		        fileName = 'A데이터_검색결과';
-		    }
-		
-		    var data = [];
-		    data.push(headers.join(','));
-		
-		    targetLayer.eachLayer(function(layer) {
+		    var config = {
+		        G: { layer: layer_G_data_0, headers: ['골프장명(인수 후 명칭)', '대권역', '세부주소', '운영방식', '홀수', '거래금액', '홀당단가'], fileName: 'G골프장_검색결과' },
+		        F: { layer: layer_F_data_0, headers: ['호텔명', '소재지', '성급', '거래일자', '매매금액', '비고'], fileName: 'F호텔_검색결과' },
+		        E: { layer: layer_E_data_0, headers: ['빌딩명', '권역', '소재지', '거래면적(평)', '거래가격(원)', '평당 거래가격(원)', '매수자'], fileName: 'E오피스_검색결과' },
+		        D: { layer: layer_D_data_0, headers: ['명칭', '소재지', '창고종류', '연면적(평)', '거래시점', '평당가격(원/평)'], fileName: 'D거래사례_검색결과' },
+		        C: { layer: layer_C_data_0, headers: ['물류센터명', '소재지', '구분', '연면적(Py)', '상온 계약월임대료(원/Py)', '주요 임차인'], fileName: 'C물류_검색결과' },
+		        B: { layer: layer_B_data_0, headers: ['소재지(통', '구분', '세부용도', '보증금/월', '의뢰금액(', '(단순)예상'], fileName: 'B매물_검색결과' },
+		        A: { layer: layer_map_data, headers: ['감정서번호', '담당자', '제출처', '주소', '물건종류', '상태'], fileName: 'A데이터_검색결과' }
+		    };
+		    var c = config[activeFilterType] || config.A;
+		    var data = [c.headers.join(',')];
+
+		    c.layer.eachLayer(function(layer) {
 		        if (map.hasLayer(layer)) {
 		            var props = layer.feature.properties;
-		            var row = headers.map(function(header) {
-		                var val = String(props[header] || "").replace(/,/g, " ");
-		                return '"' + val + '"';
-		            });
+		            var row = c.headers.map(function(h) { return '"' + String(props[h] || "").replace(/,/g, " ") + '"'; });
 		            data.push(row.join(','));
 		        }
 		    });
-		
-		    if (data.length <= 1) {
-		        alert("내보낼 데이터가 없습니다.");
-		        return;
-		    }
-		
-		    var csvContent = "\uFEFF" + data.join("\n");
-		    var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-		    var url = URL.createObjectURL(blob);
-		
+
+		    if (data.length <= 1) { alert("내보낼 데이터가 없습니다."); return; }
+		    var blob = new Blob(["\uFEFF" + data.join("\n")], { type: 'text/csv;charset=utf-8;' });
 		    var link = document.createElement("a");
-		    link.setAttribute("href", url);
-		    link.setAttribute("download", fileName + "_" + new Date().toLocaleDateString() + ".csv");
-		    document.body.appendChild(link);
-		    link.click();
-		    document.body.removeChild(link);
+		    link.setAttribute("href", URL.createObjectURL(blob));
+		    link.setAttribute("download", c.fileName + "_" + new Date().toLocaleDateString() + ".csv");
+		    document.body.appendChild(link); link.click(); document.body.removeChild(link);
 		}
 		
+		// ========== 카카오 레이어 토글 ==========
 		document.querySelectorAll('.kakao-layer-toggle').forEach(function(checkbox) {
 		    checkbox.addEventListener('change', function(e) {
 		        var layerType = e.target.getAttribute('data-type');
 		        var targetMap = window.kakaoMap || window.k_map || window.kakao_map;
-		
 		        if (targetMap && targetMap.addOverlayMapTypeId) {
-		            if (e.target.checked) {
-		                targetMap.addOverlayMapTypeId(kakao.maps.MapTypeId[layerType]);
-		            } else {
-		                targetMap.removeOverlayMapTypeId(kakao.maps.MapTypeId[layerType]);
-		            }
-		        } else {
-		            console.error("카카오 지도 객체를 찾을 수 없습니다.");
+		            if (e.target.checked) targetMap.addOverlayMapTypeId(kakao.maps.MapTypeId[layerType]);
+		            else targetMap.removeOverlayMapTypeId(kakao.maps.MapTypeId[layerType]);
 		        }
 		    });
 		});
 		
+		// ========== 외부 GeoJSON ==========
 		var externalLabelConfig = { fields: [], visible: {} };
 		var currentExternalLayer = null;
 		var externalLayerGroup = L.featureGroup().addTo(map);
@@ -1156,58 +1076,32 @@
 		document.getElementById('external-geojson-input').addEventListener('change', function(e) {
 		    var file = e.target.files[0];
 		    if (!file) return;
-		
 		    var reader = new FileReader();
 		    reader.onload = function(event) {
 		        try {
 		            var geojsonData = JSON.parse(event.target.result);
-		            
 		            externalLayerGroup.clearLayers();
 		            var oldUI = document.getElementById('external-label-controls');
 		            if (oldUI) oldUI.remove();
-		
 		            var features = geojsonData.features || [];
-		            if (features.length === 0) {
-		                alert("파일 내에 유효한 매물 데이터가 없습니다.");
-		                return;
-		            }
-		
+		            if (features.length === 0) { alert("파일 내에 유효한 매물 데이터가 없습니다."); return; }
 		            var sampleProps = features[0].properties;
 		            externalLabelConfig.fields = Object.keys(sampleProps);
 		            externalLabelConfig.fields.forEach(function(f) {
 		                externalLabelConfig.visible[f] = (f.indexOf('소재지') !== -1 || f === '구분' || f === '세부용도');
 		            });
-		            
 		            createExternalToggleUI(file.name);
-		
 		            currentExternalLayer = L.geoJson(geojsonData, {
-		                onEachFeature: function(feature, layer) {
-		                    if (typeof pop_map_data === 'function') pop_map_data(feature, layer);
-		                    renderExternalLabel(layer);
-		                },
+		                onEachFeature: function(feature, layer) { pop_map_data(feature, layer); renderExternalLabel(layer); },
 		                pointToLayer: function (feature, latlng) {
-		                    return L.circleMarker(latlng, {
-		                        radius: 8,
-		                        fillColor: "#ff4500",
-		                        color: "#ffffff",
-		                        weight: 2,
-		                        fillOpacity: 0.9
-		                    });
+		                    return L.circleMarker(latlng, { radius: 8, fillColor: "#ff4500", color: "#ffffff", weight: 2, fillOpacity: 0.9 });
 		                }
 		            });
-		
 		            externalLayerGroup.addLayer(currentExternalLayer);
-		            
-		            var lControl = window.layerControl || window.controlLayers || window.control;
-		            if (lControl) lControl.addOverlay(externalLayerGroup, "📂 " + file.name);
-		
+		            if (window.layerControl) window.layerControl.addOverlay(externalLayerGroup, "📂 " + file.name);
 		            map.fitBounds(externalLayerGroup.getBounds());
 		            alert("'" + file.name + "' 데이터를 성공적으로 불러왔습니다!");
-		
-		        } catch (err) {
-		            console.error("JSON 파싱 에러:", err);
-		            alert("JSON 형식이 잘못되었거나 파일 읽기 중 오류가 발생했습니다.");
-		        }
+		        } catch (err) { alert("JSON 형식이 잘못되었거나 파일 읽기 중 오류가 발생했습니다."); }
 		    };
 		    reader.readAsText(file);
 		});
@@ -1215,148 +1109,147 @@
 		function renderExternalLabel(layer) {
 		    var props = layer.feature.properties;
 		    var labelParts = [];
-		    
 		    externalLabelConfig.fields.forEach(function(f) {
-		        if (externalLabelConfig.visible[f] && props[f]) {
-		            labelParts.push(String(props[f]));
-		        }
+		        if (externalLabelConfig.visible[f] && props[f]) labelParts.push(String(props[f]));
 		    });
-		
 		    if (labelParts.length > 0) {
-		        var content = '<div style="text-align:center; font-weight:bold; line-height:1.4;">' + labelParts.join('<br>') + '</div>';
-		        layer.bindTooltip(content, {
-		            permanent: true,
-		            offset: [0, -12],
-		            direction: 'top',
-		            className: 'css_map_data'
+		        layer.bindTooltip('<div style="text-align:center; font-weight:bold; line-height:1.4;">' + labelParts.join('<br>') + '</div>', {
+		            permanent: true, offset: [0, -12], direction: 'top', className: 'css_map_data'
 		        }).openTooltip();
-		    } else {
-		        layer.unbindTooltip();
-		    }
+		    } else { layer.unbindTooltip(); }
 		}
 		
 		function createExternalToggleUI(fileName) {
 		    var parent = document.getElementById('external-geojson-input').parentNode;
 		    var ui = document.createElement('div');
 		    ui.id = 'external-label-controls';
-		    ui.style = "margin-top:10px; padding:12px; background:#fff4e5; border-radius:10px; border:1px solid #ffb366; max-height:200px; overflow-y:auto; box-shadow:inset 0 1px 3px rgba(0,0,0,0.1);";
-		    
-		    var title = '<div style="font-size:11px; font-weight:bold; color:#d35400; margin-bottom:8px; border-bottom:1px solid #ffcc99; padding-bottom:4px;">📍 라벨 표시 항목 선택 (' + fileName + ')</div>';
-		    
+		    ui.style = "margin-top:10px; padding:12px; background:#fff4e5; border-radius:10px; border:1px solid #ffb366; max-height:200px; overflow-y:auto;";
+		    var title = '<div style="font-size:11px; font-weight:bold; color:#d35400; margin-bottom:8px;">📍 라벨 표시 항목 선택 (' + fileName + ')</div>';
 		    var listHtml = externalLabelConfig.fields.map(function(f) {
-		        var isChecked = externalLabelConfig.visible[f] ? 'checked' : '';
-		        return '<label style="display:block; font-size:11px; margin-bottom:4px; cursor:pointer; color:#5d4037;">' +
-		               '<input type="checkbox" class="ext-chk" data-field="' + f + '" ' + isChecked + '> ' + f + '</label>';
+		        return '<label style="display:block; font-size:11px; margin-bottom:4px; cursor:pointer;"><input type="checkbox" class="ext-chk" data-field="' + f + '" ' + (externalLabelConfig.visible[f] ? 'checked' : '') + '> ' + f + '</label>';
 		    }).join('');
-		
 		    ui.innerHTML = title + listHtml;
 		    parent.appendChild(ui);
-		
 		    ui.querySelectorAll('.ext-chk').forEach(function(chk) {
 		        chk.addEventListener('change', function() {
 		            externalLabelConfig.visible[this.dataset.field] = this.checked;
-		            if (currentExternalLayer) {
-		                currentExternalLayer.eachLayer(function(lyr) { renderExternalLabel(lyr); });
-		            }
+		            if (currentExternalLayer) currentExternalLayer.eachLayer(function(lyr) { renderExternalLabel(lyr); });
 		        });
 		    });
 		}
 
-
+		// ========== 대시보드 업데이트 ==========
 		function updateDashboard() {
 		    var listContainer = document.getElementById('list-container');
 		    var countElement = document.getElementById('list-count');
 		    if (!map) return;
-		
 		    var bounds = map.getBounds();
 		    var listHtml = '';
 		    var count = 0;
-		
+
 		    map.eachLayer(function(layer) {
 		        if ((layer instanceof L.CircleMarker || layer instanceof L.Marker) && layer.feature && bounds.contains(layer.getLatLng())) {
 		            var p = layer.feature.properties;
 		            count++;
-		
+
+		            // 타입 감지
+		            var isTypeG = p.hasOwnProperty('골프장명(인수 후 명칭)');
+		            var isTypeF = p.hasOwnProperty('호텔명');
+		            var isTypeE = p.hasOwnProperty('빌딩명') && p.hasOwnProperty('평당 거래가격(원)');
 		            var isTypeD = p.hasOwnProperty('명칭') && p.hasOwnProperty('평당가격(원/평)');
 		            var isTypeC = p.hasOwnProperty('물류센터명');
 		            var isTypeB = p.hasOwnProperty('소재지(통');
-		
-		            if (isTypeD) {
-		                // D데이터(거래사례) 디자인
-		                listHtml += `
-		                    <div class="list-item type-d" onclick="focusAnyMarker(${layer._leaflet_id})" 
-		                         style="padding:16px; border-bottom:1px solid #edf2f7; border-left:4px solid #9333ea; background:#fff; cursor:pointer; margin-bottom:4px;">
-		                        <div style="font-size:11px; color:#9333ea; font-weight:bold; margin-bottom:4px;">거래사례</div>
-		                        <div class="title" style="font-weight:bold; font-size:15px; color:#2d3748; line-height:1.4;">${p['명칭'] || '정보 없음'}</div>
-		                        
-		                        <div class="price" style="color:#16a34a; font-weight:800; font-size:16px; margin-top:6px;">
-		                            평당 ${p['평당가격(원/평)'] || '금액 미정'}
-		                        </div>
-		
-		                        <div class="info" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;">
-		                            ${p['소재지'] ? `<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">${p['소재지']}</span>` : ''}
-		                            ${p['창고종류'] ? `<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">${p['창고종류']}</span>` : ''}
-		                            ${p['연면적(평)'] ? `<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">${p['연면적(평)']}평</span>` : ''}
-		                            ${p['거래시점'] ? `<span style="background:#f8fafc; color:#64748b; padding:2px 6px; border-radius:4px; font-size:11px; border:1px dashed #cbd5e1;">거래: ${p['거래시점']}</span>` : ''}
-		                        </div>
-		                    </div>
-		                `;
+
+		            if (isTypeG) {
+		                listHtml +=
+		                    '<div class="list-item type-g" onclick="focusAnyMarker(' + layer._leaflet_id + ')" ' +
+		                    'style="padding:16px; border-bottom:1px solid #edf2f7; border-left:4px solid #d97706; background:#fff; cursor:pointer; margin-bottom:4px;">' +
+		                    '<div style="font-size:11px; color:#d97706; font-weight:bold; margin-bottom:4px;">⛳ 골프장</div>' +
+		                    '<div class="title" style="font-weight:bold; font-size:15px; color:#2d3748;">' + (p['골프장명(인수 후 명칭)'] || '정보 없음') + '</div>' +
+		                    '<div class="price" style="color:#b45309; font-weight:800; font-size:16px; margin-top:6px;">' +
+		                    (p['거래금액'] && p['거래금액'] !== '-' ? p['거래금액'] : '금액 미정') + '</div>' +
+		                    '<div class="info" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;">' +
+		                    (p['대권역'] ? '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">' + p['대권역'] + '</span>' : '') +
+		                    (p['운영방식'] ? '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">' + p['운영방식'] + '</span>' : '') +
+		                    (p['홀수'] ? '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">' + p['홀수'] + 'H</span>' : '') +
+		                    (p['홀당단가'] && p['홀당단가'] !== '-' ? '<span style="background:#fef3c7; color:#92400e; padding:2px 6px; border-radius:4px; font-size:11px; border:1px dashed #fbbf24;">홀당: ' + p['홀당단가'] + '</span>' : '') +
+		                    '</div></div>';
+		            } else if (isTypeF) {
+		                listHtml +=
+		                    '<div class="list-item type-f" onclick="focusAnyMarker(' + layer._leaflet_id + ')" ' +
+		                    'style="padding:16px; border-bottom:1px solid #edf2f7; border-left:4px solid #db2777; background:#fff; cursor:pointer; margin-bottom:4px;">' +
+		                    '<div style="font-size:11px; color:#db2777; font-weight:bold; margin-bottom:4px;">🏨 호텔</div>' +
+		                    '<div class="title" style="font-weight:bold; font-size:15px; color:#2d3748;">' + (p['호텔명'] || '정보 없음') + '</div>' +
+		                    '<div class="price" style="color:#db2777; font-weight:800; font-size:16px; margin-top:6px;">' +
+		                    (p['매매금액'] || '금액 미정') + '</div>' +
+		                    '<div class="info" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;">' +
+		                    (p['소재지'] ? '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">' + p['소재지'] + '</span>' : '') +
+		                    (p['성급'] ? '<span style="background:#fdf2f8; color:#9d174d; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #fbcfe8;">' + p['성급'] + '성</span>' : '') +
+		                    (p['거래일자'] ? '<span style="background:#f8fafc; color:#64748b; padding:2px 6px; border-radius:4px; font-size:11px; border:1px dashed #cbd5e1;">' + p['거래일자'] + '</span>' : '') +
+		                    '</div></div>';
+		            } else if (isTypeE) {
+		                listHtml +=
+		                    '<div class="list-item type-e" onclick="focusAnyMarker(' + layer._leaflet_id + ')" ' +
+		                    'style="padding:16px; border-bottom:1px solid #edf2f7; border-left:4px solid #0891b2; background:#fff; cursor:pointer; margin-bottom:4px;">' +
+		                    '<div style="font-size:11px; color:#0891b2; font-weight:bold; margin-bottom:4px;">🏢 오피스</div>' +
+		                    '<div class="title" style="font-weight:bold; font-size:15px; color:#2d3748;">' + (p['빌딩명'] || '정보 없음') + '</div>' +
+		                    '<div class="price" style="color:#0891b2; font-weight:800; font-size:16px; margin-top:6px;">' +
+		                    '평당 ' + (p['평당 거래가격(원)'] || '미정') + '</div>' +
+		                    '<div class="info" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;">' +
+		                    (p['권역'] ? '<span style="background:#ecfeff; color:#155e75; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #a5f3fc;">' + p['권역'] + '</span>' : '') +
+		                    (p['소재지'] ? '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">' + p['소재지'] + '</span>' : '') +
+		                    (p['거래면적(평)'] ? '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">' + p['거래면적(평)'] + '평</span>' : '') +
+		                    (p['거래시점(연도)'] ? '<span style="background:#f8fafc; color:#64748b; padding:2px 6px; border-radius:4px; font-size:11px; border:1px dashed #cbd5e1;">' + p['거래시점(연도)'] + '.' + p['거래시점(분기)'] + 'Q</span>' : '') +
+		                    '</div></div>';
+		            } else if (isTypeD) {
+		                listHtml +=
+		                    '<div class="list-item type-d" onclick="focusAnyMarker(' + layer._leaflet_id + ')" ' +
+		                    'style="padding:16px; border-bottom:1px solid #edf2f7; border-left:4px solid #9333ea; background:#fff; cursor:pointer; margin-bottom:4px;">' +
+		                    '<div style="font-size:11px; color:#9333ea; font-weight:bold; margin-bottom:4px;">거래사례</div>' +
+		                    '<div class="title" style="font-weight:bold; font-size:15px; color:#2d3748;">' + (p['명칭'] || '정보 없음') + '</div>' +
+		                    '<div class="price" style="color:#16a34a; font-weight:800; font-size:16px; margin-top:6px;">평당 ' + (p['평당가격(원/평)'] || '금액 미정') + '</div>' +
+		                    '<div class="info" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;">' +
+		                    (p['소재지'] ? '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">' + p['소재지'] + '</span>' : '') +
+		                    (p['창고종류'] ? '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">' + p['창고종류'] + '</span>' : '') +
+		                    (p['연면적(평)'] ? '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">' + p['연면적(평)'] + '평</span>' : '') +
+		                    '</div></div>';
 		            } else if (isTypeC) {
-		                // C데이터(물류) 디자인
-		                listHtml += `
-		                    <div class="list-item type-c" onclick="focusAnyMarker(${layer._leaflet_id})" 
-		                         style="padding:16px; border-bottom:1px solid #edf2f7; border-left:4px solid #ff6b35; background:#fff; cursor:pointer; margin-bottom:4px;">
-		                        <div style="font-size:11px; color:#ff6b35; font-weight:bold; margin-bottom:4px;">물류센터</div>
-		                        <div class="title" style="font-weight:bold; font-size:15px; color:#2d3748; line-height:1.4;">${p['물류센터명'] || '정보 없음'}</div>
-		                        
-		                        <div class="price" style="color:#e53e3e; font-weight:800; font-size:16px; margin-top:6px;">
-		                            ${p['상온 계약월임대료(원/Py)'] ? p['상온 계약월임대료(원/Py)'] + '원/Py' : '금액 미정'}
-		                        </div>
-		
-		                        <div class="info" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;">
-		                            ${p['소재지'] ? `<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">${p['소재지']}</span>` : ''}
-		                            ${p['구분'] ? `<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">${p['구분']}</span>` : ''}
-		                            ${p['연면적(Py)'] ? `<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">${p['연면적(Py)']} Py</span>` : ''}
-		                            ${p['주요 임차인'] ? `<span style="background:#f8fafc; color:#64748b; padding:2px 6px; border-radius:4px; font-size:11px; border:1px dashed #cbd5e1;">임차: ${p['주요 임차인']}</span>` : ''}
-		                        </div>
-		                    </div>
-		                `;
+		                listHtml +=
+		                    '<div class="list-item type-c" onclick="focusAnyMarker(' + layer._leaflet_id + ')" ' +
+		                    'style="padding:16px; border-bottom:1px solid #edf2f7; border-left:4px solid #ff6b35; background:#fff; cursor:pointer; margin-bottom:4px;">' +
+		                    '<div style="font-size:11px; color:#ff6b35; font-weight:bold; margin-bottom:4px;">물류센터</div>' +
+		                    '<div class="title" style="font-weight:bold; font-size:15px; color:#2d3748;">' + (p['물류센터명'] || '정보 없음') + '</div>' +
+		                    '<div class="price" style="color:#e53e3e; font-weight:800; font-size:16px; margin-top:6px;">' +
+		                    (p['상온 계약월임대료(원/Py)'] ? p['상온 계약월임대료(원/Py)'] + '원/Py' : '금액 미정') + '</div>' +
+		                    '<div class="info" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;">' +
+		                    (p['소재지'] ? '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">' + p['소재지'] + '</span>' : '') +
+		                    (p['구분'] ? '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">' + p['구분'] + '</span>' : '') +
+		                    (p['연면적(Py)'] ? '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">' + p['연면적(Py)'] + ' Py</span>' : '') +
+		                    '</div></div>';
 		            } else if (isTypeB) {
-		                // B데이터(매물) 디자인
-		                listHtml += `
-		                    <div class="list-item type-b" onclick="focusAnyMarker(${layer._leaflet_id})" 
-		                         style="padding:16px; border-bottom:1px solid #edf2f7; border-left:4px solid #3182ce; background:#fff; cursor:pointer; margin-bottom:4px;">
-		                        <div style="font-size:11px; color:#3182ce; font-weight:bold; margin-bottom:4px;">실시간 매물</div>
-		                        <div class="title" style="font-weight:bold; font-size:15px; color:#2d3748; line-height:1.4;">${p['소재지(통'] || '주소 정보 없음'}</div>
-		                        
-		                        <div class="price" style="color:#e53e3e; font-weight:800; font-size:16px; margin-top:6px;">
-		                            ${p['의뢰금액('] || '금액 미정'}
-		                        </div>
-		
-		                        <div class="info" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;">
-		                            ${p['세부용도'] ? `<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">${p['세부용도']}</span>` : ''}
-		                            ${p['보증금/월'] ? `<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">보증/월: ${p['보증금/월']}</span>` : ''}
-		                            ${p['의뢰금액('] ? `<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">의뢰: ${p['의뢰금액(']}</span>` : ''}
-		                            ${p['(단순)예상'] ? `<span style="background:#f8fafc; color:#64748b; padding:2px 6px; border-radius:4px; font-size:11px; border:1px dashed #cbd5e1;">예상: ${p['(단순)예상']}</span>` : ''}
-		                        </div>
-		                    </div>
-		                `;
+		                listHtml +=
+		                    '<div class="list-item type-b" onclick="focusAnyMarker(' + layer._leaflet_id + ')" ' +
+		                    'style="padding:16px; border-bottom:1px solid #edf2f7; border-left:4px solid #3182ce; background:#fff; cursor:pointer; margin-bottom:4px;">' +
+		                    '<div style="font-size:11px; color:#3182ce; font-weight:bold; margin-bottom:4px;">실시간 매물</div>' +
+		                    '<div class="title" style="font-weight:bold; font-size:15px; color:#2d3748;">' + (p['소재지(통'] || '주소 정보 없음') + '</div>' +
+		                    '<div class="price" style="color:#e53e3e; font-weight:800; font-size:16px; margin-top:6px;">' + (p['의뢰금액('] || '금액 미정') + '</div>' +
+		                    '<div class="info" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;">' +
+		                    (p['세부용도'] ? '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">' + p['세부용도'] + '</span>' : '') +
+		                    (p['보증금/월'] ? '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">보증/월: ' + p['보증금/월'] + '</span>' : '') +
+		                    '</div></div>';
 		            } else {
-		                // A데이터(기본) 디자인
-		                listHtml += `
-		                    <div class="list-item type-a" onclick="focusAnyMarker(${layer._leaflet_id})" 
-		                         style="padding:16px; border-bottom:1px solid #edf2f7; border-left:4px solid #718096; background:#f7fafc; cursor:pointer; margin-bottom:4px;">
-		                        <div style="font-size:11px; color:#718096; font-weight:bold; margin-bottom:4px;">기본 데이터</div>
-		                        <div class="title" style="font-weight:bold; font-size:14px; color:#4a5568;">${p['주소'] || p['건명'] || '정보 없음'}</div>
-		                        <div class="info" style="font-size:12px; color:#718096; margin-top:6px;">
-		                            ${p['물건종류'] || ''} | ${p['담당자'] ? '담당: ' + p['담당자'] : '담당자 미정'}
-		                        </div>
-		                    </div>
-		                `;
+		                listHtml +=
+		                    '<div class="list-item type-a" onclick="focusAnyMarker(' + layer._leaflet_id + ')" ' +
+		                    'style="padding:16px; border-bottom:1px solid #edf2f7; border-left:4px solid #718096; background:#f7fafc; cursor:pointer; margin-bottom:4px;">' +
+		                    '<div style="font-size:11px; color:#718096; font-weight:bold; margin-bottom:4px;">기본 데이터</div>' +
+		                    '<div class="title" style="font-weight:bold; font-size:14px; color:#4a5568;">' + (p['주소'] || p['건명'] || '정보 없음') + '</div>' +
+		                    '<div class="info" style="font-size:12px; color:#718096; margin-top:6px;">' +
+		                    (p['물건종류'] || '') + ' | ' + (p['담당자'] ? '담당: ' + p['담당자'] : '담당자 미정') +
+		                    '</div></div>';
 		            }
 		        }
 		    });
-		
+
 		    listContainer.innerHTML = listHtml || '<div style="padding:40px; color:#a0aec0; text-align:center;">표시할 데이터가 없습니다.</div>';
 		    countElement.innerText = count;
 		}
@@ -1372,7 +1265,7 @@
 		
 		map.on('overlayadd overlayremove moveend zoomend', updateDashboard);
 
-		var lControl = window.layerControl || window.controlLayers || window.control;
+		var lControl = window.layerControl;
         </script>        
     </body>
 </html>
