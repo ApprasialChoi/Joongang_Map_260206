@@ -213,6 +213,13 @@
 		    .leaflet-tooltip-top.css_map_data_G:before {
 		        display: none !important;
 		    }
+		    /* 드래그 가능 라벨 */
+		    .leaflet-tooltip.draggable-tooltip {
+		        cursor: grab !important;
+		    }
+		    .leaflet-tooltip.draggable-tooltip:active {
+		        cursor: grabbing !important;
+		    }
 		</style>
         <title></title>
     </head>
@@ -296,6 +303,63 @@
         var hash = new L.Hash(map);
         map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
         var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+
+        // ========== 드래그 가능 라벨 시스템 ==========
+        var tooltipOffsets = {};
+
+        function getFeatureId(feature) {
+            var p = feature.properties;
+            return p['감정서번호'] || p['빌딩명'] || p['호텔명'] || p['골프장명(인수 후 명칭)'] || 
+                   p['물류센터명'] || p['명칭'] || p['소재지(통'] || 
+                   (p['위도'] + '_' + p['경도']) || JSON.stringify(p).substring(0, 80);
+        }
+
+        function getStoredOffset(feature, defaultOffset) {
+            var fid = getFeatureId(feature);
+            if (tooltipOffsets[fid]) return [tooltipOffsets[fid].x, tooltipOffsets[fid].y];
+            return defaultOffset;
+        }
+
+        function makeDraggableTooltip(layer) {
+            if (!layer.getTooltip || !layer.getTooltip()) return;
+            var tooltip = layer.getTooltip();
+            var el = tooltip.getElement();
+            if (!el || el._dragReady) return;
+            el._dragReady = true;
+            el.classList.add('draggable-tooltip');
+            var fid = getFeatureId(layer.feature);
+
+            el.addEventListener('mousedown', function(e) {
+                if (e.button !== 0) return;
+                e.stopPropagation(); e.preventDefault();
+                var startX = e.clientX, startY = e.clientY;
+                var cur = tooltipOffsets[fid] || { x: tooltip.options.offset[0], y: tooltip.options.offset[1] };
+                map.dragging.disable();
+                el.style.cursor = 'grabbing';
+
+                function onMove(ev) {
+                    var nx = cur.x + (ev.clientX - startX);
+                    var ny = cur.y + (ev.clientY - startY);
+                    tooltip.options.offset = [nx, ny];
+                    tooltipOffsets[fid] = { x: nx, y: ny };
+                    if (layer.getLatLng) tooltip.setLatLng(layer.getLatLng());
+                }
+                function onUp() {
+                    map.dragging.enable();
+                    el.style.cursor = 'grab';
+                    document.removeEventListener('mousemove', onMove);
+                    document.removeEventListener('mouseup', onUp);
+                }
+                document.addEventListener('mousemove', onMove);
+                document.addEventListener('mouseup', onUp);
+            });
+        }
+
+        function bindDraggableTooltip(layer, content, className, defaultOffset) {
+            var offset = getStoredOffset(layer.feature, defaultOffset);
+            layer.bindTooltip(content, { permanent: true, direction: 'top', className: className, offset: offset });
+            layer.on('tooltipopen', function() { setTimeout(function() { makeDraggableTooltip(layer); }, 50); });
+        }
 
         // ========== 팝업/라벨 필드 설정 ==========
         var popupFieldConfig_map_data = (function() {
@@ -687,7 +751,7 @@
 		var layer_B_data_0 = new L.geoJson(json_B_data_0, {
 		    onEachFeature: function(feature, layer) {
 		        pop_map_data(feature, layer);
-		        layer.bindTooltip(buildLabelContent_B_data(feature), { permanent: true, direction: 'top', className: 'css_map_data_B', offset: [0, -10] });
+		        bindDraggableTooltip(layer, buildLabelContent_B_data(feature), 'css_map_data_B', [0, -10]);
 		    },
 		    pointToLayer: function (feature, latlng) {
 		        return L.circleMarker(latlng, { radius: 6, fillColor: "#3388ff", color: "#000", weight: 1, fillOpacity: 0.8 });
@@ -697,7 +761,7 @@
 		var layer_C_data_0 = new L.geoJson(json_C_data_0, {
 		    onEachFeature: function(feature, layer) {
 		        pop_map_data(feature, layer);
-		        layer.bindTooltip(buildLabelContent_C_data(feature), { permanent: true, direction: 'top', className: 'css_map_data_C', offset: [0, -10] });
+		        bindDraggableTooltip(layer, buildLabelContent_C_data(feature), 'css_map_data_C', [0, -10]);
 		    },
 		    pointToLayer: function (feature, latlng) {
 		        return L.circleMarker(latlng, { radius: 6, fillColor: "#ff6b35", color: "#000", weight: 1, fillOpacity: 0.8 });
@@ -707,7 +771,7 @@
 		var layer_D_data_0 = new L.geoJson(json_D_data_0, {
 		    onEachFeature: function(feature, layer) {
 		        pop_map_data(feature, layer);
-		        layer.bindTooltip(buildLabelContent_D_data(feature), { permanent: true, direction: 'top', className: 'css_map_data_D', offset: [0, -10] });
+		        bindDraggableTooltip(layer, buildLabelContent_D_data(feature), 'css_map_data_D', [0, -10]);
 		    },
 		    pointToLayer: function (feature, latlng) {
 		        return L.circleMarker(latlng, { radius: 7, fillColor: "#9333ea", color: "#000", weight: 1, fillOpacity: 0.8 });
@@ -718,7 +782,7 @@
 		var layer_E_data_0 = new L.geoJson(json_E_data_0, {
 		    onEachFeature: function(feature, layer) {
 		        pop_map_data(feature, layer);
-		        layer.bindTooltip(buildLabelContent_E_data(feature), { permanent: true, direction: 'top', className: 'css_map_data_E', offset: [0, -10] });
+		        bindDraggableTooltip(layer, buildLabelContent_E_data(feature), 'css_map_data_E', [0, -10]);
 		    },
 		    pointToLayer: function (feature, latlng) {
 		        return L.circleMarker(latlng, { radius: 7, fillColor: "#0891b2", color: "#000", weight: 1, fillOpacity: 0.8 });
@@ -729,7 +793,7 @@
 		var layer_F_data_0 = new L.geoJson(json_F_data_0, {
 		    onEachFeature: function(feature, layer) {
 		        pop_map_data(feature, layer);
-		        layer.bindTooltip(buildLabelContent_F_data(feature), { permanent: true, direction: 'top', className: 'css_map_data_F', offset: [0, -10] });
+		        bindDraggableTooltip(layer, buildLabelContent_F_data(feature), 'css_map_data_F', [0, -10]);
 		    },
 		    pointToLayer: function (feature, latlng) {
 		        return L.circleMarker(latlng, { radius: 7, fillColor: "#db2777", color: "#000", weight: 1, fillOpacity: 0.8 });
@@ -740,7 +804,7 @@
 		var layer_G_data_0 = new L.geoJson(json_G_data_0, {
 		    onEachFeature: function(feature, layer) {
 		        pop_map_data(feature, layer);
-		        layer.bindTooltip(buildLabelContent_G_data(feature), { permanent: true, direction: 'top', className: 'css_map_data_G', offset: [0, -10] });
+		        bindDraggableTooltip(layer, buildLabelContent_G_data(feature), 'css_map_data_G', [0, -10]);
 		    },
 		    pointToLayer: function (feature, latlng) {
 		        return L.circleMarker(latlng, { radius: 7, fillColor: "#d97706", color: "#000", weight: 1, fillOpacity: 0.8 });
@@ -775,6 +839,7 @@
                         '<div class="actions" style="margin-bottom:5px;">',
                         '  <button type="button" data-action="all" style="font-size:10px;">전체</button>',
                         '  <button type="button" data-action="none" style="font-size:10px;">해제</button>',
+                        '  <button type="button" data-action="reset-pos" style="font-size:10px; margin-left:4px; color:#e53e3e;">위치 초기화</button>',
                         '</div>',
                         '<div class="list"></div>'
                     ].join('');
@@ -814,9 +879,13 @@
 						            if (targetLayer === layer_E_data_0) className = 'css_map_data_E';
 						            if (targetLayer === layer_F_data_0) className = 'css_map_data_F';
 						            if (targetLayer === layer_G_data_0) className = 'css_map_data_G';
+						            var offset = getStoredOffset(lyr.feature, [0, -10]);
 						            lyr.bindTooltip(newContent, {
 						                permanent: true, direction: 'top', className: className,
-						                offset: [0, -10], sticky: false, opacity: 1, interactive: false
+						                offset: offset, sticky: false, opacity: 1, interactive: false
+						            });
+						            lyr.on('tooltipopen', function() {
+						                setTimeout(function() { makeDraggableTooltip(lyr); }, 50);
 						            });
 						        }
 						    });
@@ -843,6 +912,10 @@
                             cfg.fields.forEach(function(k) { cfg.visible[k] = false; });
                             div.updateUI(); refresh();
                         };
+                        div.querySelector('[data-action="reset-pos"]').onclick = function() {
+                            tooltipOffsets = {};
+                            refresh();
+                        };
                     };
 
                     m.on('overlayadd overlayremove', function() { div.updateUI(); });
@@ -856,7 +929,9 @@
         setBounds();
         var i = 0;
         layer_map_data.eachLayer(function(layer) {
-            layer.bindTooltip(buildLabelContent_map_data(layer.feature), {permanent: true, offset: [-0, -16], className: 'css_map_data'});
+            var offset = getStoredOffset(layer.feature, [0, -16]);
+            layer.bindTooltip(buildLabelContent_map_data(layer.feature), {permanent: true, offset: offset, className: 'css_map_data'});
+            layer.on('tooltipopen', function() { setTimeout(function() { makeDraggableTooltip(layer); }, 50); });
             labels.push(layer);
             totalMarkers += 1;
             layer.added = true;
