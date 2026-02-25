@@ -220,6 +220,50 @@
 		    .leaflet-tooltip.draggable-tooltip:active {
 		        cursor: grabbing !important;
 		    }
+		    /* 건축물 검색 모달 */
+		    .building-modal-overlay {
+		        display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+		        background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;
+		    }
+		    .building-modal-overlay.active { display: flex; }
+		    .building-modal {
+		        background: white; border-radius: 16px; width: 560px; max-height: 85vh;
+		        box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; display: flex; flex-direction: column;
+		    }
+		    .building-modal-header {
+		        padding: 20px 24px; background: linear-gradient(135deg, #0051af, #0077ed);
+		        color: white; display: flex; align-items: center; justify-content: space-between;
+		    }
+		    .building-modal-header h3 { margin: 0; font-size: 18px; }
+		    .building-modal-body { padding: 24px; overflow-y: auto; flex: 1; }
+		    .bm-field { margin-bottom: 14px; }
+		    .bm-field label { display: block; font-size: 12px; font-weight: 600; color: #555; margin-bottom: 4px; }
+		    .bm-field input, .bm-field select {
+		        width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px;
+		        font-size: 14px; box-sizing: border-box; transition: border 0.2s;
+		    }
+		    .bm-field input:focus, .bm-field select:focus { border-color: #0051af; outline: none; }
+		    .bm-row { display: flex; gap: 12px; }
+		    .bm-row .bm-field { flex: 1; }
+		    .bm-btn-run {
+		        width: 100%; padding: 14px; background: linear-gradient(135deg, #0051af, #0077ed);
+		        color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold;
+		        cursor: pointer; transition: opacity 0.2s; margin-top: 8px;
+		    }
+		    .bm-btn-run:hover { opacity: 0.9; }
+		    .bm-btn-run:disabled { background: #aaa; cursor: not-allowed; }
+		    .bm-progress { margin-top: 16px; padding: 14px; background: #f8f9fa; border-radius: 10px; display: none; }
+		    .bm-progress-bar { height: 6px; background: #e2e8f0; border-radius: 3px; margin-top: 8px; overflow: hidden; }
+		    .bm-progress-fill { height: 100%; background: #0051af; border-radius: 3px; transition: width 0.3s; width: 0%; }
+		    .bm-result { margin-top: 16px; display: none; }
+		    .bm-result-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+		    .bm-result-table th { background: #f1f5f9; padding: 8px; text-align: left; position: sticky; top: 0; }
+		    .bm-result-table td { padding: 6px 8px; border-bottom: 1px solid #eee; }
+		    .bm-download-btn {
+		        display: inline-block; padding: 10px 20px; background: #28a745; color: white;
+		        border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer;
+		        text-decoration: none; margin-top: 10px;
+		    }
 		</style>
         <title></title>
     </head>
@@ -248,7 +292,10 @@
 		        <h4 style="margin: 0; font-size: 13px; color: #333;">상세 필터</h4>
 		        <span id="filter-layer-badge" style="font-size:11px; color:#fff; background:#0051af; padding:2px 7px; border-radius:10px; margin-left:8px;">A 데이터</span>
 		        <span id="filter-result-count" style="font-size:12px; color:#0051af; font-weight:bold; margin-left:auto;"></span>
-		        <button onclick="exportToExcel()" style="margin-left:10px; padding:4px 10px; background-color:#28a745; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold; font-size:11px; white-space:nowrap;">
+		        <button onclick="openBuildingSearchModal()" style="margin-left:10px; padding:4px 10px; background-color:#0051af; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold; font-size:11px; white-space:nowrap;">
+		            🏗️ 건축물 검색
+		        </button>
+		        <button onclick="exportToExcel()" style="margin-left:6px; padding:4px 10px; background-color:#28a745; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold; font-size:11px; white-space:nowrap;">
 		            📊 엑셀 저장
 		        </button>
 		    </div>
@@ -273,6 +320,63 @@
 		        </div>
 		    </div>
 		    <div id="external-label-controls"></div>
+		</div>
+
+		<!-- 건축물 검색 모달 -->
+		<div class="building-modal-overlay" id="buildingModal">
+		    <div class="building-modal">
+		        <div class="building-modal-header">
+		            <h3>🏗️ 건축물대장 검색</h3>
+		            <button onclick="closeBuildingModal()" style="background:none; border:none; color:white; font-size:22px; cursor:pointer;">✕</button>
+		        </div>
+		        <div class="building-modal-body">
+		            <div class="bm-row">
+		                <div class="bm-field">
+		                    <label>시도 *</label>
+		                    <input type="text" id="bm-sido" placeholder="예: 경기도" value="경기도">
+		                </div>
+		                <div class="bm-field">
+		                    <label>시군구 *</label>
+		                    <input type="text" id="bm-sigungu" placeholder="예: 이천시">
+		                </div>
+		            </div>
+		            <div class="bm-row">
+		                <div class="bm-field">
+		                    <label>읍면동 (비우면 전체 순회)</label>
+		                    <input type="text" id="bm-eupmyeondong" placeholder="예: 장호원읍">
+		                </div>
+		                <div class="bm-field">
+		                    <label>리 (선택)</label>
+		                    <input type="text" id="bm-ri" placeholder="예: 장호원리">
+		                </div>
+		            </div>
+		            <div class="bm-field">
+		                <label>검색 용도 (콤마 구분)</label>
+		                <input type="text" id="bm-uses" placeholder="예: 창고시설,창고" value="창고시설,창고">
+		            </div>
+		            <div id="bm-server-status" style="font-size:12px; color:#888; margin-bottom:8px;"></div>
+		            <button class="bm-btn-run" id="bm-run-btn" onclick="runBuildingSearch()">🔍 검색 시작</button>
+		            <div class="bm-progress" id="bm-progress">
+		                <div style="display:flex; justify-content:space-between; font-size:13px;">
+		                    <span id="bm-progress-text">준비 중...</span>
+		                    <span id="bm-progress-count" style="font-weight:bold; color:#0051af;">0건</span>
+		                </div>
+		                <div class="bm-progress-bar"><div class="bm-progress-fill" id="bm-progress-fill"></div></div>
+		            </div>
+		            <div class="bm-result" id="bm-result">
+		                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+		                    <span style="font-weight:bold; font-size:15px;">📋 검색 결과: <span id="bm-result-count" style="color:#0051af;">0</span>건</span>
+		                    <a class="bm-download-btn" id="bm-download-btn" href="#" style="display:none;">📥 엑셀 다운로드</a>
+		                </div>
+		                <div style="max-height:250px; overflow:auto; border:1px solid #eee; border-radius:8px;">
+		                    <table class="bm-result-table">
+		                        <thead><tr><th>소재지</th><th>주용도</th><th>연면적(㎡)</th><th>사용승인일</th><th>구조</th></tr></thead>
+		                        <tbody id="bm-result-tbody"></tbody>
+		                    </table>
+		                </div>
+		            </div>
+		        </div>
+		    </div>
 		</div>
 
         <script src="js/qgis2web_expressions.js"></script>
@@ -1438,6 +1542,119 @@
 		map.on('overlayadd overlayremove moveend zoomend', updateDashboard);
 
 		var lControl = window.layerControl;
+
+		// ========== 건축물 검색 (PythonAnywhere 서버 연동) ==========
+		// ★★★ 아래 주소를 본인 PythonAnywhere 주소로 변경하세요 ★★★
+		// 예: 'https://yourname.pythonanywhere.com'
+		var BUILDING_API = 'https://your-username.pythonanywhere.com';
+		var bmPollingTimer = null;
+
+		function openBuildingSearchModal() {
+		    document.getElementById('buildingModal').classList.add('active');
+		    checkBuildingServer();
+		}
+		function closeBuildingModal() {
+		    document.getElementById('buildingModal').classList.remove('active');
+		    if (bmPollingTimer) { clearInterval(bmPollingTimer); bmPollingTimer = null; }
+		}
+
+		function checkBuildingServer() {
+		    var statusEl = document.getElementById('bm-server-status');
+		    statusEl.innerHTML = '⏳ 서버 연결 확인 중...';
+		    fetch(BUILDING_API + '/api/health')
+		        .then(function(r) { return r.json(); })
+		        .then(function(d) {
+		            if (d.bjdong_loaded) {
+		                statusEl.innerHTML = '✅ 서버 연결됨 (법정동코드 ' + d.bjdong_count.toLocaleString() + '개 로드)';
+		                statusEl.style.color = '#16a34a';
+		            } else {
+		                statusEl.innerHTML = '⚠️ 서버 연결됨, 법정동코드 파일 미로드';
+		                statusEl.style.color = '#d97706';
+		            }
+		        })
+		        .catch(function() {
+		            statusEl.innerHTML = '❌ 서버 미연결 — <code>python building_api_server.py</code> 먼저 실행하세요';
+		            statusEl.style.color = '#dc2626';
+		        });
+		}
+
+		function runBuildingSearch() {
+		    var sido = document.getElementById('bm-sido').value.trim();
+		    var sigungu = document.getElementById('bm-sigungu').value.trim();
+		    var eupmyeondong = document.getElementById('bm-eupmyeondong').value.trim();
+		    var ri = document.getElementById('bm-ri').value.trim();
+		    var uses = document.getElementById('bm-uses').value.trim();
+
+		    if (!sido || !sigungu) { alert('시도와 시군구는 필수입니다.'); return; }
+
+		    var btn = document.getElementById('bm-run-btn');
+		    btn.disabled = true; btn.textContent = '⏳ 검색 중...';
+
+		    var progressEl = document.getElementById('bm-progress');
+		    var resultEl = document.getElementById('bm-result');
+		    progressEl.style.display = 'block';
+		    resultEl.style.display = 'none';
+
+		    // 진행상황 폴링
+		    bmPollingTimer = setInterval(function() {
+		        fetch(BUILDING_API + '/api/progress')
+		            .then(function(r) { return r.json(); })
+		            .then(function(p) {
+		                document.getElementById('bm-progress-text').textContent = p.message || '';
+		                document.getElementById('bm-progress-count').textContent = p.found + '건 발견';
+		                var pct = p.total > 0 ? Math.round((p.current / p.total) * 100) : 0;
+		                document.getElementById('bm-progress-fill').style.width = pct + '%';
+		            }).catch(function(){});
+		    }, 1000);
+
+		    fetch(BUILDING_API + '/api/search', {
+		        method: 'POST',
+		        headers: { 'Content-Type': 'application/json' },
+		        body: JSON.stringify({
+		            sido: sido, sigungu: sigungu,
+		            eupmyeondong: eupmyeondong, ri: ri,
+		            target_uses: uses
+		        })
+		    })
+		    .then(function(r) { return r.json(); })
+		    .then(function(data) {
+		        clearInterval(bmPollingTimer); bmPollingTimer = null;
+		        btn.disabled = false; btn.textContent = '🔍 검색 시작';
+		        document.getElementById('bm-progress-fill').style.width = '100%';
+
+		        if (data.error) {
+		            document.getElementById('bm-progress-text').textContent = '❌ ' + data.error;
+		            return;
+		        }
+
+		        document.getElementById('bm-progress-text').textContent = '✅ 완료!';
+		        resultEl.style.display = 'block';
+		        document.getElementById('bm-result-count').textContent = (data.count || 0).toLocaleString();
+
+		        // 미리보기 테이블
+		        var tbody = document.getElementById('bm-result-tbody');
+		        tbody.innerHTML = '';
+		        (data.preview || []).forEach(function(b) {
+		            tbody.innerHTML += '<tr><td>' + (b['소재지']||'') + '</td><td>' + (b['주용도']||'') +
+		                '</td><td>' + (b['연면적(㎡)']||'') + '</td><td>' + (b['사용승인일']||'') +
+		                '</td><td>' + (b['구조']||'') + '</td></tr>';
+		        });
+
+		        // 다운로드 버튼
+		        var dlBtn = document.getElementById('bm-download-btn');
+		        if (data.file) {
+		            dlBtn.href = BUILDING_API + '/api/download/' + encodeURIComponent(data.file);
+		            dlBtn.style.display = 'inline-block';
+		        } else {
+		            dlBtn.style.display = 'none';
+		        }
+		    })
+		    .catch(function(err) {
+		        clearInterval(bmPollingTimer); bmPollingTimer = null;
+		        btn.disabled = false; btn.textContent = '🔍 검색 시작';
+		        document.getElementById('bm-progress-text').textContent = '❌ 서버 연결 실패: ' + err.message;
+		    });
+		}
         </script>        
     </body>
 </html>
