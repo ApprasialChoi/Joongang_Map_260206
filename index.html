@@ -150,6 +150,7 @@
 		</style>
 		<style>
 		    .leaflet-tooltip.css_map_data_B,
+		    .leaflet-tooltip.css_map_data_A,
 		    .leaflet-tooltip.css_map_data_C,
 		    .leaflet-tooltip.css_map_data_D,
 		    .leaflet-tooltip.css_map_data_E,
@@ -197,6 +198,7 @@
 		        margin-top: 0 !important;
 		        padding-top: 0 !important;
 		    }
+		    .labels-hidden .css_map_data_A,
 		    .labels-hidden .css_map_data_B,
 		    .labels-hidden .css_map_data_C,
 		    .labels-hidden .css_map_data_D,
@@ -205,6 +207,7 @@
 		    .labels-hidden .css_map_data_G {
 		        display: none !important;
 		    }
+		    .leaflet-tooltip-top.css_map_data_A:before,
 		    .leaflet-tooltip-top.css_map_data_B:before,
 		    .leaflet-tooltip-top.css_map_data_C:before,
 		    .leaflet-tooltip-top.css_map_data_D:before,
@@ -268,6 +271,46 @@
         <title></title>
     </head>
     <body>
+		<!-- ========== 로그인 화면 ========== -->
+		<div id="login-screen" style="position:fixed; top:0; left:0; width:100%; height:100%; background:linear-gradient(135deg,#0f172a,#1e3a5f); z-index:99999; display:flex; justify-content:center; align-items:center;">
+		    <div style="background:white; border-radius:20px; padding:48px 40px; width:380px; box-shadow:0 20px 60px rgba(0,0,0,0.4); text-align:center;">
+		        <div style="font-size:48px; margin-bottom:12px;">🗺️</div>
+		        <h2 style="margin:0 0 6px; font-size:22px; color:#1e293b;">중앙감정 GIS</h2>
+		        <p style="margin:0 0 28px; font-size:13px; color:#94a3b8;">접속하려면 비밀번호를 입력하세요</p>
+		        <input type="password" id="login-pw" placeholder="비밀번호 입력"
+		            style="width:100%; padding:14px 16px; border:2px solid #e2e8f0; border-radius:12px; font-size:15px; box-sizing:border-box; outline:none; transition:border 0.2s;"
+		            onfocus="this.style.borderColor='#0051af'" onblur="this.style.borderColor='#e2e8f0'"
+		            onkeydown="if(event.key==='Enter') doLogin()">
+		        <div id="login-error" style="color:#dc2626; font-size:12px; margin-top:8px; min-height:18px;"></div>
+		        <button onclick="doLogin()"
+		            style="width:100%; padding:14px; background:linear-gradient(135deg,#0051af,#0077ed); color:white; border:none; border-radius:12px; font-size:16px; font-weight:bold; cursor:pointer; margin-top:8px; transition:opacity 0.2s;"
+		            onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+		            로그인
+		        </button>
+		    </div>
+		</div>
+		<script>
+		// ★ 비밀번호 설정 (원하는 값으로 변경하세요)
+		var SITE_PASSWORD = '5989500q!';
+
+		function doLogin() {
+		    var pw = document.getElementById('login-pw').value;
+		    if (pw === SITE_PASSWORD) {
+		        document.getElementById('login-screen').style.display = 'none';
+		        sessionStorage.setItem('authenticated', 'yes');
+		    } else {
+		        document.getElementById('login-error').textContent = '비밀번호가 올바르지 않습니다.';
+		        document.getElementById('login-pw').style.borderColor = '#dc2626';
+		        document.getElementById('login-pw').value = '';
+		        document.getElementById('login-pw').focus();
+		    }
+		}
+		// 이미 인증된 세션이면 바로 통과
+		if (sessionStorage.getItem('authenticated') === 'yes') {
+		    document.getElementById('login-screen').style.display = 'none';
+		}
+		</script>
+
 		<div id="side-dashboard" style="position: fixed; top: 0; left: 0; width: 350px; height: 100%; background: white; z-index: 3000; box-shadow: 2px 0 10px rgba(0,0,0,0.1); display: flex; flex-direction: column;">
 		    <div style="padding: 20px; border-bottom: 1px solid #eee; background: #f8f9fa;">
 		        <h2 style="margin: 0; font-size: 18px; color: #333;">매물 리스트 <span id="list-count" style="color: #0051af;">0</span></h2>
@@ -736,20 +779,26 @@
             var cfg = labelFieldConfig_map_data;
             var props = feature && feature.properties ? feature.properties : feature;
             if (!props) return '';
-            var parts = [];
+            var activeFields = [];
             for (var i = 0; i < cfg.fields.length; i++) {
                 var key = cfg.fields[i];
                 if (!cfg.visible[key]) continue;
                 var v = props[key];
                 if (v === null || v === undefined || v === '') continue;
-                parts.push(String(v));
+                // 주소는 메인 타이틀로
+                if (key === '주소') {
+                    activeFields.unshift('<div class="text-main" style="font-size:14px;">' + v + '</div>');
+                } else if (key === '상태') {
+                    var stColor = v === '완료' ? '#16a34a' : (v === '진행' ? '#d97706' : '#64748b');
+                    activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">상태:</span> <span style="color:' + stColor + ';">' + v + '</span></div>');
+                } else {
+                    var labelMap = {'제출처(Tar':'제출처', '담당자':'담당자', '의뢰일자':'의뢰일', '물건종류':'종류'};
+                    var label = labelMap[key] || key;
+                    activeFields.push('<div class="text-main"><span style="color:#888; font-size:11px;">' + label + ':</span> ' + v + '</div>');
+                }
             }
-            if (!parts.length) return '';
-            var multi = parts.length > 1;
-            var cls = multi ? 'q2w-label q2w-label--multi' : 'q2w-label q2w-label--single';
-            var sep = multi ? '\n' : ' ';
-            return '<div class="' + cls + '" style="color:#ffffff; font-size:10pt; font-family:\'Open Sans\', sans-serif;">' +
-                parts.join(sep) + '</div>';
+            if (!activeFields.length) return '';
+            return '<div class="custom-tooltip-box" style="border-color:#85b66f !important;">' + activeFields.join('') + '</div>';
         }
         
         function removeEmptyRowsFromPopupContent(content, feature) {
@@ -976,7 +1025,7 @@
 						        lyr.unbindTooltip();
 						        var newContent = buildFunc(lyr.feature);
 						        if (newContent) {
-						            var className = 'css_map_data';
+						            var className = 'css_map_data_A';
 						            if (targetLayer === layer_B_data_0) className = 'css_map_data_B';
 						            if (targetLayer === layer_C_data_0) className = 'css_map_data_C';
 						            if (targetLayer === layer_D_data_0) className = 'css_map_data_D';
@@ -1034,7 +1083,7 @@
         var i = 0;
         layer_map_data.eachLayer(function(layer) {
             var offset = getStoredOffset(layer.feature, [0, -16]);
-            layer.bindTooltip(buildLabelContent_map_data(layer.feature), {permanent: true, offset: offset, className: 'css_map_data'});
+            layer.bindTooltip(buildLabelContent_map_data(layer.feature), {permanent: true, offset: offset, className: 'css_map_data_A'});
             layer.on('tooltipopen', function() { setTimeout(function() { makeDraggableTooltip(layer); }, 50); });
             labels.push(layer);
             totalMarkers += 1;
@@ -1285,6 +1334,11 @@
 
 		// ========== 엑셀 내보내기 ==========
 		function exportToExcel() {
+		    var pw = prompt('엑셀 저장을 위해 비밀번호를 입력하세요:');
+		    if (pw !== SITE_PASSWORD) {
+		        if (pw !== null) alert('비밀번호가 올바르지 않습니다.');
+		        return;
+		    }
 		    var layerMap = {
 		        G: { layer: layer_G_data_0, fileName: '골프장거래사례_검색결과' },
 		        F: { layer: layer_F_data_0, fileName: '호텔거래사례_검색결과' },
@@ -1546,7 +1600,7 @@
 		// ========== 건축물 검색 (PythonAnywhere 서버 연동) ==========
 		// ★★★ 아래 주소를 본인 PythonAnywhere 주소로 변경하세요 ★★★
 		// 예: 'https://yourname.pythonanywhere.com'
-		var BUILDING_API = 'https://AppraisalChoi.pythonanywhere.com';
+		var BUILDING_API = 'https://your-username.pythonanywhere.com';
 		var bmPollingTimer = null;
 
 		function openBuildingSearchModal() {
