@@ -406,12 +406,18 @@
 		                </div>
 		                <div class="bm-progress-bar"><div class="bm-progress-fill" id="bm-progress-fill"></div></div>
 		            </div>
-					<div class="bm-result" id="bm-result">
-					    <div style="display:flex; align-items:center; justify-content:space-between;">
-					        <span style="font-weight:bold; font-size:15px;">📋 검색 결과: <span id="bm-result-count" style="color:#0051af;">0</span>건</span>
-					        <a class="bm-download-btn" id="bm-download-btn" href="#" style="display:none;">📥 엑셀 다운로드</a>
-					    </div>
-					</div>
+		            <div class="bm-result" id="bm-result">
+		                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+		                    <span style="font-weight:bold; font-size:15px;">📋 검색 결과: <span id="bm-result-count" style="color:#0051af;">0</span>건</span>
+		                    <a class="bm-download-btn" id="bm-download-btn" href="#" style="display:none;">📥 엑셀 다운로드</a>
+		                </div>
+		                <div style="max-height:250px; overflow:auto; border:1px solid #eee; border-radius:8px;">
+							<table class="bm-result-table">
+							    <thead><tr><th>소재지</th><th>주용도</th><th>연면적(㎡)</th><th>사용승인일</th><th>소유구분</th><th>최근변동일자</th><th>최근변동사유</th></tr></thead>
+							    <tbody id="bm-result-tbody"></tbody>
+							</table>
+		                </div>
+		            </div>
 		        </div>
 		    </div>
 		</div>
@@ -1675,17 +1681,18 @@
 			        return;
 			    }
 			
-			    document.getElementById('bm-progress-text').textContent = '✅ ' + (data.message || '완료!');
+			    document.getElementById('bm-progress-text').textContent = '✅ 1단계 완료!';
 			    resultEl.style.display = 'block';
 			    document.getElementById('bm-result-count').textContent = (data.count || 0).toLocaleString();
 			
-			    var dlBtn = document.getElementById('bm-download-btn');
-			    if (data.file) {
-			        dlBtn.href = BUILDING_API + '/api/download/' + encodeURIComponent(data.file);
-			        dlBtn.style.display = 'inline-block';
-			        dlBtn.textContent = '📥 엑셀 다운로드 (건축물+소유권)';
-			    }
-			})
+			    // 미리보기 테이블
+			    var tbody = document.getElementById('bm-result-tbody');
+			    tbody.innerHTML = '';
+			    (data.preview || []).forEach(function(b) {
+			        tbody.innerHTML += '<tr><td>' + (b['소재지']||'') + '</td><td>' + (b['주용도']||'') +
+			            '</td><td>' + (b['연면적(㎡)']||'') + '</td><td>' + (b['사용승인일']||'') +
+			            '</td><td>' + (b['구조']||'') + '</td></tr>';
+			    });
 			
 			    // 1단계 다운로드 버튼
 			    var dlBtn = document.getElementById('bm-download-btn');
