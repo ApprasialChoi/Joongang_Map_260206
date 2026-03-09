@@ -398,7 +398,7 @@
 		                <input type="text" id="bm-uses" placeholder="예: 창고시설,창고" value="창고시설,창고">
 		            </div>
 		            <div id="bm-server-status" style="font-size:12px; color:#888; margin-bottom:8px;"></div>
-		            <button class="bm-btn-run" id="bm-run-btn" onclick="runBuildingSearch()">🔍 검색 시작</button>
+		            <button class="bm-btn-run" id="bm-run-btn" onclick="runBuildingSearch()">🔍 검색 시작 (건축물+소유권)</button>
 		            <div class="bm-progress" id="bm-progress">
 		                <div style="display:flex; justify-content:space-between; font-size:13px;">
 		                    <span id="bm-progress-text">준비 중...</span>
@@ -406,18 +406,13 @@
 		                </div>
 		                <div class="bm-progress-bar"><div class="bm-progress-fill" id="bm-progress-fill"></div></div>
 		            </div>
-		            <div class="bm-result" id="bm-result">
-		                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
-		                    <span style="font-weight:bold; font-size:15px;">📋 검색 결과: <span id="bm-result-count" style="color:#0051af;">0</span>건</span>
-		                    <a class="bm-download-btn" id="bm-download-btn" href="#" style="display:none;">📥 엑셀 다운로드</a>
-		                </div>
-		                <div style="max-height:250px; overflow:auto; border:1px solid #eee; border-radius:8px;">
-							<table class="bm-result-table">
-							    <thead><tr><th>소재지</th><th>주용도</th><th>연면적(㎡)</th><th>사용승인일</th><th>소유구분</th><th>최근변동일자</th><th>최근변동사유</th></tr></thead>
-							    <tbody id="bm-result-tbody"></tbody>
-							</table>
-		                </div>
-		            </div>
+					
+					<div class="bm-result" id="bm-result">
+					    <div style="display:flex; align-items:center; justify-content:space-between;">
+					        <span style="font-weight:bold; font-size:15px;">📋 검색 결과: <span id="bm-result-count" style="color:#0051af;">0</span>건</span>
+					        <a class="bm-download-btn" id="bm-download-btn" href="#" style="display:none;">📥 엑셀 다운로드</a>
+					    </div>
+					</div>					
 		        </div>
 		    </div>
 		</div>
@@ -1671,123 +1666,27 @@
 		        })
 		    })
 		    .then(function(r) { return r.json(); })
-			.then(function(data) {
-			    clearInterval(bmPollingTimer); bmPollingTimer = null;
-			    btn.disabled = false; btn.textContent = '🔍 검색 시작';
-			    document.getElementById('bm-progress-fill').style.width = '100%';
-			
-			    if (data.error) {
-			        document.getElementById('bm-progress-text').textContent = '❌ ' + data.error;
-			        return;
-			    }
-			
-			    document.getElementById('bm-progress-text').textContent = '✅ 1단계 완료!';
-			    resultEl.style.display = 'block';
-			    document.getElementById('bm-result-count').textContent = (data.count || 0).toLocaleString();
-			
-			    // 미리보기 테이블
-			    var tbody = document.getElementById('bm-result-tbody');
-			    tbody.innerHTML = '';
-			    (data.preview || []).forEach(function(b) {
-			        tbody.innerHTML += '<tr><td>' + (b['소재지']||'') + '</td><td>' + (b['주용도']||'') +
-			            '</td><td>' + (b['연면적(㎡)']||'') + '</td><td>' + (b['사용승인일']||'') +
-			            '</td><td>' + (b['구조']||'') + '</td></tr>';
-			    });
-			
-			    // 1단계 다운로드 버튼
-			    var dlBtn = document.getElementById('bm-download-btn');
-			    if (data.file) {
-			        dlBtn.href = BUILDING_API + '/api/download/' + encodeURIComponent(data.file);
-			        dlBtn.style.display = 'inline-block';
-			        dlBtn.textContent = '📥 건축물 엑셀 다운로드';
-			        // 파일명 저장 (2단계용)
-			        window._bmSearchFile = data.file;
-			    }
-			
-			    // 2단계 버튼 추가
-			    var kgeopBtn = document.getElementById('bm-kgeop-btn');
-			    if (!kgeopBtn) {
-			        kgeopBtn = document.createElement('button');
-			        kgeopBtn.id = 'bm-kgeop-btn';
-			        kgeopBtn.className = 'bm-download-btn';
-			        kgeopBtn.style.background = '#0051af';
-			        kgeopBtn.style.marginLeft = '10px';
-			        kgeopBtn.textContent = '🔍 2단계: 소유권 조회';
-			        kgeopBtn.onclick = runKgeopSearch;
-			        dlBtn.parentNode.appendChild(kgeopBtn);
-			    }
-			    kgeopBtn.style.display = 'inline-block';
-			    kgeopBtn.disabled = false;
-			    kgeopBtn.textContent = '🔍 2단계: 소유권 조회';
-			})
-		    .catch(function(err) {
-		        clearInterval(bmPollingTimer); bmPollingTimer = null;
-		        btn.disabled = false; btn.textContent = '🔍 검색 시작';
-		        document.getElementById('bm-progress-text').textContent = '❌ 서버 연결 실패: ' + err.message;
-		    });
-		}
-		function runKgeopSearch() {
-		    var file = window._bmSearchFile;
-		    if (!file) { alert('1단계 검색을 먼저 실행하세요.'); return; }
+		.then(function(data) {
+		    clearInterval(bmPollingTimer); bmPollingTimer = null;
+		    btn.disabled = false; btn.textContent = '🔍 검색 시작 (건축물+소유권)';
+		    document.getElementById('bm-progress-fill').style.width = '100%';
 		
-		    var kgeopBtn = document.getElementById('bm-kgeop-btn');
-		    kgeopBtn.disabled = true;
-		    kgeopBtn.textContent = '⏳ 소유권 조회 중...';
+		    if (data.error) {
+		        document.getElementById('bm-progress-text').textContent = '❌ ' + data.error;
+		        return;
+		    }
 		
-		    var progressEl = document.getElementById('bm-progress');
-		    progressEl.style.display = 'block';
+		    document.getElementById('bm-progress-text').textContent = '✅ ' + (data.message || '완료!');
+		    resultEl.style.display = 'block';
+		    document.getElementById('bm-result-count').textContent = (data.count || 0).toLocaleString();
 		
-		    // 진행상황 폴링
-		    var kgeopTimer = setInterval(function() {
-		        fetch(BUILDING_API + '/api/kgeop-progress')
-		            .then(function(r) { return r.json(); })
-		            .then(function(p) {
-		                document.getElementById('bm-progress-text').textContent = p.message || '';
-		                var pct = p.total > 0 ? Math.round((p.current / p.total) * 100) : 0;
-		                document.getElementById('bm-progress-fill').style.width = pct + '%';
-		            }).catch(function(){});
-		    }, 1000);
-		
-		    fetch(BUILDING_API + '/api/kgeop', {
-		        method: 'POST',
-		        headers: { 'Content-Type': 'application/json' },
-		        body: JSON.stringify({ file: file })
-		    })
-		    .then(function(r) { return r.json(); })
-		    .then(function(data) {
-		        clearInterval(kgeopTimer);
-		        kgeopBtn.disabled = false;
-		        kgeopBtn.textContent = '🔍 2단계: 소유권 조회';
-		        document.getElementById('bm-progress-fill').style.width = '100%';
-		
-		        if (data.error) {
-		            document.getElementById('bm-progress-text').textContent = '❌ ' + data.error;
-		            return;
-		        }
-		
-		        document.getElementById('bm-progress-text').textContent = '✅ 2단계 완료! ' + data.message;
-		
-		        // 통합 다운로드 버튼 추가
-		        var dlBtn2 = document.getElementById('bm-download-btn2');
-		        if (!dlBtn2) {
-		            dlBtn2 = document.createElement('a');
-		            dlBtn2.id = 'bm-download-btn2';
-		            dlBtn2.className = 'bm-download-btn';
-		            dlBtn2.style.background = '#d97706';
-		            dlBtn2.style.marginLeft = '10px';
-		            document.getElementById('bm-download-btn').parentNode.appendChild(dlBtn2);
-		        }
-		        dlBtn2.href = BUILDING_API + '/api/download/' + encodeURIComponent(data.file);
-		        dlBtn2.textContent = '📥 통합(소유권포함) 다운로드';
-		        dlBtn2.style.display = 'inline-block';
-		    })
-		    .catch(function(err) {
-		        clearInterval(kgeopTimer);
-		        kgeopBtn.disabled = false;
-		        kgeopBtn.textContent = '🔍 2단계: 소유권 조회';
-		        document.getElementById('bm-progress-text').textContent = '❌ 오류: ' + err.message;
-		    });
-		}	
+		    var dlBtn = document.getElementById('bm-download-btn');
+		    if (data.file) {
+		        dlBtn.href = BUILDING_API + '/api/download/' + encodeURIComponent(data.file);
+		        dlBtn.style.display = 'inline-block';
+		        dlBtn.textContent = '📥 엑셀 다운로드 (건축물+소유권)';
+		    }
+		})
         </script>        
     </body>
 </html>
