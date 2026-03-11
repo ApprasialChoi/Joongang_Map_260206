@@ -429,28 +429,28 @@
 		<div class="building-modal-overlay" id="buildingModal">
 		    <div class="building-modal">
 		        <div class="building-modal-header">
-		            <h3>🏗️ 건축물대장 검색</h3>
+		            <h3>🏗️ 건축물대장 + 소유권 검색</h3>
 		            <button onclick="closeBuildingModal()" style="background:none; border:none; color:white; font-size:22px; cursor:pointer;">✕</button>
 		        </div>
 		        <div class="building-modal-body">
 		            <div class="bm-row">
 		                <div class="bm-field">
 		                    <label>시도 *</label>
-		                    <input type="text" id="bm-sido" placeholder="예: 경기도" value="경기도">
+		                    <select id="bm-sido" onchange="onSidoChange()"><option value="">-- 시도 선택 --</option></select>
 		                </div>
 		                <div class="bm-field">
 		                    <label>시군구 *</label>
-		                    <input type="text" id="bm-sigungu" placeholder="예: 이천시">
+		                    <select id="bm-sigungu" onchange="onSigunguChange()"><option value="">-- 시군구 선택 --</option></select>
 		                </div>
 		            </div>
 		            <div class="bm-row">
 		                <div class="bm-field">
-		                    <label>읍면동 (비우면 전체 순회)</label>
-		                    <input type="text" id="bm-eupmyeondong" placeholder="예: 장호원읍">
+		                    <label>읍면동 (전체=비워두기)</label>
+		                    <select id="bm-eupmyeondong" onchange="onEmdChange()"><option value="">-- 전체 (순회) --</option></select>
 		                </div>
 		                <div class="bm-field">
 		                    <label>리 (선택)</label>
-		                    <input type="text" id="bm-ri" placeholder="예: 장호원리">
+		                    <select id="bm-ri"><option value="">-- 전체 --</option></select>
 		                </div>
 		            </div>
 		            <div class="bm-field">
@@ -458,7 +458,7 @@
 		                <input type="text" id="bm-uses" placeholder="예: 창고시설,창고" value="창고시설,창고">
 		            </div>
 		            <div id="bm-server-status" style="font-size:12px; color:#888; margin-bottom:8px;"></div>
-		            <button class="bm-btn-run" id="bm-run-btn" onclick="runBuildingSearch()">🔍 검색 시작</button>
+		            <button class="bm-btn-run" id="bm-run-btn" onclick="runBuildingSearch()">🔍 검색 시작 (건축물+소유권)</button>
 		            <div class="bm-progress" id="bm-progress">
 		                <div style="display:flex; justify-content:space-between; font-size:13px;">
 		                    <span id="bm-progress-text">준비 중...</span>
@@ -467,15 +467,9 @@
 		                <div class="bm-progress-bar"><div class="bm-progress-fill" id="bm-progress-fill"></div></div>
 		            </div>
 		            <div class="bm-result" id="bm-result">
-		                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+		                <div style="display:flex; align-items:center; justify-content:space-between;">
 		                    <span style="font-weight:bold; font-size:15px;">📋 검색 결과: <span id="bm-result-count" style="color:#0051af;">0</span>건</span>
 		                    <a class="bm-download-btn" id="bm-download-btn" href="#" style="display:none;">📥 엑셀 다운로드</a>
-		                </div>
-		                <div style="max-height:250px; overflow:auto; border:1px solid #eee; border-radius:8px;">
-							<table class="bm-result-table">
-							    <thead><tr><th>소재지</th><th>주용도</th><th>연면적(㎡)</th><th>사용승인일</th><th>소유구분</th><th>최근변동일자</th><th>최근변동사유</th></tr></thead>
-							    <tbody id="bm-result-tbody"></tbody>
-							</table>
 		                </div>
 		            </div>
 		        </div>
@@ -1666,12 +1660,12 @@
 		function openBuildingSearchModal() {
 		    document.getElementById('buildingModal').classList.add('active');
 		    checkBuildingServer();
+		    loadSidoList();
 		}
 		function closeBuildingModal() {
 		    document.getElementById('buildingModal').classList.remove('active');
 		    if (bmPollingTimer) { clearInterval(bmPollingTimer); bmPollingTimer = null; }
 		}
-
 		function checkBuildingServer() {
 		    var statusEl = document.getElementById('bm-server-status');
 		    statusEl.innerHTML = '⏳ 서버 연결 확인 중...';
@@ -1687,9 +1681,81 @@
 		            }
 		        })
 		        .catch(function() {
-		            statusEl.innerHTML = '❌ 서버 미연결 — <code>python building_api_server.py</code> 먼저 실행하세요';
+		            statusEl.innerHTML = '❌ 서버 미연결';
 		            statusEl.style.color = '#dc2626';
 		        });
+		}
+
+		// ========== 드롭다운 연동 ==========
+		function loadSidoList() {
+		    var sel = document.getElementById('bm-sido');
+		    if (sel.options.length > 1) return; // 이미 로드됨
+		    fetch(BUILDING_API + '/api/region/sido')
+		        .then(function(r) { return r.json(); })
+		        .then(function(list) {
+		            list.forEach(function(s) {
+		                var opt = document.createElement('option');
+		                opt.value = s; opt.textContent = s;
+		                sel.appendChild(opt);
+		            });
+		        }).catch(function(){});
+		}
+
+		function onSidoChange() {
+		    var sido = document.getElementById('bm-sido').value;
+		    var sggSel = document.getElementById('bm-sigungu');
+		    var emdSel = document.getElementById('bm-eupmyeondong');
+		    var riSel = document.getElementById('bm-ri');
+		    sggSel.innerHTML = '<option value="">-- 시군구 선택 --</option>';
+		    emdSel.innerHTML = '<option value="">-- 전체 (순회) --</option>';
+		    riSel.innerHTML = '<option value="">-- 전체 --</option>';
+		    if (!sido) return;
+		    fetch(BUILDING_API + '/api/region/sigungu?sido=' + encodeURIComponent(sido))
+		        .then(function(r) { return r.json(); })
+		        .then(function(list) {
+		            list.forEach(function(s) {
+		                var opt = document.createElement('option');
+		                opt.value = s; opt.textContent = s;
+		                sggSel.appendChild(opt);
+		            });
+		        }).catch(function(){});
+		}
+
+		function onSigunguChange() {
+		    var sido = document.getElementById('bm-sido').value;
+		    var sigungu = document.getElementById('bm-sigungu').value;
+		    var emdSel = document.getElementById('bm-eupmyeondong');
+		    var riSel = document.getElementById('bm-ri');
+		    emdSel.innerHTML = '<option value="">-- 전체 (순회) --</option>';
+		    riSel.innerHTML = '<option value="">-- 전체 --</option>';
+		    if (!sido || !sigungu) return;
+		    fetch(BUILDING_API + '/api/region/eupmyeondong?sido=' + encodeURIComponent(sido) + '&sigungu=' + encodeURIComponent(sigungu))
+		        .then(function(r) { return r.json(); })
+		        .then(function(data) {
+		            (data.eupmyeondong || []).forEach(function(s) {
+		                var opt = document.createElement('option');
+		                opt.value = s; opt.textContent = s;
+		                emdSel.appendChild(opt);
+		            });
+		        }).catch(function(){});
+		}
+
+		function onEmdChange() {
+		    var sido = document.getElementById('bm-sido').value;
+		    var sigungu = document.getElementById('bm-sigungu').value;
+		    var emd = document.getElementById('bm-eupmyeondong').value;
+		    var riSel = document.getElementById('bm-ri');
+		    riSel.innerHTML = '<option value="">-- 전체 --</option>';
+		    if (!sido || !sigungu || !emd) return;
+		    fetch(BUILDING_API + '/api/region/eupmyeondong?sido=' + encodeURIComponent(sido) + '&sigungu=' + encodeURIComponent(sigungu) + '&eupmyeondong=' + encodeURIComponent(emd))
+		        .then(function(r) { return r.json(); })
+		        .then(function(data) {
+		            (data.ri || []).forEach(function(s) {
+		                var opt = document.createElement('option');
+		                opt.value = s; opt.textContent = s;
+		                riSel.appendChild(opt);
+		            });
+		        }).catch(function(){});
 		}
 
 		function runBuildingSearch() {
