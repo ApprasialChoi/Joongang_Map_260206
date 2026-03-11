@@ -271,6 +271,10 @@
         <title></title>
     </head>
     <body>
+		<!-- 캡쳐 방지 가림막 -->
+		<div id="capture-block" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#000; z-index:999999; justify-content:center; align-items:center;">
+		    <div style="color:white; font-size:24px; font-weight:bold; text-align:center;">🚫 화면 캡쳐가 감지되었습니다<br><span style="font-size:14px; color:#ff6b6b;">모든 접속 기록은 서버에 저장됩니다</span></div>
+		</div>
 		<!-- ========== 로그인 화면 ========== -->
 		<div id="login-screen" style="position:fixed; top:0; left:0; width:100%; height:100%; background:linear-gradient(135deg,#0f172a,#1e3a5f); z-index:99999; display:flex; justify-content:center; align-items:center;">
 		    <div style="background:white; border-radius:20px; padding:48px 40px; width:380px; box-shadow:0 20px 60px rgba(0,0,0,0.4); text-align:center;">
@@ -290,7 +294,7 @@
 		    </div>
 		</div>
 		<script>
-		// ★ 비밀번호 설정 (원하는 값으로 변경하세요)
+		// ★ 비밀번호 설정
 		var SITE_PASSWORD = 'q9500!';
 
 		function doLogin() {
@@ -298,17 +302,73 @@
 		    if (pw === SITE_PASSWORD) {
 		        document.getElementById('login-screen').style.display = 'none';
 		        sessionStorage.setItem('authenticated', 'yes');
+		        // 접속 기록 전송
+		        fetch(BUILDING_API + '/api/log-access', {
+		            method: 'POST',
+		            headers: {'Content-Type': 'application/json'},
+		            body: JSON.stringify({action: '로그인 성공'})
+		        }).catch(function(){});
 		    } else {
+		        fetch(BUILDING_API + '/api/log-access', {
+		            method: 'POST',
+		            headers: {'Content-Type': 'application/json'},
+		            body: JSON.stringify({action: '로그인 실패'})
+		        }).catch(function(){});
 		        document.getElementById('login-error').textContent = '비밀번호가 올바르지 않습니다.';
 		        document.getElementById('login-pw').style.borderColor = '#dc2626';
 		        document.getElementById('login-pw').value = '';
 		        document.getElementById('login-pw').focus();
 		    }
 		}
-		// 이미 인증된 세션이면 바로 통과
 		if (sessionStorage.getItem('authenticated') === 'yes') {
 		    document.getElementById('login-screen').style.display = 'none';
 		}
+
+		// ========== 스크린 캡쳐 방지 ==========
+		(function() {
+		    document.addEventListener('keyup', function(e) {
+		        if (e.key === 'PrintScreen' || e.keyCode === 44) {
+		            navigator.clipboard.writeText('캡쳐가 차단되었습니다.').catch(function(){});
+		            var overlay = document.getElementById('capture-block');
+		            if (overlay) { overlay.style.display = 'flex'; setTimeout(function() { overlay.style.display = 'none'; }, 5000); }
+		        }
+		    });
+		    document.addEventListener('keydown', function(e) {
+		        if (e.key === 'PrintScreen' || e.keyCode === 44) { e.preventDefault(); return false; }
+		        if (e.ctrlKey && e.shiftKey && (e.key === 'S' || e.key === 's')) { e.preventDefault(); return false; }
+		        if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j')) { e.preventDefault(); return false; }
+		        if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
+		        if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) { e.preventDefault(); return false; }
+		    });
+		    var devtoolsOpen = false;
+		    setInterval(function() {
+		        var w = window.outerWidth - window.innerWidth > 160;
+		        var h = window.outerHeight - window.innerHeight > 160;
+		        if (w || h) { if (!devtoolsOpen) { devtoolsOpen = true; var o = document.getElementById('capture-block'); if (o) o.style.display = 'flex'; } }
+		        else { if (devtoolsOpen) { devtoolsOpen = false; var o = document.getElementById('capture-block'); if (o) o.style.display = 'none'; } }
+		    }, 1000);
+		})();
+
+		// ========== 클립보드 캡쳐 방지 + IP 경고 ==========
+		var _userIP = '';
+		fetch('https://appraisalchoi.pythonanywhere.com/api/my-ip')
+		    .then(function(r) { return r.json(); })
+		    .then(function(d) { _userIP = d.ip || ''; })
+		    .catch(function(){});
+
+		setInterval(function() {
+		    if (document.hasFocus() && !document.querySelector('.building-modal-overlay.active')) {
+		        var now = new Date();
+		        var timeStr = now.getFullYear() + '-' +
+		            String(now.getMonth()+1).padStart(2,'0') + '-' +
+		            String(now.getDate()).padStart(2,'0') + ' ' +
+		            String(now.getHours()).padStart(2,'0') + ':' +
+		            String(now.getMinutes()).padStart(2,'0') + ':' +
+		            String(now.getSeconds()).padStart(2,'0');
+		        var msg = '🚫 화면 캡쳐가 감지되었습니다.\n접속 IP: ' + _userIP + '\n시간: ' + timeStr + '\n모든 접속 기록은 서버에 저장됩니다.';
+		        navigator.clipboard.writeText(msg).catch(function(){});
+		    }
+		}, 1000);
 		</script>
 
 		<div id="side-dashboard" style="position: fixed; top: 0; left: 0; width: 350px; height: 100%; background: white; z-index: 3000; box-shadow: 2px 0 10px rgba(0,0,0,0.1); display: flex; flex-direction: column;">
