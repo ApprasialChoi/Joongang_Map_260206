@@ -556,9 +556,10 @@
             });
         }
 
+        // ★★★ 수정 1: interactive: true 추가 ★★★
         function bindDraggableTooltip(layer, content, className, defaultOffset) {
             var offset = getStoredOffset(layer.feature, defaultOffset);
-            layer.bindTooltip(content, { permanent: true, direction: 'top', className: className, offset: offset });
+            layer.bindTooltip(content, { permanent: true, direction: 'top', className: className, offset: offset, interactive: true });
             layer.on('tooltipopen', function() { setTimeout(function() { makeDraggableTooltip(layer); }, 50); });
         }
 
@@ -1074,6 +1075,7 @@
                             cfg = labelFieldConfig_map_data; targetLayer = layer_map_data; buildFunc = buildLabelContent_map_data;
                         }
 
+						// ★★★ 수정 2: refresh() 내 interactive: true 로 변경 ★★★
 						function refresh() {
 						    targetLayer.eachLayer(function(lyr) {
 						        lyr.unbindTooltip();
@@ -1089,7 +1091,7 @@
 						            var offset = getStoredOffset(lyr.feature, [0, -10]);
 						            lyr.bindTooltip(newContent, {
 						                permanent: true, direction: 'top', className: className,
-						                offset: offset, sticky: false, opacity: 1, interactive: false
+						                offset: offset, sticky: false, opacity: 1, interactive: true
 						            });
 						            lyr.on('tooltipopen', function() {
 						                setTimeout(function() { makeDraggableTooltip(lyr); }, 50);
@@ -1135,9 +1137,10 @@
         
         setBounds();
         var i = 0;
+        // ★★★ 수정 3: layer_map_data 초기 바인딩에 interactive: true 추가 ★★★
         layer_map_data.eachLayer(function(layer) {
             var offset = getStoredOffset(layer.feature, [0, -16]);
-            layer.bindTooltip(buildLabelContent_map_data(layer.feature), {permanent: true, offset: offset, className: 'css_map_data_A'});
+            layer.bindTooltip(buildLabelContent_map_data(layer.feature), {permanent: true, offset: offset, className: 'css_map_data_A', interactive: true});
             layer.on('tooltipopen', function() { setTimeout(function() { makeDraggableTooltip(layer); }, 50); });
             labels.push(layer);
             totalMarkers += 1;
@@ -1147,7 +1150,6 @@
         });
 
 		// ========== 필터 설정 ==========
-		// type: 'text' (기본, 포함검색), type: 'range' (숫자 범위, 최소~최대)
 		var filterFieldConfig = {
 		    A: [
 		        { field: '제출처',  placeholder: '예: 기업은행' },
@@ -1260,7 +1262,7 @@
 		    document.getElementById('filter-result-count').innerText = '';
 		}
 		
-		// 숫자 파싱 헬퍼: 콤마 제거 후 숫자 추출
+		// 숫자 파싱 헬퍼
 		function parseFilterNumber(str) {
 		    if (!str || str === '-') return null;
 		    var cleaned = String(str).replace(/[,\s원평억Py㎡]/g, '');
@@ -1297,7 +1299,6 @@
 		        if (!rangeFilters[field]) rangeFilters[field] = { altField: altField };
 		        if (input.value.trim() !== '') rangeFilters[field].max = parseFloat(input.value.replace(/[,\s]/g, ''));
 		    });
-		    // 빈 범위 필터 제거
 		    Object.keys(rangeFilters).forEach(function(k) {
 		        if (rangeFilters[k].min === undefined && rangeFilters[k].max === undefined) delete rangeFilters[k];
 		    });
@@ -1309,7 +1310,6 @@
 		    targetLayer.eachLayer(function(layer) {
 		        var props = layer.feature.properties;
 		        
-		        // 텍스트 필터 체크
 		        var textMatch = textFilters.every(function(filter) {
 		            var dataValue = String(props[filter.field] || '').toLowerCase();
 		            if (filter.altField) {
@@ -1319,7 +1319,6 @@
 		            return dataValue.includes(filter.value);
 		        });
 		        
-		        // 범위 필터 체크
 		        var rangeMatch = Object.keys(rangeFilters).every(function(field) {
 		            var rf = rangeFilters[field];
 		            var numVal = parseFilterNumber(props[field]);
@@ -1404,7 +1403,6 @@
 		    };
 		    var c = layerMap[activeFilterType] || layerMap.A;
 
-		    // 1) 화면에 보이는(필터 통과) 피처 수집
 		    var visibleFeatures = [];
 		    c.layer.eachLayer(function(layer) {
 		        if (map.hasLayer(layer)) {
@@ -1413,7 +1411,6 @@
 		    });
 		    if (visibleFeatures.length === 0) { alert("내보낼 데이터가 없습니다."); return; }
 
-		    // 2) 전체 프로퍼티 키 수집 (원본 순서 최대한 보존)
 		    var allKeys = [];
 		    var keySet = {};
 		    visibleFeatures.forEach(function(props) {
@@ -1422,7 +1419,6 @@
 		        });
 		    });
 
-		    // 3) CSV 생성 (모든 필드 포함)
 		    var csvRows = [allKeys.map(function(k) { return '"' + k.replace(/"/g, '""') + '"'; }).join(',')];
 		    visibleFeatures.forEach(function(props) {
 		        var row = allKeys.map(function(k) {
@@ -1536,7 +1532,6 @@
 		            var p = layer.feature.properties;
 		            count++;
 
-		            // 타입 감지
 		            var isTypeG = p.hasOwnProperty('골프장명(인수 후 명칭)');
 		            var isTypeF = p.hasOwnProperty('호텔명');
 		            var isTypeE = p.hasOwnProperty('빌딩명') && p.hasOwnProperty('평당 거래가격(원)');
@@ -1652,8 +1647,6 @@
 		var lControl = window.layerControl;
 
 		// ========== 건축물 검색 (PythonAnywhere 서버 연동) ==========
-		// ★★★ 아래 주소를 본인 PythonAnywhere 주소로 변경하세요 ★★★
-		// 예: 'https://yourname.pythonanywhere.com'
 		var BUILDING_API = 'https://appraisalchoi.pythonanywhere.com';
 		var bmPollingTimer = null;
 
@@ -1686,10 +1679,9 @@
 		        });
 		}
 
-		// ========== 드롭다운 연동 ==========
 		function loadSidoList() {
 		    var sel = document.getElementById('bm-sido');
-		    if (sel.options.length > 1) return; // 이미 로드됨
+		    if (sel.options.length > 1) return;
 		    fetch(BUILDING_API + '/api/region/sido')
 		        .then(function(r) { return r.json(); })
 		        .then(function(list) {
@@ -1775,7 +1767,6 @@
 		    progressEl.style.display = 'block';
 		    resultEl.style.display = 'none';
 
-		    // 진행상황 폴링
 		    bmPollingTimer = setInterval(function() {
 		        fetch(BUILDING_API + '/api/progress')
 		            .then(function(r) { return r.json(); })
