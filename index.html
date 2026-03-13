@@ -169,16 +169,19 @@
 		        background-color: #ffffff !important;
 		        border: 2px solid #3388ff !important;
 		        border-radius: 8px !important;
-		        padding: 10px 14px !important;
+		        padding: var(--label-padding, 10px 14px) !important;
 		        box-shadow: 0 4px 12px rgba(0,0,0,0.25) !important;
 		        text-align: center;
-		        min-width: 100px;
-		        max-width: 250px; 
+		        min-width: var(--label-min-width, 100px);
+		        max-width: var(--label-max-width, 250px); 
+		        transform: scale(var(--label-scale, 1));
+		        transform-origin: center bottom;
+		        transition: transform 0.15s ease;
 		    }
 		    .text-main {
 		        font-weight: bold !important;
 		        color: #1a202c !important;
-		        font-size: 13px !important;
+		        font-size: var(--label-font-main, 13px) !important;
 		        margin-bottom: 2px;
 		        white-space: nowrap;
 		        overflow: hidden;
@@ -187,7 +190,7 @@
 		    .text-price {
 		        font-weight: 900 !important;
 		        color: #e53e3e !important;
-		        font-size: 15px !important;
+		        font-size: var(--label-font-price, 15px) !important;
 		        margin-top: 6px;
 		        border-top: 1px solid #edf2f7;
 		        padding-top: 6px;
@@ -574,6 +577,42 @@
         map.on('overlayadd overlayremove', function() {
             setTimeout(updateAllConnectors, 200);
         });
+
+        // ========== 줌 레벨별 라벨 크기 조정 ==========
+        // 줌 레벨:  ~10(시도) / 11~12(시군구) / 13~14(읍면동) / 15~16(동네) / 17~18(건물) / 19+(상세)
+        var labelScaleConfig = [
+            { maxZoom: 9,  scale: 0.45, fontMain: '8px',  fontPrice: '9px',  padding: '3px 5px',  minW: '40px',  maxW: '100px' },
+            { maxZoom: 10, scale: 0.55, fontMain: '9px',  fontPrice: '10px', padding: '4px 6px',  minW: '50px',  maxW: '120px' },
+            { maxZoom: 11, scale: 0.65, fontMain: '10px', fontPrice: '11px', padding: '5px 7px',  minW: '60px',  maxW: '140px' },
+            { maxZoom: 12, scale: 0.75, fontMain: '11px', fontPrice: '12px', padding: '6px 8px',  minW: '70px',  maxW: '160px' },
+            { maxZoom: 13, scale: 0.85, fontMain: '11px', fontPrice: '13px', padding: '7px 10px', minW: '80px',  maxW: '180px' },
+            { maxZoom: 14, scale: 0.90, fontMain: '12px', fontPrice: '14px', padding: '8px 12px', minW: '90px',  maxW: '200px' },
+            { maxZoom: 15, scale: 0.95, fontMain: '12px', fontPrice: '14px', padding: '9px 13px', minW: '95px',  maxW: '220px' },
+            { maxZoom: 16, scale: 1.00, fontMain: '13px', fontPrice: '15px', padding: '10px 14px', minW: '100px', maxW: '250px' },
+            { maxZoom: 17, scale: 1.05, fontMain: '14px', fontPrice: '16px', padding: '10px 14px', minW: '100px', maxW: '270px' },
+            { maxZoom: 99, scale: 1.10, fontMain: '15px', fontPrice: '17px', padding: '12px 16px', minW: '110px', maxW: '300px' }
+        ];
+
+        function updateLabelScale() {
+            var zoom = map.getZoom();
+            var cfg = labelScaleConfig[labelScaleConfig.length - 1];
+            for (var i = 0; i < labelScaleConfig.length; i++) {
+                if (zoom <= labelScaleConfig[i].maxZoom) {
+                    cfg = labelScaleConfig[i];
+                    break;
+                }
+            }
+            var root = document.documentElement;
+            root.style.setProperty('--label-scale', cfg.scale);
+            root.style.setProperty('--label-font-main', cfg.fontMain);
+            root.style.setProperty('--label-font-price', cfg.fontPrice);
+            root.style.setProperty('--label-padding', cfg.padding);
+            root.style.setProperty('--label-min-width', cfg.minW);
+            root.style.setProperty('--label-max-width', cfg.maxW);
+        }
+
+        map.on('zoomend', updateLabelScale);
+        updateLabelScale(); // 초기 적용
 
         // ========== 드래그 가능 라벨 시스템 ==========
         var tooltipOffsets = {};
