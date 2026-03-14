@@ -456,9 +456,10 @@
 		                    <select id="bm-ri"><option value="">-- 전체 --</option></select>
 		                </div>
 		            </div>
-		            <div class="bm-field">
-		                <label>검색 용도 (콤마 구분)</label>
-		                <input type="text" id="bm-uses" placeholder="예: 창고시설,창고" value="창고시설,창고">
+					<div class="bm-field">
+		                <label>검색 용도 (Ctrl+클릭으로 복수 선택)</label>
+		                <select id="bm-uses-select" multiple size="6" style="width:100%; padding:6px; border:1px solid #ddd; border-radius:8px; font-size:13px;"></select>
+		                <div id="bm-uses-selected" style="margin-top:4px; font-size:11px; color:#0051af;"></div>
 		            </div>
 		            <div id="bm-server-status" style="font-size:12px; color:#888; margin-bottom:8px;"></div>
 		            <button class="bm-btn-run" id="bm-run-btn" onclick="runBuildingSearch()">🔍 검색 시작 (건축물+소유권)</button>
@@ -1769,6 +1770,7 @@
 		    document.getElementById('buildingModal').classList.add('active');
 		    checkBuildingServer();
 		    loadSidoList();
+		    loadUsesList();
 		}
 		function closeBuildingModal() {
 		    document.getElementById('buildingModal').classList.remove('active');
@@ -1870,7 +1872,13 @@
 		    var sigungu = document.getElementById('bm-sigungu').value.trim();
 		    var eupmyeondong = document.getElementById('bm-eupmyeondong').value.trim();
 		    var ri = document.getElementById('bm-ri').value.trim();
-		    var uses = document.getElementById('bm-uses').value.trim();
+		    var sel = document.getElementById('bm-uses-select');
+		    var usesArr = [];
+		    for (var i = 0; i < sel.options.length; i++) {
+		        if (sel.options[i].selected) usesArr.push(sel.options[i].value);
+		    }
+		    var uses = usesArr.join(',');
+		    if (!uses) { alert('검색할 용도를 선택하세요.'); return; }
 
 		    if (!sido || !sigungu) { alert('시도와 시군구는 필수입니다.'); return; }
 
@@ -1930,6 +1938,29 @@
 		        document.getElementById('bm-progress-text').textContent = '❌ 서버 연결 실패: ' + err.message;
 		    });
 		}
+
+		function loadUsesList() {
+		    var sel = document.getElementById('bm-uses-select');
+		    if (sel.options.length > 0) return;
+		    fetch(BUILDING_API + '/api/region/uses')
+		        .then(function(r) { return r.json(); })
+		        .then(function(list) {
+		            list.forEach(function(u) {
+		                var opt = document.createElement('option');
+		                opt.value = u; opt.textContent = u;
+		                sel.appendChild(opt);
+		            });
+		        }).catch(function(){});
+		    sel.addEventListener('change', function() {
+		        var selected = [];
+		        for (var i = 0; i < sel.options.length; i++) {
+		            if (sel.options[i].selected) selected.push(sel.options[i].value);
+		        }
+		        document.getElementById('bm-uses-selected').textContent = selected.length > 0 ? '선택: ' + selected.join(', ') : '';
+		    });
+		}
+
+			
         </script>        
     </body>
 </html>
