@@ -520,7 +520,6 @@
             var off = tooltip.options.offset || [0, 0];
             var dist = Math.sqrt(off[0]*off[0] + off[1]*off[1]);
 
-            // 거리 짧으면 선 제거
             if (dist < 20) {
                 if (connectorLines[fid]) {
                     map.removeLayer(connectorLines[fid]);
@@ -529,21 +528,31 @@
                 return;
             }
 
-            // 마커 좌표
+            // 라벨 클래스에 따라 색상 결정 (라벨 테두리색과 동일)
+            var cls = tooltip.options.className || '';
+            var lineColor = '#3388ff'; // 기본 (파란색)
+            if (cls.indexOf('_A') !== -1) lineColor = '#85b66f';
+            else if (cls.indexOf('_B') !== -1) lineColor = '#3388ff';
+            else if (cls.indexOf('_C') !== -1) lineColor = '#ff6b35';
+            else if (cls.indexOf('_D') !== -1) lineColor = '#9333ea';
+            else if (cls.indexOf('_E') !== -1) lineColor = '#0891b2';
+            else if (cls.indexOf('_F') !== -1) lineColor = '#db2777';
+            else if (cls.indexOf('_G') !== -1) lineColor = '#d97706';
+
             var markerLatLng = layer.getLatLng();
-            // 라벨 끝점 = 마커의 화면좌표 + offset → 다시 latLng 변환
             var markerPt = map.latLngToContainerPoint(markerLatLng);
             var labelPt = L.point(markerPt.x + off[0], markerPt.y + off[1]);
             var labelLatLng = map.containerPointToLatLng(labelPt);
 
             if (connectorLines[fid]) {
                 connectorLines[fid].setLatLngs([markerLatLng, labelLatLng]);
+                connectorLines[fid].setStyle({ color: lineColor });
             } else {
                 connectorLines[fid] = L.polyline([markerLatLng, labelLatLng], {
-                    color: '#888',
-                    weight: 1.5,
-                    dashArray: '4,3',
-                    opacity: 0.5,
+                    color: lineColor,
+                    weight: 2,
+                    dashArray: '6,4',
+                    opacity: 0.7,
                     interactive: false
                 }).addTo(map);
             }
