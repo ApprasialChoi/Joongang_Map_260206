@@ -512,62 +512,44 @@
         var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
 
         // ========== 마커-라벨 연결선 시스템 ==========
-        map.createPane('connectorPane');
-        map.getPane('connectorPane').style.zIndex = 399;
-        map.getPane('connectorPane').style.pointerEvents = 'none';
-
-        var connectorSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        connectorSvg.style.cssText = 'position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; overflow:visible;';
-        map.getPane('connectorPane').appendChild(connectorSvg);
-
-        var connectorLines = {}; // fid -> SVG line element
-
+        var connectorLines = {};
         function updateConnectorLine(layer) {
-            if (!layer.getTooltip || !layer.getTooltip()) return;
-            var tooltip = layer.getTooltip();
-            var el = tooltip.getElement();
-            if (!el || !layer.getLatLng) return;
-
+            if (!layer.getTooltip || !layer.getTooltip() || !layer.getLatLng) return;
             var fid = getFeatureId(layer.feature);
-            var markerPt = map.latLngToLayerPoint(layer.getLatLng());
-
-            // 라벨 중심 = 마커 위치(화면) + offset
+            var tooltip = layer.getTooltip();
             var off = tooltip.options.offset || [0, 0];
-            var labelPt = { x: markerPt.x + off[0], y: markerPt.y + off[1] };
-
-            // offset 거리가 너무 작으면 선 숨김
             var dist = Math.sqrt(off[0]*off[0] + off[1]*off[1]);
 
-            if (!connectorLines[fid]) {
-                var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                line.setAttribute('stroke', '#666');
-                line.setAttribute('stroke-width', '1.5');
-                line.setAttribute('stroke-dasharray', '4,3');
-                line.setAttribute('stroke-opacity', '0.6');
-                connectorSvg.appendChild(line);
-                connectorLines[fid] = line;
+            // 거리 짧으면 선 제거
+            if (dist < 20) {
+                if (connectorLines[fid]) {
+                    map.removeLayer(connectorLines[fid]);
+                    delete connectorLines[fid];
+                }
+                return;
             }
 
-            var line = connectorLines[fid];
-            if (dist < 20) {
-                line.setAttribute('visibility', 'hidden');
+            // 마커 좌표
+            var markerLatLng = layer.getLatLng();
+            // 라벨 끝점 = 마커의 화면좌표 + offset → 다시 latLng 변환
+            var markerPt = map.latLngToContainerPoint(markerLatLng);
+            var labelPt = L.point(markerPt.x + off[0], markerPt.y + off[1]);
+            var labelLatLng = map.containerPointToLatLng(labelPt);
+
+            if (connectorLines[fid]) {
+                connectorLines[fid].setLatLngs([markerLatLng, labelLatLng]);
             } else {
-                line.setAttribute('visibility', 'visible');
-                line.setAttribute('x1', markerPt.x);
-                line.setAttribute('y1', markerPt.y);
-                line.setAttribute('x2', labelPt.x);
-                line.setAttribute('y2', labelPt.y);
+                connectorLines[fid] = L.polyline([markerLatLng, labelLatLng], {
+                    color: '#888',
+                    weight: 1.5,
+                    dashArray: '4,3',
+                    opacity: 0.5,
+                    interactive: false
+                }).addTo(map);
             }
         }
 
         function updateAllConnectors() {
-            // SVG viewBox를 map container 크기에 맞춤
-            var size = map.getSize();
-            var topLeft = map.containerPointToLayerPoint([0, 0]);
-            connectorSvg.setAttribute('viewBox', topLeft.x + ' ' + topLeft.y + ' ' + size.x + ' ' + size.y);
-            connectorSvg.style.width = size.x + 'px';
-            connectorSvg.style.height = size.y + 'px';
-
             map.eachLayer(function(layer) {
                 if (layer.feature && layer.getTooltip && layer.getTooltip()) {
                     updateConnectorLine(layer);
@@ -575,9 +557,21 @@
             });
         }
 
-        map.on('move zoom moveend zoomend resize', updateAllConnectors);
-        // 초기 + 레이어 변경 시에도 갱신
+        map.on('moveend zoomend resize', updateAllConnectors);
         map.on('overlayadd overlayremove', function() {
+            // 레이어 변경 시 불필요한 연결선 정리
+            var activeFids = {};
+            map.eachLayer(function(layer) {
+                if (layer.feature && layer.getTooltip && layer.getTooltip()) {
+                    activeFids[getFeatureId(layer.feature)] = true;
+                }
+            });
+            Object.keys(connectorLines).forEach(function(fid) {
+                if (!activeFids[fid]) {
+                    map.removeLayer(connectorLines[fid]);
+                    delete connectorLines[fid];
+                }
+            });
             setTimeout(updateAllConnectors, 200);
         });
 
@@ -1235,11 +1229,10 @@
                             cfg.fields.forEach(function(k) { cfg.visible[k] = false; });
                             div.updateUI(); refresh();
                         };
-                        div.querySelector('[data-action="reset-pos"]').onclick = function() {
+						div.querySelector('[data-action="reset-pos"]').onclick = function() {
                             tooltipOffsets = {};
-                            // 연결선도 모두 제거
                             Object.keys(connectorLines).forEach(function(k) {
-                                if (connectorLines[k].parentNode) connectorLines[k].parentNode.removeChild(connectorLines[k]);
+                                map.removeLayer(connectorLines[k]);
                             });
                             connectorLines = {};
                             refresh();
