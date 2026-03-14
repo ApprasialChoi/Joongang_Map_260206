@@ -385,6 +385,17 @@
 		</div>
         <div id="kakao-map"></div>
 		<div id="map"></div>
+		<!-- 주소 검색 -->
+		<div style="position:fixed; top:20px; right:20px; z-index:2001;">
+		    <div style="display:flex; gap:4px;">
+		        <input type="text" id="addr-search-input" placeholder="주소 검색 (예: 강남구 역삼동, 부산 해운대)"
+		            style="width:280px; padding:10px 14px; border:2px solid #0051af; border-radius:10px; font-size:13px; box-shadow:0 2px 8px rgba(0,0,0,0.15); outline:none;"
+		            onkeydown="if(event.key==='Enter') searchAddress()">
+		        <button onclick="searchAddress()"
+		            style="padding:10px 14px; background:#0051af; color:white; border:none; border-radius:10px; font-size:13px; font-weight:bold; cursor:pointer; white-space:nowrap;">🔍</button>
+		    </div>
+		    <div id="addr-search-results" style="display:none; margin-top:4px; background:white; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.2); max-height:300px; overflow-y:auto; font-size:13px;"></div>
+		</div>
 		<!-- 로드뷰 패널 -->
 		<div id="roadview-panel" style="display:none; position:fixed; bottom:0; left:350px; right:0; height:35%; z-index:2000; background:#000; border-top:3px solid #0051af;">
 		    <div style="position:absolute; top:0; left:0; right:0; height:32px; background:#0051af; display:flex; align-items:center; padding:0 12px; z-index:1;">
@@ -483,7 +494,7 @@
 		</div>
 
         <script src="js/qgis2web_expressions.js"></script>
-        <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=231190ac1aca72ada0b739110d8a0eb4"></script>
+        <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=231190ac1aca72ada0b739110d8a0eb4&libraries=services"></script>
         <script src="js/leaflet.js"></script>
         <script src="js/kakao_base.js"></script>
         <script src="https://cdn.jsdelivr.net/gh/jjimenezshaw/Leaflet.Control.Layers.Tree@master/L.Control.Layers.Tree.js"></script>
@@ -1963,8 +1974,93 @@
 		        document.getElementById('bm-uses-selected').textContent = selected.length > 0 ? '선택: ' + selected.join(', ') : '';
 		    });
 		}
+		// ========== 주소 검색 ==========
+		var addrSearchMarker = null;
 
-			
+		function searchAddress() {
+		    var query = document.getElementById('addr-search-input').value.trim();
+		    if (!query) return;
+
+		    var geocoder = new kakao.maps.services.Geocoder();
+		    var places = new kakao.maps.services.Places();
+		    var resultsDiv = document.getElementById('addr-search-results');
+		    resultsDiv.innerHTML = '<div style="padding:12px; color:#888;">검색 중...</div>';
+		    resultsDiv.style.display = 'block';
+
+		    var allResults = [];
+
+		    // 주소 검색
+		    geocoder.addressSearch(query, function(result, status) {
+		        if (status === kakao.maps.services.Status.OK) {
+		            result.forEach(function(r) {
+		                allResults.push({
+		                    name: r.address_name,
+		                    road: r.road_address ? r.road_address.address_name : '',
+		                    lat: parseFloat(r.y),
+		                    lng: parseFloat(r.x),
+		                    type: '주소'
+		                });
+		            });
+		        }
+
+		        // 키워드 검색 (장소)
+		        places.keywordSearch(query, function(result2, status2) {
+		            if (status2 === kakao.maps.services.Status.OK) {
+		                result2.forEach(function(r) {
+		                    allResults.push({
+		                        name: r.place_name,
+		                        road: r.road_address_name || r.address_name,
+		                        lat: parseFloat(r.y),
+		                        lng: parseFloat(r.x),
+		                        type: '장소'
+		                    });
+		                });
+		            }
+
+		            if (allResults.length === 0) {
+		                resultsDiv.innerHTML = '<div style="padding:12px; color:#dc2626;">검색 결과가 없습니다.</div>';
+		                return;
+		            }
+
+		            var html = '';
+		            allResults.forEach(function(r, i) {
+		                html += '<div onclick="goToAddress(' + r.lat + ',' + r.lng + ',\'' + r.name.replace(/'/g, '') + '\')" ' +
+		                    'style="padding:10px 14px; cursor:pointer; border-bottom:1px solid #f0f0f0; transition:background 0.15s;" ' +
+		                    'onmouseover="this.style.background=\'#f0f7ff\'" onmouseout="this.style.background=\'white\'">' +
+		                    '<div style="font-weight:bold; color:#1a202c;">' + r.name +
+		                    '<span style="font-size:11px; color:#888; margin-left:6px; background:#f1f5f9; padding:1px 5px; border-radius:3px;">' + r.type + '</span></div>' +
+		                    (r.road ? '<div style="font-size:11px; color:#888; margin-top:2px;">' + r.road + '</div>' : '') +
+		                    '</div>';
+		            });
+		            resultsDiv.innerHTML = html;
+		        });
+		    });
+		}
+
+		function goToAddress(lat, lng, name) {
+		    map.setView([lat, lng], 17);
+		    document.getElementById('addr-search-results').style.display = 'none';
+
+		    // 기존 마커 제거
+		    if (addrSearchMarker) map.removeLayer(addrSearchMarker);
+
+		    // 새 마커 추가
+		    addrSearchMarker = L.marker([lat, lng]).addTo(map)
+		        .bindPopup('<div style="font-weight:bold; font-size:14px;">' + name + '</div>' +
+		            '<div style="margin-top:6px;">' +
+		            '<button onclick="openRoadview({lat:' + lat + ',lng:' + lng + '},\'' + name + '\')" ' +
+		            'style="padding:4px 10px; background:#0051af; color:white; border:none; border-radius:4px; font-size:11px; cursor:pointer;">📷 로드뷰</button></div>')
+		        .openPopup();
+		}
+
+		// 검색창 외부 클릭 시 결과 닫기
+		document.addEventListener('click', function(e) {
+		    var container = document.getElementById('addr-search-results');
+		    var input = document.getElementById('addr-search-input');
+		    if (container && !container.contains(e.target) && e.target !== input && e.target.tagName !== 'BUTTON') {
+		        container.style.display = 'none';
+		    }
+		});
         </script>        
     </body>
 </html>
