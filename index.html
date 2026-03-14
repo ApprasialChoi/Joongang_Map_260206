@@ -328,7 +328,8 @@
 		}
 
 		// ========== 스크린 캡쳐 방지 ==========
-		(function() {
+		/*
+			(function() {
 		    document.addEventListener('keyup', function(e) {
 		        if (e.key === 'PrintScreen' || e.keyCode === 44) {
 		            navigator.clipboard.writeText('캡쳐가 차단되었습니다.').catch(function(){});
@@ -351,6 +352,7 @@
 		        else { if (devtoolsOpen) { devtoolsOpen = false; var o = document.getElementById('capture-block'); if (o) o.style.display = 'none'; } }
 		    }, 1000);
 		})();
+		*/
 
 		// ========== 클립보드 캡쳐 방지 + IP 경고 ==========
 		var _userIP = '';
