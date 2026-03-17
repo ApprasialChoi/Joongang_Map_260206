@@ -270,6 +270,27 @@
 		        border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer;
 		        text-decoration: none; margin-top: 10px;
 		    }
+			/* 첨부파일 New 뱃지 애니메이션 */
+		    .attach-new-badge {
+		        position: absolute;
+		        top: -28px;
+		        left: 50%;
+		        transform: translateX(-50%);
+		        background: #dc2626;
+		        color: white;
+		        font-size: 10px;
+		        font-weight: bold;
+		        padding: 2px 6px;
+		        border-radius: 4px;
+		        white-space: nowrap;
+		        pointer-events: none;
+		        z-index: 1000;
+		        animation: newBadgeBounce 1.5s ease-in-out infinite;
+		    }
+		    @keyframes newBadgeBounce {
+		        0%, 100% { top: -28px; }
+		        50% { top: -36px; }
+		    }
 		</style>
         <title></title>
     </head>
@@ -2060,19 +2081,12 @@
 		    });
 		}
 
-		function goToAddress(lat, lng, name) {
+	function goToAddress(lat, lng, name) {
 		    map.setView([lat, lng], 17);
 		    document.getElementById('addr-search-results').style.display = 'none';
-
-		    // 기존 마커 제거
 		    if (addrSearchMarker) map.removeLayer(addrSearchMarker);
-
-		    // 새 마커 추가
 		    addrSearchMarker = L.marker([lat, lng]).addTo(map)
-		        .bindPopup('<div style="font-weight:bold; font-size:14px;">' + name + '</div>' +
-		            '<div style="margin-top:6px;">' +
-		            '<button onclick="openRoadview({lat:' + lat + ',lng:' + lng + '},\'' + name + '\')" ' +
-		            'style="padding:4px 10px; background:#0051af; color:white; border:none; border-radius:4px; font-size:11px; cursor:pointer;">📷 로드뷰</button></div>')
+		        .bindPopup('<div style="font-weight:bold; font-size:14px;">' + name + '</div>')
 		        .openPopup();
 		}
 
@@ -2113,6 +2127,77 @@
 		            listDiv.innerHTML = '<span style="color:#dc2626;">파일 목록 로드 실패</span>';
 		        });
 		}
+		// ========== 첨부파일 New 뱃지 ==========
+		var attachBadgeCache = {};
+
+		function checkAttachBadge(layer) {
+		    if (!layer.feature) return;
+		    var props = layer.feature.properties || {};
+		    var markerId = props['감정서번호'] || props['빌딩명'] || props['호텔명'] ||
+		        props['골프장명(인수 후 명칭)'] || props['물류센터명'] || props['명칭'] ||
+		        props['소재지(통'] || (props['위도'] + '_' + props['경도']) || '';
+		    markerId = String(markerId).trim().replace(/[^a-zA-Z0-9가-힣_\-]/g, '_');
+		    if (!markerId) return;
+
+		    fetch(BUILDING_API + '/api/attach/list?marker_id=' + encodeURIComponent(markerId))
+		        .then(function(r) { return r.json(); })
+		        .then(function(files) {
+		            var fid = getFeatureId(layer.feature);
+		            if (files.length > 0) {
+		                attachBadgeCache[fid] = true;
+		                addNewBadge(layer);
+		            } else {
+		                attachBadgeCache[fid] = false;
+		                removeNewBadge(layer);
+		            }
+		        }).catch(function(){});
+		}
+
+		function addNewBadge(layer) {
+		    if (!layer._icon && !layer._path) return;
+		    var el = layer._icon || layer._path;
+		    if (el.querySelector('.attach-new-badge')) return;
+		    el.style.position = 'relative';
+		    el.style.overflow = 'visible';
+		    var badge = document.createElement('div');
+		    badge.className = 'attach-new-badge';
+		    badge.textContent = '📎 New!';
+		    el.appendChild(badge);
+		}
+
+		function removeNewBadge(layer) {
+		    var el = layer._icon || layer._path;
+		    if (!el) return;
+		    var badge = el.querySelector('.attach-new-badge');
+		    if (badge) badge.remove();
+		}
+
+		// 초기 로드: 모든 레이어의 첨부파일 상태 확인
+		function checkAllAttachBadges() {
+		    var layers = [layer_map_data, layer_B_data_0, layer_C_data_0, layer_D_data_0, layer_E_data_0, layer_F_data_0, layer_G_data_0];
+		    layers.forEach(function(layerGroup) {
+		        if (!map.hasLayer(layerGroup)) return;
+		        layerGroup.eachLayer(function(layer) {
+		            checkAttachBadge(layer);
+		        });
+		    });
+		}
+
+		// 업로드/삭제 후 뱃지 갱신
+		var _origUpload = uploadAttachFiles;
+		uploadAttachFiles = function(input, markerId) {
+		    _origUpload(input, markerId);
+		    setTimeout(checkAllAttachBadges, 2000);
+		};
+		var _origDelete = deleteAttachFile;
+		deleteAttachFile = function(markerId, filename) {
+		    _origDelete(markerId, filename);
+		    setTimeout(checkAllAttachBadges, 1500);
+		};
+
+		// 페이지 로드 후 뱃지 체크
+		setTimeout(checkAllAttachBadges, 2000);
+		map.on('overlayadd', function() { setTimeout(checkAllAttachBadges, 500); });
 
 		function uploadAttachFiles(input, markerId) {
 		    var files = input.files;
