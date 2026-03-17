@@ -2037,9 +2037,9 @@
 		    geocoder.addressSearch(query, function(result, status) {
 		        if (status === kakao.maps.services.Status.OK) {
 		            result.forEach(function(r) {
-		                allResults.push({
-		                    name: r.place_name,
-		                    road: r.road_address_name || r.address_name,
+		               allResults.push({
+		                    name: r.address_name,
+		                    road: r.road_address ? r.road_address.address_name : '',
 		                    jibun: r.address_name,
 		                    lat: parseFloat(r.y),
 		                    lng: parseFloat(r.x),
