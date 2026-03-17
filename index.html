@@ -2038,11 +2038,12 @@
 		        if (status === kakao.maps.services.Status.OK) {
 		            result.forEach(function(r) {
 		                allResults.push({
-		                    name: r.address_name,
-		                    road: r.road_address ? r.road_address.address_name : '',
+		                    name: r.place_name,
+		                    road: r.road_address_name || r.address_name,
+		                    jibun: r.address_name,
 		                    lat: parseFloat(r.y),
 		                    lng: parseFloat(r.x),
-		                    type: '주소'
+		                    type: '장소'
 		                });
 		            });
 		        }
@@ -2068,7 +2069,7 @@
 
 		            var html = '';
 		            allResults.forEach(function(r, i) {
-		                html += '<div onclick="goToAddress(' + r.lat + ',' + r.lng + ',\'' + r.name.replace(/'/g, '') + '\')" ' +
+		                html += '<div onclick="goToAddress(' + r.lat + ',' + r.lng + ',\'' + r.name.replace(/'/g, '') + '\',\'' + (r.jibun || r.name).replace(/'/g, '') + '\')" ' +
 		                    'style="padding:10px 14px; cursor:pointer; border-bottom:1px solid #f0f0f0; transition:background 0.15s;" ' +
 		                    'onmouseover="this.style.background=\'#f0f7ff\'" onmouseout="this.style.background=\'white\'">' +
 		                    '<div style="font-weight:bold; color:#1a202c;">' + r.name +
