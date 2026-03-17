@@ -2081,15 +2081,103 @@
 		    });
 		}
 
-	function goToAddress(lat, lng, name) {
+		function goToAddress(lat, lng, name) {
 		    map.setView([lat, lng], 17);
 		    document.getElementById('addr-search-results').style.display = 'none';
 		    if (addrSearchMarker) map.removeLayer(addrSearchMarker);
-		    addrSearchMarker = L.marker([lat, lng]).addTo(map)
-		        .bindPopup('<div style="font-weight:bold; font-size:14px;">' + name + '</div>')
-		        .openPopup();
-		}
 
+		    addrSearchMarker = L.marker([lat, lng]).addTo(map)
+		        .bindPopup('<div style="text-align:center; padding:10px;"><b>' + name + '</b><br><span style="color:#888;">토지·건축물 정보 조회 중...</span></div>', {
+		            maxHeight: 500, minWidth: 420, maxWidth: 460
+		        })
+		        .openPopup();
+
+		    // 서버에 조회 요청
+		    fetch(BUILDING_API + '/api/parcel-info', {
+		        method: 'POST',
+		        headers: { 'Content-Type': 'application/json' },
+		        body: JSON.stringify({ address: name })
+		    })
+		    .then(function(r) { return r.json(); })
+		    .then(function(data) {
+		        if (data.error) {
+		            addrSearchMarker.setPopupContent(
+		                '<div style="padding:6px;"><b>' + name + '</b>' +
+		                '<div style="color:#dc2626; margin-top:6px;">⚠ ' + data.error + '</div></div>'
+		            );
+		            return;
+		        }
+
+		        var html = '<div style="font-size:12px;">';
+		        html += '<div style="font-weight:bold; font-size:14px; margin-bottom:8px; padding-bottom:6px; border-bottom:2px solid #0051af;">' + name + '</div>';
+		        html += '<div style="font-size:10px; color:#888; margin-bottom:8px;">PNU: ' + data.pnu + '</div>';
+
+		        // 토지특성 테이블
+		        var land = data.land || {};
+		        if (!land.error) {
+		            html += '<div style="font-weight:bold; color:#0051af; margin-bottom:4px;">🏞️ 토지특성</div>';
+		            html += '<table style="width:100%; border-collapse:collapse; margin-bottom:10px; font-size:11px;">';
+		            var landFields = [
+		                ['지목', land['지목']], ['면적(㎡)', land['토지면적(㎡)']],
+		                ['용도지역', land['용도지역1']], ['용도지역2', land['용도지역2']],
+		                ['이용상황', land['토지이용상황']], ['도로접면', land['도로접면']],
+		                ['지형높이', land['지형높이']], ['지형형상', land['지형형상']],
+		                ['공시지가', land['공시지가(원/㎡)'] ? Number(land['공시지가(원/㎡)']).toLocaleString() + '원/㎡' : ''],
+		                ['기준연도', land['기준연도']]
+		            ];
+		            landFields.forEach(function(f) {
+		                if (f[1]) {
+		                    html += '<tr><th style="padding:3px 6px; background:#f0f7ff; white-space:nowrap; width:30%;">' + f[0] + '</th>';
+		                    html += '<td style="padding:3px 6px;">' + f[1] + '</td></tr>';
+		                }
+		            });
+		            html += '</table>';
+		        } else {
+		            html += '<div style="color:#888; margin-bottom:8px;">🏞️ 토지특성: ' + land.error + '</div>';
+		        }
+
+		        // 건축물대장 테이블
+		        var blds = data.buildings || [];
+		        if (blds.length > 0) {
+		            html += '<div style="font-weight:bold; color:#0051af; margin-bottom:4px;">🏢 건축물대장 (' + blds.length + '건)</div>';
+		            blds.forEach(function(b, idx) {
+		                if (idx > 0) html += '<div style="border-top:1px dashed #ddd; margin:6px 0;"></div>';
+		                if (b['건물명']) html += '<div style="font-weight:bold; margin-bottom:3px;">' + b['건물명'] + '</div>';
+		                html += '<table style="width:100%; border-collapse:collapse; font-size:11px;">';
+		                var bldFields = [
+		                    ['주용도', b['주용도']], ['구조', b['구조']],
+		                    ['대지면적', b['대지면적'] ? Number(b['대지면적']).toLocaleString() + '㎡' : ''],
+		                    ['건축면적', b['건축면적'] ? Number(b['건축면적']).toLocaleString() + '㎡' : ''],
+		                    ['연면적', b['연면적'] ? Number(b['연면적']).toLocaleString() + '㎡' : ''],
+		                    ['건폐율/용적률', (b['건폐율(%)'] || '-') + '% / ' + (b['용적률(%)'] || '-') + '%'],
+		                    ['층수', (b['지상층수'] || '-') + '층 / 지하' + (b['지하층수'] || '-') + '층'],
+		                    ['높이', b['높이(m)'] ? b['높이(m)'] + 'm' : ''],
+		                    ['사용승인일', b['사용승인일']],
+		                    ['도로명', b['도로명']]
+		                ];
+		                bldFields.forEach(function(f) {
+		                    if (f[1] && f[1] !== '-% / -%') {
+		                        html += '<tr><th style="padding:3px 6px; background:#f8f9fa; white-space:nowrap; width:30%;">' + f[0] + '</th>';
+		                        html += '<td style="padding:3px 6px;">' + f[1] + '</td></tr>';
+		                    }
+		                });
+		                html += '</table>';
+		            });
+		        } else {
+		            html += '<div style="color:#888;">🏢 건축물대장: 해당 필지에 건축물 없음</div>';
+		        }
+
+		        html += '</div>';
+		        addrSearchMarker.setPopupContent(html);
+		        addrSearchMarker.openPopup();
+		    })
+		    .catch(function(err) {
+		        addrSearchMarker.setPopupContent(
+		            '<div style="padding:6px;"><b>' + name + '</b>' +
+		            '<div style="color:#dc2626; margin-top:6px;">⚠ 서버 연결 실패: ' + err.message + '</div></div>'
+		        );
+		    });
+		}
 		// 검색창 외부 클릭 시 결과 닫기
 		document.addEventListener('click', function(e) {
 		    var container = document.getElementById('addr-search-results');
