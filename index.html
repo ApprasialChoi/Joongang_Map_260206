@@ -2082,7 +2082,7 @@
 		    });
 		}
 
-		function goToAddress(lat, lng, name) {
+		function goToAddress(lat, lng, name, jibunAddr) {
 		    map.setView([lat, lng], 17);
 		    document.getElementById('addr-search-results').style.display = 'none';
 		    if (addrSearchMarker) map.removeLayer(addrSearchMarker);
@@ -2093,11 +2093,12 @@
 		        })
 		        .openPopup();
 
-		    // 서버에 조회 요청
+		    var searchAddr = jibunAddr || name;
+
 		    fetch(BUILDING_API + '/api/parcel-info', {
 		        method: 'POST',
 		        headers: { 'Content-Type': 'application/json' },
-		        body: JSON.stringify({ address: name })
+		        body: JSON.stringify({ address: searchAddr })
 		    })
 		    .then(function(r) { return r.json(); })
 		    .then(function(data) {
