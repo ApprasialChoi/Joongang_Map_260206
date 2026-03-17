@@ -978,7 +978,7 @@
 		        '</div>' +
 		        '</td></tr>';
 
-		    var tableContent = rows || '<tr><td>데이터가 없습니다.</td></tr>';
+		    var tableContent = rows
 		    tableContent += attachHtml;
 
 		    // 팝업 열릴 때 파일 목록 로드하는 스크립트 트리거
@@ -1063,16 +1063,9 @@
         var bounds_group = new L.featureGroup([]);
         function setBounds() {}
 
-       function pop_map_data(feature, layer) {
+		function pop_map_data(feature, layer) {
 		    layer.bindPopup(function(l) {
-		        var content = buildPopupContent_map_data(l.feature);
-		        var latlng = l.getLatLng();
-		        var address = l.feature.properties['주소'] || l.feature.properties['소재지(통'] || l.feature.properties['소재지'] || l.feature.properties['세부주소'] || '';
-		        content += '<div style="margin-top:8px; text-align:center;">' +
-		            '<button onclick="openRoadview({lat:' + latlng.lat + ',lng:' + latlng.lng + '},\'' + address.replace(/'/g, '') + '\')" ' +
-		            'style="padding:6px 16px; background:#0051af; color:white; border:none; border-radius:5px; cursor:pointer; font-size:12px; font-weight:bold;">' +
-		            '📷 이 위치 로드뷰 보기</button></div>';
-		        return content;
+		        return buildPopupContent_map_data(l.feature);
 		    }, {
 		        maxHeight: 500, minWidth: 400, maxWidth: 450,
 		        offset: [0, -10], className: 'custom-popup-styled'
