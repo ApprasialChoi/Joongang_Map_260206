@@ -2094,38 +2094,30 @@
 		        .openPopup();
 
 		    var searchAddr = jibunAddr || name;
+		    var landData = null;
+		    var bldData = null;
+		    var pnuCode = null;
+		    var done = 0;
 
-		    fetch(BUILDING_API + '/api/parcel-info', {
-		        method: 'POST',
-		        headers: { 'Content-Type': 'application/json' },
-		        body: JSON.stringify({ address: searchAddr })
-		    })
-		    .then(function(r) { return r.json(); })
-		    .then(function(data) {
-		        if (data.error) {
-		            addrSearchMarker.setPopupContent(
-		                '<div style="padding:6px;"><b>' + name + '</b>' +
-		                '<div style="color:#dc2626; margin-top:6px;">⚠ ' + data.error + '</div></div>'
-		            );
-		            return;
-		        }
+		    function renderResult() {
+		        done++;
+		        if (done < 2) return; // 두 요청 모두 완료 후 렌더링
 
 		        var html = '<div style="font-size:12px;">';
 		        html += '<div style="font-weight:bold; font-size:14px; margin-bottom:8px; padding-bottom:6px; border-bottom:2px solid #0051af;">' + name + '</div>';
-		        html += '<div style="font-size:10px; color:#888; margin-bottom:8px;">PNU: ' + data.pnu + '</div>';
+		        if (pnuCode) html += '<div style="font-size:10px; color:#888; margin-bottom:8px;">PNU: ' + pnuCode + '</div>';
 
-		        // 토지특성 테이블
-		        var land = data.land || {};
-		        if (!land.error) {
+		        // 토지특성
+		        if (landData && !landData.error) {
 		            html += '<div style="font-weight:bold; color:#0051af; margin-bottom:4px;">🏞️ 토지특성</div>';
 		            html += '<table style="width:100%; border-collapse:collapse; margin-bottom:10px; font-size:11px;">';
 		            var landFields = [
-		                ['지목', land['지목']], ['면적(㎡)', land['토지면적(㎡)']],
-		                ['용도지역', land['용도지역1']], ['용도지역2', land['용도지역2']],
-		                ['이용상황', land['토지이용상황']], ['도로접면', land['도로접면']],
-		                ['지형높이', land['지형높이']], ['지형형상', land['지형형상']],
-		                ['공시지가', land['공시지가(원/㎡)'] ? Number(land['공시지가(원/㎡)']).toLocaleString() + '원/㎡' : ''],
-		                ['기준연도', land['기준연도']]
+		                ['지목', landData['지목']], ['면적(㎡)', landData['토지면적']],
+		                ['용도지역', landData['용도지역1']], ['용도지역2', landData['용도지역2']],
+		                ['이용상황', landData['이용상황']], ['도로접면', landData['도로접면']],
+		                ['지형높이', landData['지형높이']], ['지형형상', landData['지형형상']],
+		                ['공시지가', landData['공시지가'] ? Number(landData['공시지가']).toLocaleString() + '원/㎡' : ''],
+		                ['기준연도', landData['기준연도']]
 		            ];
 		            landFields.forEach(function(f) {
 		                if (f[1]) {
@@ -2135,11 +2127,11 @@
 		            });
 		            html += '</table>';
 		        } else {
-		            html += '<div style="color:#888; margin-bottom:8px;">🏞️ 토지특성: ' + land.error + '</div>';
+		            html += '<div style="color:#888; margin-bottom:8px;">🏞️ 토지특성: ' + (landData ? landData.error : '조회 실패') + '</div>';
 		        }
 
-		        // 건축물대장 테이블
-		        var blds = data.buildings || [];
+		        // 건축물대장
+		        var blds = (bldData && bldData.buildings) ? bldData.buildings : [];
 		        if (blds.length > 0) {
 		            html += '<div style="font-weight:bold; color:#0051af; margin-bottom:4px;">🏢 건축물대장 (' + blds.length + '건)</div>';
 		            blds.forEach(function(b, idx) {
@@ -2165,6 +2157,8 @@
 		                });
 		                html += '</table>';
 		            });
+		        } else if (bldData && bldData.error) {
+		            html += '<div style="color:#dc2626;">🏢 건축물대장: ' + bldData.error + '</div>';
 		        } else {
 		            html += '<div style="color:#888;">🏢 건축물대장: 해당 필지에 건축물 없음</div>';
 		        }
@@ -2172,22 +2166,74 @@
 		        html += '</div>';
 		        addrSearchMarker.setPopupContent(html);
 		        addrSearchMarker.openPopup();
+		    }
+
+		    // ① 건축물대장 (PythonAnywhere 경유)
+		    fetch(BUILDING_API + '/api/parcel-info', {
+		        method: 'POST',
+		        headers: { 'Content-Type': 'application/json' },
+		        body: JSON.stringify({ address: searchAddr })
+		    })
+		    .then(function(r) { return r.json(); })
+		    .then(function(data) {
+		        bldData = data;
+		        pnuCode = data.pnu || '';
+		        // PNU 받은 후 토지특성 조회 시작
+		        if (pnuCode) {
+		            queryLandDirect(pnuCode);
+		        } else {
+		            landData = { error: data.error || 'PNU 변환 실패' };
+		            renderResult();
+		        }
+		        renderResult();
 		    })
 		    .catch(function(err) {
-		        addrSearchMarker.setPopupContent(
-		            '<div style="padding:6px;"><b>' + name + '</b>' +
-		            '<div style="color:#dc2626; margin-top:6px;">⚠ 서버 연결 실패: ' + err.message + '</div></div>'
-		        );
+		        bldData = { error: '서버 연결 실패: ' + err.message };
+		        landData = { error: '서버 연결 실패' };
+		        done = 1; // 토지특성 스킵
+		        renderResult();
 		    });
-		}
-		// 검색창 외부 클릭 시 결과 닫기
-		document.addEventListener('click', function(e) {
-		    var container = document.getElementById('addr-search-results');
-		    var input = document.getElementById('addr-search-input');
-		    if (container && !container.contains(e.target) && e.target !== input && e.target.tagName !== 'BUTTON') {
-		        container.style.display = 'none';
+
+		    // ② 토지특성 (프론트에서 직접 브이월드 호출)
+		    function queryLandDirect(pnu) {
+		        var url = 'https://api.vworld.kr/ned/data/getLandCharacteristics' +
+		            '?key=E333059C-5AF1-3959-9C69-99B588DBFB75' +
+		            '&pnu=' + pnu +
+		            '&stdrYear=2025' +
+		            '&format=json' +
+		            '&numOfRows=10&pageNo=1' +
+		            '&domain=apprasialchoi.github.io';
+
+		        fetch(url)
+		        .then(function(r) { return r.json(); })
+		        .then(function(data) {
+		            var items = ((data.landCharacteristics || {}).field) || [];
+		            if (!Array.isArray(items)) items = [items];
+		            if (items.length > 0) {
+		                var nd = items[items.length - 1];
+		                landData = {
+		                    '지목': nd.lndcgrCodeNm || '',
+		                    '토지면적': nd.lndpclAr || '',
+		                    '용도지역1': nd.prposArea1Nm || '',
+		                    '용도지역2': nd.prposArea2Nm || '',
+		                    '이용상황': nd.ladUseSittnNm || '',
+		                    '지형높이': nd.tpgrphHgCodeNm || '',
+		                    '지형형상': nd.tpgrphFrmCodeNm || '',
+		                    '도로접면': nd.roadSideCodeNm || '',
+		                    '공시지가': nd.pblntfPclnd || '',
+		                    '기준연도': nd.stdrYear || ''
+		                };
+		            } else {
+		                landData = { error: '토지특성 데이터 없음' };
+		            }
+		            renderResult();
+		        })
+		        .catch(function(err) {
+		            landData = { error: '브이월드 조회 실패: ' + err.message };
+		            renderResult();
+		        });
 		    }
-		});
+		}
 
 		// ========== 파일 첨부 시스템 ==========
 		function loadAttachList(markerId) {
