@@ -935,15 +935,25 @@
 		    }
 		    var props = feature.properties || {};
 		    var rows = '';
-		    if (props['감정서번호']) { 
+
+		    // 마커 고유 ID 생성
+		    var markerId = props['감정서번호'] || props['빌딩명'] || props['호텔명'] ||
+		        props['골프장명(인수 후 명칭)'] || props['물류센터명'] || props['명칭'] ||
+		        props['소재지(통'] || (props['위도'] + '_' + props['경도']) || '';
+		    markerId = String(markerId).trim().replace(/[^a-zA-Z0-9가-힣_\-]/g, '_');
+
+		    // 이미지
+		    if (props['감정서번호']) {
 		        var id = String(props['감정서번호']).trim();
-		        var imgPath = "images/" + id + ".jpg"; 
+		        var imgPath = "images/" + id + ".jpg";
 		        rows += '<tr><td colspan="2" class="popup-image-container" style="text-align:center;">' +
-		                '<img src="' + imgPath + '" ' +
-		                'style="width:100%; max-height:250px; object-fit:contain; border-radius:8px; margin-bottom:10px;" ' +
-		                'onerror="this.src=\'images/' + id + '.png\'; this.onerror=function(){this.style.display=\'none\'};">' + 
-		                '</td></tr>';
+		            '<img src="' + imgPath + '" ' +
+		            'style="width:100%; max-height:250px; object-fit:contain; border-radius:8px; margin-bottom:10px;" ' +
+		            'onerror="this.src=\'images/' + id + '.png\'; this.onerror=function(){this.style.display=\'none\'};">' +
+		            '</td></tr>';
 		    }
+
+		    // 데이터 필드
 		    var cfg = popupFieldConfig_map_data;
 		    for (var i = 0; i < cfg.fields.length; i++) {
 		        var key = cfg.fields[i];
@@ -952,9 +962,29 @@
 		        if (val === null || val === undefined || val === '') continue;
 		        rows += '<tr><th style="min-width:80px; text-align:left;">' + key + '</th><td>' + fmt(val) + '</td></tr>';
 		    }
-		    return '<table style="width:100%; border-collapse:collapse;">' + 
-		           (rows || '<tr><td>데이터가 없습니다.</td></tr>') + 
-		           '</table>';
+
+		    // 파일 첨부 영역
+		    var attachHtml =
+		        '<tr><td colspan="2" style="padding-top:10px; border-top:2px solid #e2e8f0;">' +
+		        '<div id="attach-area-' + markerId + '" style="margin-top:4px;">' +
+		        '  <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">' +
+		        '    <span style="font-weight:bold; font-size:13px;">📎 첨부파일</span>' +
+		        '    <label style="padding:4px 10px; background:#0051af; color:white; border-radius:5px; font-size:11px; cursor:pointer;">' +
+		        '      업로드' +
+		        '      <input type="file" multiple style="display:none;" onchange="uploadAttachFiles(this,\'' + markerId + '\')">' +
+		        '    </label>' +
+		        '  </div>' +
+		        '  <div id="attach-list-' + markerId + '" style="font-size:12px; color:#555;">로딩 중...</div>' +
+		        '</div>' +
+		        '</td></tr>';
+
+		    var tableContent = rows || '<tr><td>데이터가 없습니다.</td></tr>';
+		    tableContent += attachHtml;
+
+		    // 팝업 열릴 때 파일 목록 로드하는 스크립트 트리거
+		    setTimeout(function() { loadAttachList(markerId); }, 100);
+
+		    return '<table style="width:100%; border-collapse:collapse;">' + tableContent + '</table>';
 		}
 
         function buildLabelContent_map_data(feature) {
@@ -2061,6 +2091,77 @@
 		        container.style.display = 'none';
 		    }
 		});
+
+		// ========== 파일 첨부 시스템 ==========
+		function loadAttachList(markerId) {
+		    var listDiv = document.getElementById('attach-list-' + markerId);
+		    if (!listDiv) return;
+		    fetch(BUILDING_API + '/api/attach/list?marker_id=' + encodeURIComponent(markerId))
+		        .then(function(r) { return r.json(); })
+		        .then(function(files) {
+		            if (files.length === 0) {
+		                listDiv.innerHTML = '<span style="color:#aaa;">첨부된 파일이 없습니다.</span>';
+		                return;
+		            }
+		            var html = '';
+		            files.forEach(function(f) {
+		                var dlUrl = BUILDING_API + '/api/attach/download/' + encodeURIComponent(markerId) + '/' + encodeURIComponent(f.filename);
+		                html += '<div style="display:flex; align-items:center; gap:6px; padding:4px 0; border-bottom:1px solid #f0f0f0;">' +
+		                    '<a href="' + dlUrl + '" target="_blank" style="flex:1; color:#0051af; text-decoration:none; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="' + f.filename + '">' +
+		                    '📄 ' + f.filename + '</a>' +
+		                    '<span style="color:#aaa; font-size:10px; white-space:nowrap;">' + f.size_kb + 'KB</span>' +
+		                    '<button onclick="deleteAttachFile(\'' + markerId + '\',\'' + f.filename.replace(/'/g, "\\'") + '\')" ' +
+		                    'style="background:none; border:none; color:#dc2626; cursor:pointer; font-size:14px; padding:0 4px;" title="삭제">✕</button>' +
+		                    '</div>';
+		            });
+		            listDiv.innerHTML = html;
+		        })
+		        .catch(function() {
+		            listDiv.innerHTML = '<span style="color:#dc2626;">파일 목록 로드 실패</span>';
+		        });
+		}
+
+		function uploadAttachFiles(input, markerId) {
+		    var files = input.files;
+		    if (!files || files.length === 0) return;
+		    var listDiv = document.getElementById('attach-list-' + markerId);
+		    if (listDiv) listDiv.innerHTML = '<span style="color:#888;">업로드 중...</span>';
+
+		    var uploaded = 0;
+		    var total = files.length;
+
+		    for (var i = 0; i < files.length; i++) {
+		        var formData = new FormData();
+		        formData.append('marker_id', markerId);
+		        formData.append('file', files[i]);
+
+		        fetch(BUILDING_API + '/api/attach/upload', {
+		            method: 'POST',
+		            body: formData
+		        })
+		        .then(function(r) { return r.json(); })
+		        .then(function() {
+		            uploaded++;
+		            if (uploaded >= total) loadAttachList(markerId);
+		        })
+		        .catch(function() {
+		            uploaded++;
+		            if (uploaded >= total) loadAttachList(markerId);
+		        });
+		    }
+		    input.value = '';
+		}
+
+		function deleteAttachFile(markerId, filename) {
+		    if (!confirm(filename + ' 파일을 삭제할까요?')) return;
+		    fetch(BUILDING_API + '/api/attach/delete', {
+		        method: 'POST',
+		        headers: { 'Content-Type': 'application/json' },
+		        body: JSON.stringify({ marker_id: markerId, filename: filename })
+		    })
+		    .then(function() { loadAttachList(markerId); })
+		    .catch(function() { alert('삭제 실패'); });
+		}
         </script>        
     </body>
 </html>
