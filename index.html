@@ -141,7 +141,82 @@
 		}
         </style>
 		<style>
-		    #map, #kakao-map { left: 350px !important; width: calc(100% - 350px) !important; }
+		    /* ========== 사이드바 토글 시스템 ========== */
+		    :root {
+		        --sidebar-width: 350px;
+		    }
+		    #side-dashboard {
+		        width: var(--sidebar-width);
+		        transition: transform 0.3s ease, box-shadow 0.3s ease;
+		    }
+		    #side-dashboard.collapsed {
+		        transform: translateX(calc(-1 * var(--sidebar-width)));
+		        box-shadow: none;
+		    }
+		    #map, #kakao-map {
+		        left: var(--sidebar-width) !important;
+		        width: calc(100% - var(--sidebar-width)) !important;
+		        transition: left 0.3s ease, width 0.3s ease;
+		    }
+		    body.sidebar-collapsed #map,
+		    body.sidebar-collapsed #kakao-map {
+		        left: 0 !important;
+		        width: 100% !important;
+		    }
+		    /* 토글 버튼 */
+		    #sidebar-toggle-btn {
+		        position: fixed;
+		        top: 50%;
+		        left: var(--sidebar-width);
+		        transform: translateY(-50%);
+		        z-index: 3001;
+		        width: 24px;
+		        height: 64px;
+		        background: #ffffff;
+		        border: 1px solid #d1d5db;
+		        border-left: none;
+		        border-radius: 0 8px 8px 0;
+		        cursor: pointer;
+		        display: flex;
+		        align-items: center;
+		        justify-content: center;
+		        box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+		        transition: left 0.3s ease, background 0.2s;
+		        font-size: 14px;
+		        color: #64748b;
+		        padding: 0;
+		    }
+		    #sidebar-toggle-btn:hover {
+		        background: #f0f7ff;
+		        color: #0051af;
+		    }
+		    body.sidebar-collapsed #sidebar-toggle-btn {
+		        left: 0;
+		    }
+		    /* 필터 패널 & 주소 검색 위치 연동 */
+		    .filter-panel {
+		        left: calc(var(--sidebar-width) + 20px) !important;
+		        transition: left 0.3s ease;
+		    }
+		    body.sidebar-collapsed .filter-panel {
+		        left: 20px !important;
+		    }
+		    #addr-search-wrapper {
+		        left: calc(var(--sidebar-width) + 730px);
+		        transition: left 0.3s ease;
+		    }
+		    body.sidebar-collapsed #addr-search-wrapper {
+		        left: 730px;
+		    }
+		    /* 로드뷰 패널 연동 */
+		    #roadview-panel {
+		        left: var(--sidebar-width);
+		        transition: left 0.3s ease;
+		    }
+		    body.sidebar-collapsed #roadview-panel {
+		        left: 0;
+		    }
+
 		    .list-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; transition: background 0.2s; }
 		    .list-item:hover { background: #f0f7ff; }
 		    .list-item .title { font-weight: bold; font-size: 15px; margin-bottom: 5px; }
@@ -397,6 +472,9 @@
 		}, 1000);
 		</script>
 
+		<!-- ========== 사이드바 토글 버튼 ========== -->
+		<button id="sidebar-toggle-btn" onclick="toggleSidebar()" title="사이드바 접기/펼치기">◀</button>
+
 		<div id="side-dashboard" style="position: fixed; top: 0; left: 0; width: 350px; height: 100%; background: white; z-index: 3000; box-shadow: 2px 0 10px rgba(0,0,0,0.1); display: flex; flex-direction: column;">
 		    <div style="padding: 20px; border-bottom: 1px solid #eee; background: #f8f9fa;">
 		        <h2 style="margin: 0; font-size: 18px; color: #333;">매물 리스트 <span id="list-count" style="color: #0051af;">0</span></h2>
@@ -407,7 +485,7 @@
         <div id="kakao-map"></div>
 		<div id="map"></div>
 		<!-- 주소 검색 -->
-		<div style="position:fixed; top:20px; left:calc(350px + 730px); z-index:2001;">
+		<div id="addr-search-wrapper" style="position:fixed; top:20px; z-index:2001;">
 		    <div style="display:flex; gap:4px;">
 		        <input type="text" id="addr-search-input" placeholder="주소 검색 (예: 강남구 역삼동, 부산 해운대)"
 		            style="width:280px; padding:10px 14px; border:2px solid #0051af; border-radius:10px; font-size:13px; box-shadow:0 2px 8px rgba(0,0,0,0.15); outline:none;"
@@ -418,7 +496,7 @@
 		    <div id="addr-search-results" style="display:none; margin-top:4px; background:white; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.2); max-height:300px; overflow-y:auto; font-size:13px;"></div>
 		</div>
 		<!-- 로드뷰 패널 -->
-		<div id="roadview-panel" style="display:none; position:fixed; bottom:0; left:350px; right:0; height:35%; z-index:2000; background:#000; border-top:3px solid #0051af;">
+		<div id="roadview-panel" style="display:none; position:fixed; bottom:0; right:0; height:35%; z-index:2000; background:#000; border-top:3px solid #0051af;">
 		    <div style="position:absolute; top:0; left:0; right:0; height:32px; background:#0051af; display:flex; align-items:center; padding:0 12px; z-index:1;">
 		        <span style="color:white; font-size:13px; font-weight:bold;">📷 로드뷰</span>
 		        <span id="roadview-address" style="color:#cce4ff; font-size:12px; margin-left:10px;"></span>
@@ -427,7 +505,7 @@
 		    <div id="roadview" style="position:absolute; top:32px; left:0; right:0; bottom:0;"></div>
 		</div>
 
-		<div class="filter-panel" style="position: fixed; top: 20px; left: 370px; z-index: 2000; background: white; padding: 10px 14px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 700px; font-family: sans-serif;">
+		<div class="filter-panel" style="position: fixed; top: 20px; z-index: 2000; background: white; padding: 10px 14px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 700px; font-family: sans-serif;">
 		    <div style="display: flex; align-items: center; margin-bottom: 8px;">
 		        <h4 style="margin: 0; font-size: 13px; color: #333;">상세 필터</h4>
 		        <span id="filter-layer-badge" style="font-size:11px; color:#fff; background:#0051af; padding:2px 7px; border-radius:10px; margin-left:8px;">A 데이터</span>
@@ -535,6 +613,31 @@
 		<script src="data/F_data.js"></script>
 		<script src="data/G_data.js"></script>
         <script>
+		// ========== 사이드바 토글 ==========
+		var sidebarOpen = true;
+		function toggleSidebar() {
+		    sidebarOpen = !sidebarOpen;
+		    var dashboard = document.getElementById('side-dashboard');
+		    var btn = document.getElementById('sidebar-toggle-btn');
+
+		    if (sidebarOpen) {
+		        document.body.classList.remove('sidebar-collapsed');
+		        dashboard.classList.remove('collapsed');
+		        btn.textContent = '◀';
+		        btn.title = '사이드바 접기';
+		    } else {
+		        document.body.classList.add('sidebar-collapsed');
+		        dashboard.classList.add('collapsed');
+		        btn.textContent = '▶';
+		        btn.title = '사이드바 펼치기';
+		    }
+
+		    // Leaflet 지도 크기 재계산
+		    setTimeout(function() {
+		        if (window.map) map.invalidateSize();
+		    }, 350);
+		}
+
         var map = L.map('map', {
             zoomControl:false, maxZoom:28, minZoom:1
         }).fitBounds([[37.43966984122166,126.86818683641245],[37.6101521616503,127.1412179712234]]);
@@ -617,7 +720,6 @@
         });
 
         // ========== 줌 레벨별 라벨 크기 조정 ==========
-        // 줌 레벨:  ~10(시도) / 11~12(시군구) / 13~14(읍면동) / 15~16(동네) / 17~18(건물) / 19+(상세)
         var labelScaleConfig = [
             { maxZoom: 9,  scale: 0.45, fontMain: '8px',  fontPrice: '9px',  padding: '3px 5px',  minW: '40px',  maxW: '100px' },
             { maxZoom: 10, scale: 0.55, fontMain: '9px',  fontPrice: '10px', padding: '4px 6px',  minW: '50px',  maxW: '120px' },
@@ -704,7 +806,6 @@
             });
         }
 
-        // ★★★ 수정 1: interactive: true 추가 ★★★
         function bindDraggableTooltip(layer, content, className, defaultOffset) {
             var offset = getStoredOffset(layer.feature, defaultOffset);
             layer.bindTooltip(content, { permanent: true, direction: 'top', className: className, offset: offset, interactive: true });
@@ -755,7 +856,6 @@
 		    }
 		};
 
-		// E 데이터용 필드 설정 (오피스 거래사례)
 		var labelFieldConfig_E_data = {
 		    fields: ["빌딩명", "권역", "지번주소", "사용승인일", "거래면적(평)", "거래가격(원)", "평당 거래가격(원)", "매도자", "매수자", "평당 보증금", "평당 임대료", "평당 관리비"],
 		    visible: {
@@ -766,7 +866,6 @@
 		    }
 		};
 
-		// F 데이터용 필드 설정 (호텔 거래사례)
 		var labelFieldConfig_F_data = {
 		    fields: ["호텔명", "소재지", "성급", "거래일자", "매매금액", "비고", "등기"],
 		    visible: {
@@ -775,7 +874,6 @@
 		    }
 		};
 
-		// G 데이터용 필드 설정 (골프장 거래사례)
 		var labelFieldConfig_G_data = {
 		    fields: ["골프장명(인수 후 명칭)", "세부주소", "운영방식", "홀수", "거래 월", "거래금액", "홀당단가", "매도자", "매수자", "거래방식"],
 		    visible: {
@@ -857,7 +955,6 @@
 		    return '<div class="custom-tooltip-box">' + activeFields.join('') + '</div>';
 		}
 
-		// E 데이터용 라벨 (오피스 - 청록)
 		function buildLabelContent_E_data(feature) {
 		    var cfg = labelFieldConfig_E_data;
 		    var p = feature.properties;
@@ -890,7 +987,6 @@
 		    return '<div class="custom-tooltip-box">' + activeFields.join('') + '</div>';
 		}
 
-		// F 데이터용 라벨 (호텔 - 핑크)
 		function buildLabelContent_F_data(feature) {
 		    var cfg = labelFieldConfig_F_data;
 		    var p = feature.properties;
@@ -913,7 +1009,6 @@
 		    return '<div class="custom-tooltip-box">' + activeFields.join('') + '</div>';
 		}
 
-		// G 데이터용 라벨 (골프장 - 황금)
 		function buildLabelContent_G_data(feature) {
 		    var cfg = labelFieldConfig_G_data;
 		    var p = feature.properties;
@@ -957,13 +1052,11 @@
 		    var props = feature.properties || {};
 		    var rows = '';
 
-		    // 마커 고유 ID 생성
 		    var markerId = props['감정서번호'] || props['빌딩명'] || props['호텔명'] ||
 		        props['골프장명(인수 후 명칭)'] || props['물류센터명'] || props['명칭'] ||
 		        props['소재지(통'] || (props['위도'] + '_' + props['경도']) || '';
 		    markerId = String(markerId).trim().replace(/[^a-zA-Z0-9가-힣_\-]/g, '_');
 
-		    // 이미지
 		    if (props['감정서번호']) {
 		        var id = String(props['감정서번호']).trim();
 		        var imgPath = "images/" + id + ".jpg";
@@ -974,7 +1067,6 @@
 		            '</td></tr>';
 		    }
 
-		    // 데이터 필드
 		    var cfg = popupFieldConfig_map_data;
 		    for (var i = 0; i < cfg.fields.length; i++) {
 		        var key = cfg.fields[i];
@@ -984,7 +1076,6 @@
 		        rows += '<tr><th style="min-width:80px; text-align:left;">' + key + '</th><td>' + fmt(val) + '</td></tr>';
 		    }
 
-		    // 파일 첨부 영역
 		    var attachHtml =
 		        '<tr><td colspan="2" style="padding-top:10px; border-top:2px solid #e2e8f0;">' +
 		        '<div id="attach-area-' + markerId + '" style="margin-top:4px;">' +
@@ -1002,7 +1093,6 @@
 		    var tableContent = rows
 		    tableContent += attachHtml;
 
-		    // 팝업 열릴 때 파일 목록 로드하는 스크립트 트리거
 		    setTimeout(function() { loadAttachList(markerId); }, 100);
 
 		    return '<table style="width:100%; border-collapse:collapse;">' + tableContent + '</table>';
@@ -1018,7 +1108,6 @@
                 if (!cfg.visible[key]) continue;
                 var v = props[key];
                 if (v === null || v === undefined || v === '') continue;
-                // 주소는 메인 타이틀로
                 if (key === '주소') {
                     activeFields.unshift('<div class="text-main" style="font-size:14px;">' + v + '</div>');
                 } else if (key === '상태') {
@@ -1126,7 +1215,6 @@
         var layer_labels_map_data = new LabelToggleLayer();
         layer_labels_map_data.addTo(map);
 
-		// ========== B/C/D/E/F/G 레이어 생성 ==========
 		var layer_B_data_0 = new L.geoJson(json_B_data_0, {
 		    onEachFeature: function(feature, layer) {
 		        pop_map_data(feature, layer);
@@ -1157,7 +1245,6 @@
 		    }
 		});
 
-		// E 데이터 레이어 (오피스 - 청록)
 		var layer_E_data_0 = new L.geoJson(json_E_data_0, {
 		    onEachFeature: function(feature, layer) {
 		        pop_map_data(feature, layer);
@@ -1168,7 +1255,6 @@
 		    }
 		});
 
-		// F 데이터 레이어 (호텔 - 핑크)
 		var layer_F_data_0 = new L.geoJson(json_F_data_0, {
 		    onEachFeature: function(feature, layer) {
 		        pop_map_data(feature, layer);
@@ -1179,7 +1265,6 @@
 		    }
 		});
 
-		// G 데이터 레이어 (골프장 - 황금)
 		var layer_G_data_0 = new L.geoJson(json_G_data_0, {
 		    onEachFeature: function(feature, layer) {
 		        pop_map_data(feature, layer);
@@ -1190,7 +1275,6 @@
 		    }
 		});
 
-        // ========== 통합 컨트롤 ==========
         var baseMaps = {};
         var overlays = {
             '중앙 공통접수건': layer_map_data,
@@ -1206,7 +1290,6 @@
             baseMaps, overlays, { collapsed: false, position: 'topright' }
         ).addTo(map);
 
-		// ========== 라벨 필드 토글 컨트롤 ==========
         (function addLabelFieldToggleControl() {
             var Control = L.Control.extend({
                 options: { position: 'topright' },
@@ -1246,7 +1329,6 @@
                             cfg = labelFieldConfig_map_data; targetLayer = layer_map_data; buildFunc = buildLabelContent_map_data;
                         }
 
-						// ★★★ 수정 2: refresh() 내 interactive: true 로 변경 ★★★
 						function refresh() {
 						    targetLayer.eachLayer(function(lyr) {
 						        lyr.unbindTooltip();
@@ -1269,7 +1351,6 @@
 						            });
 						        }
 						    });
-						    // resetLabels 비활성화: 모든 라벨이 항상 표시되도록 함
 						    setTimeout(updateAllConnectors, 200);
 						}
 
@@ -1313,15 +1394,12 @@
         
         setBounds();
         var i = 0;
-        // ★★★ 수정 3: layer_map_data 초기 바인딩에 interactive: true 추가 ★★★
         layer_map_data.eachLayer(function(layer) {
             var offset = getStoredOffset(layer.feature, [0, -16]);
             layer.bindTooltip(buildLabelContent_map_data(layer.feature), {permanent: true, offset: offset, className: 'css_map_data_A', interactive: true});
             layer.on('tooltipopen', function() { setTimeout(function() { makeDraggableTooltip(layer); }, 50); });
-            // labelgun 등록 비활성화: 모든 라벨이 항상 표시되도록 함
         });
 
-        // 초기 연결선 렌더링
         setTimeout(updateAllConnectors, 300);
 
 		// ========== 필터 설정 ==========
@@ -1437,7 +1515,6 @@
 		    document.getElementById('filter-result-count').innerText = '';
 		}
 		
-		// 숫자 파싱 헬퍼
 		function parseFilterNumber(str) {
 		    if (!str || str === '-') return null;
 		    var cleaned = String(str).replace(/[,\s원평억Py㎡]/g, '');
@@ -2033,7 +2110,6 @@
 
 		    var allResults = [];
 
-		    // 주소 검색
 		    geocoder.addressSearch(query, function(result, status) {
 		        if (status === kakao.maps.services.Status.OK) {
 		            result.forEach(function(r) {
@@ -2048,7 +2124,6 @@
 		            });
 		        }
 
-		        // 키워드 검색 (장소)
 		        places.keywordSearch(query, function(result2, status2) {
 		            if (status2 === kakao.maps.services.Status.OK) {
 		                result2.forEach(function(r) {
@@ -2101,13 +2176,12 @@
 
 		    function renderResult() {
 		        done++;
-		        if (done < 2) return; // 두 요청 모두 완료 후 렌더링
+		        if (done < 2) return;
 
 		        var html = '<div style="font-size:12px;">';
 		        html += '<div style="font-weight:bold; font-size:14px; margin-bottom:8px; padding-bottom:6px; border-bottom:2px solid #0051af;">' + name + '</div>';
 		        if (pnuCode) html += '<div style="font-size:10px; color:#888; margin-bottom:8px;">PNU: ' + pnuCode + '</div>';
 
-		        // 토지특성
 		        if (landData && !landData.error) {
 		            html += '<div style="font-weight:bold; color:#0051af; margin-bottom:4px;">🏞️ 토지특성</div>';
 		            html += '<table style="width:100%; border-collapse:collapse; margin-bottom:10px; font-size:11px;">';
@@ -2130,7 +2204,6 @@
 		            html += '<div style="color:#888; margin-bottom:8px;">🏞️ 토지특성: ' + (landData ? landData.error : '조회 실패') + '</div>';
 		        }
 
-		        // 건축물대장
 		        var blds = (bldData && bldData.buildings) ? bldData.buildings : [];
 		        if (blds.length > 0) {
 		            html += '<div style="font-weight:bold; color:#0051af; margin-bottom:4px;">🏢 건축물대장 (' + blds.length + '건)</div>';
@@ -2168,7 +2241,6 @@
 		        addrSearchMarker.openPopup();
 		    }
 
-		    // ① 건축물대장 (PythonAnywhere 경유)
 		    fetch(BUILDING_API + '/api/parcel-info', {
 		        method: 'POST',
 		        headers: { 'Content-Type': 'application/json' },
@@ -2178,7 +2250,6 @@
 		    .then(function(data) {
 		        bldData = data;
 		        pnuCode = data.pnu || '';
-		        // PNU 받은 후 토지특성 조회 시작
 		        if (pnuCode) {
 		            queryLandDirect(pnuCode);
 		        } else {
@@ -2190,11 +2261,10 @@
 		    .catch(function(err) {
 		        bldData = { error: '서버 연결 실패: ' + err.message };
 		        landData = { error: '서버 연결 실패' };
-		        done = 1; // 토지특성 스킵
+		        done = 1;
 		        renderResult();
 		    });
 
-		    // ② 토지특성 (프론트에서 직접 브이월드 호출)
 		    function queryLandDirect(pnu) {
 		        var url = 'https://api.vworld.kr/ned/data/getLandCharacteristics' +
 		            '?key=E333059C-5AF1-3959-9C69-99B588DBFB75' +
@@ -2308,7 +2378,6 @@
 		    if (badge) badge.remove();
 		}
 
-		// 초기 로드: 모든 레이어의 첨부파일 상태 확인
 		function checkAllAttachBadges() {
 		    var layers = [layer_map_data, layer_B_data_0, layer_C_data_0, layer_D_data_0, layer_E_data_0, layer_F_data_0, layer_G_data_0];
 		    layers.forEach(function(layerGroup) {
@@ -2319,7 +2388,6 @@
 		    });
 		}
 
-		// 업로드/삭제 후 뱃지 갱신
 		var _origUpload = uploadAttachFiles;
 		uploadAttachFiles = function(input, markerId) {
 		    _origUpload(input, markerId);
@@ -2331,7 +2399,6 @@
 		    setTimeout(checkAllAttachBadges, 1500);
 		};
 
-		// 페이지 로드 후 뱃지 체크
 		setTimeout(checkAllAttachBadges, 2000);
 		map.on('overlayadd', function() { setTimeout(checkAllAttachBadges, 500); });
 
