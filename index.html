@@ -193,20 +193,17 @@
 		    body.sidebar-collapsed #sidebar-toggle-btn {
 		        left: 0;
 		    }
-		    /* 필터 패널 & 주소 검색 위치 연동 */
+		    /* 필터 패널 반응형 */
 		    .filter-panel {
 		        left: calc(var(--sidebar-width) + 20px) !important;
-		        transition: left 0.3s ease;
+		        width: calc(100% - var(--sidebar-width) - 40px) !important;
+		        max-width: 1100px;
+		        transition: left 0.3s ease, width 0.3s ease;
+		        box-sizing: border-box;
 		    }
 		    body.sidebar-collapsed .filter-panel {
 		        left: 20px !important;
-		    }
-		    #addr-search-wrapper {
-		        left: calc(var(--sidebar-width) + 730px);
-		        transition: left 0.3s ease;
-		    }
-		    body.sidebar-collapsed #addr-search-wrapper {
-		        left: 730px;
+		        width: calc(100% - 40px) !important;
 		    }
 		    /* 로드뷰 패널 연동 */
 		    #roadview-panel {
@@ -484,17 +481,6 @@
 		</div>
         <div id="kakao-map"></div>
 		<div id="map"></div>
-		<!-- 주소 검색 -->
-		<div id="addr-search-wrapper" style="position:fixed; top:20px; z-index:2001;">
-		    <div style="display:flex; gap:4px;">
-		        <input type="text" id="addr-search-input" placeholder="주소 검색 (예: 강남구 역삼동, 부산 해운대)"
-		            style="width:280px; padding:10px 14px; border:2px solid #0051af; border-radius:10px; font-size:13px; box-shadow:0 2px 8px rgba(0,0,0,0.15); outline:none;"
-		            onkeydown="if(event.key==='Enter') searchAddress()">
-		        <button onclick="searchAddress()"
-		            style="padding:10px 14px; background:#0051af; color:white; border:none; border-radius:10px; font-size:13px; font-weight:bold; cursor:pointer; white-space:nowrap;">🔍</button>
-		    </div>
-		    <div id="addr-search-results" style="display:none; margin-top:4px; background:white; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.2); max-height:300px; overflow-y:auto; font-size:13px;"></div>
-		</div>
 		<!-- 로드뷰 패널 -->
 		<div id="roadview-panel" style="display:none; position:fixed; bottom:0; right:0; height:35%; z-index:2000; background:#000; border-top:3px solid #0051af;">
 		    <div style="position:absolute; top:0; left:0; right:0; height:32px; background:#0051af; display:flex; align-items:center; padding:0 12px; z-index:1;">
@@ -505,21 +491,21 @@
 		    <div id="roadview" style="position:absolute; top:32px; left:0; right:0; bottom:0;"></div>
 		</div>
 
-		<div class="filter-panel" style="position: fixed; top: 20px; z-index: 2000; background: white; padding: 10px 14px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 700px; font-family: sans-serif;">
-		    <div style="display: flex; align-items: center; margin-bottom: 8px;">
+		<div class="filter-panel" style="position: fixed; top: 20px; z-index: 2000; background: white; padding: 10px 14px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-family: sans-serif;">
+		    <div style="display: flex; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
 		        <h4 style="margin: 0; font-size: 13px; color: #333;">상세 필터</h4>
-		        <span id="filter-layer-badge" style="font-size:11px; color:#fff; background:#0051af; padding:2px 7px; border-radius:10px; margin-left:8px;">A 데이터</span>
+		        <span id="filter-layer-badge" style="font-size:11px; color:#fff; background:#0051af; padding:2px 7px; border-radius:10px;">A 데이터</span>
 		        <span id="filter-result-count" style="font-size:12px; color:#0051af; font-weight:bold; margin-left:auto;"></span>
-		        <button onclick="openBuildingSearchModal()" style="margin-left:10px; padding:4px 10px; background-color:#0051af; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold; font-size:11px; white-space:nowrap;">
+		        <button onclick="openBuildingSearchModal()" style="padding:4px 10px; background-color:#0051af; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold; font-size:11px; white-space:nowrap;">
 		            🏗️ 건축물 검색
 		        </button>
-		        <button onclick="exportToExcel()" style="margin-left:6px; padding:4px 10px; background-color:#28a745; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold; font-size:11px; white-space:nowrap;">
+		        <button onclick="exportToExcel()" style="padding:4px 10px; background-color:#28a745; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold; font-size:11px; white-space:nowrap;">
 		            📊 엑셀 저장
 		        </button>
 		    </div>
 		    <div id="dynamic-filter-inputs" style="display:flex; flex-wrap:wrap; gap:6px; align-items:flex-end;"></div>
-		    <div style="display:flex; align-items:center; gap:16px; margin-top:8px; padding-top:8px; border-top:1px solid #eee; flex-wrap:wrap;">
-		        <div style="display:flex; align-items:center; gap:10px; font-size:12px;">
+		    <div style="display:flex; align-items:center; gap:10px; margin-top:8px; padding-top:8px; border-top:1px solid #eee; flex-wrap:wrap;">
+		        <div style="display:flex; align-items:center; gap:8px; font-size:12px; flex-wrap:wrap;">
 		            <span style="font-size:11px; font-weight:bold; color:#555; white-space:nowrap;">🗺️ 지도</span>
 		            <label style="display:flex; align-items:center; gap:3px; cursor:pointer; white-space:nowrap;">
 		                <input type="checkbox" class="kakao-layer-toggle" data-type="USE_DISTRICT"> 지적편집도
@@ -534,7 +520,17 @@
 		        <div style="width:1px; height:18px; background:#ddd;"></div>
 		        <div style="display:flex; align-items:center; gap:6px; font-size:12px;">
 		            <span style="font-size:11px; font-weight:bold; color:#0051af; white-space:nowrap;">📂 GeoJSON</span>
-		            <input type="file" id="external-geojson-input" accept=".json,.geojson" style="font-size:11px;">
+		            <input type="file" id="external-geojson-input" accept=".json,.geojson" style="font-size:11px; max-width:160px;">
+		        </div>
+		        <div style="width:1px; height:18px; background:#ddd;"></div>
+		        <!-- 주소 검색 (필터 패널 내부 통합) -->
+		        <div style="display:flex; align-items:center; gap:4px; position:relative;">
+		            <input type="text" id="addr-search-input" placeholder="주소 검색"
+		                style="width:200px; padding:6px 10px; border:2px solid #0051af; border-radius:8px; font-size:12px; outline:none;"
+		                onkeydown="if(event.key==='Enter') searchAddress()">
+		            <button onclick="searchAddress()"
+		                style="padding:6px 10px; background:#0051af; color:white; border:none; border-radius:8px; font-size:12px; font-weight:bold; cursor:pointer; white-space:nowrap;">🔍</button>
+		            <div id="addr-search-results" style="display:none; position:absolute; top:100%; left:0; margin-top:4px; background:white; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.2); max-height:300px; overflow-y:auto; font-size:13px; width:320px; z-index:9999;"></div>
 		        </div>
 		    </div>
 		    <div id="external-label-controls"></div>
@@ -1770,7 +1766,177 @@
 		    });
 		}
 
-		// ========== 대시보드 업데이트 ==========
+		// ========== 대시보드 카드 시스템 ==========
+		var cardConfig = {
+		    G: {
+		        icon: '⛳', label: '골프장', color: '#d97706', priceColor: '#b45309', bg: '#fff',
+		        borderWidth: '4px', titleSize: '15px', priceSize: '16px',
+		        title: '골프장명(인수 후 명칭)',
+		        price: '거래금액',
+		        pricePrefix: '',
+		        tags: [
+		            { field: '대권역' },
+		            { field: '운영방식' },
+		            { field: '홀수', suffix: 'H' },
+		            { field: '홀당단가', prefix: '홀당: ', style: 'highlight', highlightBg: '#fef3c7', highlightColor: '#92400e', highlightBorder: '#fbbf24' }
+		        ],
+		        detect: function(p) { return p.hasOwnProperty('골프장명(인수 후 명칭)'); }
+		    },
+		    F: {
+		        icon: '🏨', label: '호텔', color: '#db2777', priceColor: '#db2777', bg: '#fff',
+		        borderWidth: '4px', titleSize: '15px', priceSize: '16px',
+		        title: '호텔명',
+		        price: '매매금액',
+		        pricePrefix: '',
+		        tags: [
+		            { field: '소재지' },
+		            { field: '성급', suffix: '성', style: 'accent', accentBg: '#fdf2f8', accentColor: '#9d174d', accentBorder: '#fbcfe8' },
+		            { field: '거래일자', style: 'muted' }
+		        ],
+		        detect: function(p) { return p.hasOwnProperty('호텔명'); }
+		    },
+		    E: {
+		        icon: '🏢', label: '오피스', color: '#0891b2', priceColor: '#0891b2', bg: '#fff',
+		        borderWidth: '4px', titleSize: '15px', priceSize: '16px',
+		        title: '빌딩명',
+		        price: '평당 거래가격(원)',
+		        pricePrefix: '평당 ',
+		        tags: [
+		            { field: '권역', style: 'accent', accentBg: '#ecfeff', accentColor: '#155e75', accentBorder: '#a5f3fc' },
+		            { field: '소재지' },
+		            { field: '거래면적(평)', suffix: '평' },
+		            { field: '거래시점(연도)', suffix: 'Q', suffixField: '거래시점(분기)', style: 'muted', format: function(p) { return p['거래시점(연도)'] + '.' + (p['거래시점(분기)'] || ''); } }
+		        ],
+		        detect: function(p) { return p.hasOwnProperty('빌딩명') && p.hasOwnProperty('평당 거래가격(원)'); }
+		    },
+		    D: {
+		        icon: '📦', label: '거래사례', color: '#9333ea', priceColor: '#16a34a', bg: '#fff',
+		        borderWidth: '4px', titleSize: '15px', priceSize: '16px',
+		        title: '명칭',
+		        price: '평당가격(원/평)',
+		        pricePrefix: '평당 ',
+		        tags: [
+		            { field: '소재지' },
+		            { field: '창고종류' },
+		            { field: '연면적(평)', suffix: '평' }
+		        ],
+		        detect: function(p) { return p.hasOwnProperty('명칭') && p.hasOwnProperty('평당가격(원/평)'); }
+		    },
+		    C: {
+		        icon: '🏭', label: '물류센터', color: '#ff6b35', priceColor: '#e53e3e', bg: '#fff',
+		        borderWidth: '4px', titleSize: '15px', priceSize: '16px',
+		        title: '물류센터명',
+		        price: '상온 계약월임대료(원/Py)',
+		        priceSuffix: '원/Py',
+		        pricePrefix: '',
+		        tags: [
+		            { field: '소재지' },
+		            { field: '구분' },
+		            { field: '연면적(Py)', suffix: ' Py' }
+		        ],
+		        detect: function(p) { return p.hasOwnProperty('물류센터명'); }
+		    },
+		    B: {
+		        icon: '🏠', label: '실시간 매물', color: '#3182ce', priceColor: '#e53e3e', bg: '#fff',
+		        borderWidth: '4px', titleSize: '15px', priceSize: '16px',
+		        title: '소재지(통',
+		        price: '의뢰금액',
+		        priceAlt: '의뢰금액(',
+		        pricePrefix: '',
+		        tags: [
+		            { field: '세부용도' },
+		            { field: '보증금/월', prefix: '보증/월: ' }
+		        ],
+		        detect: function(p) { return p.hasOwnProperty('소재지(통'); }
+		    },
+		    A: {
+		        icon: '📋', label: '기본 데이터', color: '#718096', priceColor: '#718096', bg: '#f7fafc',
+		        borderWidth: '4px', titleSize: '14px', priceSize: '12px',
+		        title: '주소',
+		        titleAlt: '건명',
+		        price: null, // A 타입은 가격 대신 info
+		        infoFormat: function(p) {
+		            return (p['물건종류'] || '') + ' | ' + (p['담당자'] ? '담당: ' + p['담당자'] : '담당자 미정');
+		        },
+		        tags: [],
+		        detect: function() { return true; } // 기본 fallback
+		    }
+		};
+
+		// 유형 순서 (우선순위 높은 순)
+		var cardTypeOrder = ['G', 'F', 'E', 'D', 'C', 'B', 'A'];
+
+		function detectCardType(p) {
+		    for (var i = 0; i < cardTypeOrder.length; i++) {
+		        var type = cardTypeOrder[i];
+		        if (cardConfig[type].detect(p)) return type;
+		    }
+		    return 'A';
+		}
+
+		function buildCardTag(tagCfg, p) {
+		    var val;
+		    if (tagCfg.format) {
+		        val = tagCfg.format(p);
+		    } else {
+		        val = p[tagCfg.field];
+		    }
+		    if (!val || val === '-') return '';
+
+		    var text = (tagCfg.prefix || '') + val + (tagCfg.suffix || '');
+		    var style = tagCfg.style || 'default';
+
+		    if (style === 'highlight') {
+		        return '<span style="background:' + (tagCfg.highlightBg || '#fef3c7') + '; color:' + (tagCfg.highlightColor || '#92400e') +
+		            '; padding:2px 6px; border-radius:4px; font-size:11px; border:1px dashed ' + (tagCfg.highlightBorder || '#fbbf24') + ';">' + text + '</span>';
+		    } else if (style === 'accent') {
+		        return '<span style="background:' + (tagCfg.accentBg || '#f1f5f9') + '; color:' + (tagCfg.accentColor || '#475569') +
+		            '; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid ' + (tagCfg.accentBorder || '#e2e8f0') + ';">' + text + '</span>';
+		    } else if (style === 'muted') {
+		        return '<span style="background:#f8fafc; color:#64748b; padding:2px 6px; border-radius:4px; font-size:11px; border:1px dashed #cbd5e1;">' + text + '</span>';
+		    } else {
+		        return '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">' + text + '</span>';
+		    }
+		}
+
+		function buildCard(type, p, leafletId) {
+		    var c = cardConfig[type];
+		    var titleVal = p[c.title] || (c.titleAlt ? p[c.titleAlt] : '') || '정보 없음';
+
+		    // 가격
+		    var priceHtml = '';
+		    if (c.price) {
+		        var priceVal = p[c.price] || (c.priceAlt ? p[c.priceAlt] : '') || '금액 미정';
+		        if (priceVal === '-') priceVal = '금액 미정';
+		        priceHtml = '<div style="color:' + c.priceColor + '; font-weight:800; font-size:' + c.priceSize + '; margin-top:6px;">' +
+		            (c.pricePrefix || '') + priceVal + (c.priceSuffix || '') + '</div>';
+		    } else if (c.infoFormat) {
+		        priceHtml = '<div style="font-size:' + c.priceSize + '; color:' + c.priceColor + '; margin-top:6px;">' +
+		            c.infoFormat(p) + '</div>';
+		    }
+
+		    // 태그
+		    var tagsHtml = '';
+		    if (c.tags && c.tags.length > 0) {
+		        var tagParts = [];
+		        c.tags.forEach(function(tagCfg) {
+		            var t = buildCardTag(tagCfg, p);
+		            if (t) tagParts.push(t);
+		        });
+		        if (tagParts.length > 0) {
+		            tagsHtml = '<div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;">' + tagParts.join('') + '</div>';
+		        }
+		    }
+
+		    return '<div class="list-item type-' + type.toLowerCase() + '" onclick="focusAnyMarker(' + leafletId + ')" ' +
+		        'style="padding:16px; border-bottom:1px solid #edf2f7; border-left:' + c.borderWidth + ' solid ' + c.color + '; background:' + c.bg + '; cursor:pointer; margin-bottom:4px;">' +
+		        '<div style="font-size:11px; color:' + c.color + '; font-weight:bold; margin-bottom:4px;">' + c.icon + ' ' + c.label + '</div>' +
+		        '<div style="font-weight:bold; font-size:' + c.titleSize + '; color:#2d3748;">' + titleVal + '</div>' +
+		        priceHtml +
+		        tagsHtml +
+		        '</div>';
+		}
+
 		function updateDashboard() {
 		    var listContainer = document.getElementById('list-container');
 		    var countElement = document.getElementById('list-count');
@@ -1783,101 +1949,8 @@
 		        if ((layer instanceof L.CircleMarker || layer instanceof L.Marker) && layer.feature && bounds.contains(layer.getLatLng())) {
 		            var p = layer.feature.properties;
 		            count++;
-
-		            var isTypeG = p.hasOwnProperty('골프장명(인수 후 명칭)');
-		            var isTypeF = p.hasOwnProperty('호텔명');
-		            var isTypeE = p.hasOwnProperty('빌딩명') && p.hasOwnProperty('평당 거래가격(원)');
-		            var isTypeD = p.hasOwnProperty('명칭') && p.hasOwnProperty('평당가격(원/평)');
-		            var isTypeC = p.hasOwnProperty('물류센터명');
-		            var isTypeB = p.hasOwnProperty('소재지(통');
-
-		            if (isTypeG) {
-		                listHtml +=
-		                    '<div class="list-item type-g" onclick="focusAnyMarker(' + layer._leaflet_id + ')" ' +
-		                    'style="padding:16px; border-bottom:1px solid #edf2f7; border-left:4px solid #d97706; background:#fff; cursor:pointer; margin-bottom:4px;">' +
-		                    '<div style="font-size:11px; color:#d97706; font-weight:bold; margin-bottom:4px;">⛳ 골프장</div>' +
-		                    '<div class="title" style="font-weight:bold; font-size:15px; color:#2d3748;">' + (p['골프장명(인수 후 명칭)'] || '정보 없음') + '</div>' +
-		                    '<div class="price" style="color:#b45309; font-weight:800; font-size:16px; margin-top:6px;">' +
-		                    (p['거래금액'] && p['거래금액'] !== '-' ? p['거래금액'] : '금액 미정') + '</div>' +
-		                    '<div class="info" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;">' +
-		                    (p['대권역'] ? '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">' + p['대권역'] + '</span>' : '') +
-		                    (p['운영방식'] ? '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">' + p['운영방식'] + '</span>' : '') +
-		                    (p['홀수'] ? '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">' + p['홀수'] + 'H</span>' : '') +
-		                    (p['홀당단가'] && p['홀당단가'] !== '-' ? '<span style="background:#fef3c7; color:#92400e; padding:2px 6px; border-radius:4px; font-size:11px; border:1px dashed #fbbf24;">홀당: ' + p['홀당단가'] + '</span>' : '') +
-		                    '</div></div>';
-		            } else if (isTypeF) {
-		                listHtml +=
-		                    '<div class="list-item type-f" onclick="focusAnyMarker(' + layer._leaflet_id + ')" ' +
-		                    'style="padding:16px; border-bottom:1px solid #edf2f7; border-left:4px solid #db2777; background:#fff; cursor:pointer; margin-bottom:4px;">' +
-		                    '<div style="font-size:11px; color:#db2777; font-weight:bold; margin-bottom:4px;">🏨 호텔</div>' +
-		                    '<div class="title" style="font-weight:bold; font-size:15px; color:#2d3748;">' + (p['호텔명'] || '정보 없음') + '</div>' +
-		                    '<div class="price" style="color:#db2777; font-weight:800; font-size:16px; margin-top:6px;">' +
-		                    (p['매매금액'] || '금액 미정') + '</div>' +
-		                    '<div class="info" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;">' +
-		                    (p['소재지'] ? '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">' + p['소재지'] + '</span>' : '') +
-		                    (p['성급'] ? '<span style="background:#fdf2f8; color:#9d174d; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #fbcfe8;">' + p['성급'] + '성</span>' : '') +
-		                    (p['거래일자'] ? '<span style="background:#f8fafc; color:#64748b; padding:2px 6px; border-radius:4px; font-size:11px; border:1px dashed #cbd5e1;">' + p['거래일자'] + '</span>' : '') +
-		                    '</div></div>';
-		            } else if (isTypeE) {
-		                listHtml +=
-		                    '<div class="list-item type-e" onclick="focusAnyMarker(' + layer._leaflet_id + ')" ' +
-		                    'style="padding:16px; border-bottom:1px solid #edf2f7; border-left:4px solid #0891b2; background:#fff; cursor:pointer; margin-bottom:4px;">' +
-		                    '<div style="font-size:11px; color:#0891b2; font-weight:bold; margin-bottom:4px;">🏢 오피스</div>' +
-		                    '<div class="title" style="font-weight:bold; font-size:15px; color:#2d3748;">' + (p['빌딩명'] || '정보 없음') + '</div>' +
-		                    '<div class="price" style="color:#0891b2; font-weight:800; font-size:16px; margin-top:6px;">' +
-		                    '평당 ' + (p['평당 거래가격(원)'] || '미정') + '</div>' +
-		                    '<div class="info" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;">' +
-		                    (p['권역'] ? '<span style="background:#ecfeff; color:#155e75; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #a5f3fc;">' + p['권역'] + '</span>' : '') +
-		                    (p['소재지'] ? '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">' + p['소재지'] + '</span>' : '') +
-		                    (p['거래면적(평)'] ? '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">' + p['거래면적(평)'] + '평</span>' : '') +
-		                    (p['거래시점(연도)'] ? '<span style="background:#f8fafc; color:#64748b; padding:2px 6px; border-radius:4px; font-size:11px; border:1px dashed #cbd5e1;">' + p['거래시점(연도)'] + '.' + p['거래시점(분기)'] + 'Q</span>' : '') +
-		                    '</div></div>';
-		            } else if (isTypeD) {
-		                listHtml +=
-		                    '<div class="list-item type-d" onclick="focusAnyMarker(' + layer._leaflet_id + ')" ' +
-		                    'style="padding:16px; border-bottom:1px solid #edf2f7; border-left:4px solid #9333ea; background:#fff; cursor:pointer; margin-bottom:4px;">' +
-		                    '<div style="font-size:11px; color:#9333ea; font-weight:bold; margin-bottom:4px;">거래사례</div>' +
-		                    '<div class="title" style="font-weight:bold; font-size:15px; color:#2d3748;">' + (p['명칭'] || '정보 없음') + '</div>' +
-		                    '<div class="price" style="color:#16a34a; font-weight:800; font-size:16px; margin-top:6px;">평당 ' + (p['평당가격(원/평)'] || '금액 미정') + '</div>' +
-		                    '<div class="info" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;">' +
-		                    (p['소재지'] ? '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">' + p['소재지'] + '</span>' : '') +
-		                    (p['창고종류'] ? '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">' + p['창고종류'] + '</span>' : '') +
-		                    (p['연면적(평)'] ? '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">' + p['연면적(평)'] + '평</span>' : '') +
-		                    '</div></div>';
-		            } else if (isTypeC) {
-		                listHtml +=
-		                    '<div class="list-item type-c" onclick="focusAnyMarker(' + layer._leaflet_id + ')" ' +
-		                    'style="padding:16px; border-bottom:1px solid #edf2f7; border-left:4px solid #ff6b35; background:#fff; cursor:pointer; margin-bottom:4px;">' +
-		                    '<div style="font-size:11px; color:#ff6b35; font-weight:bold; margin-bottom:4px;">물류센터</div>' +
-		                    '<div class="title" style="font-weight:bold; font-size:15px; color:#2d3748;">' + (p['물류센터명'] || '정보 없음') + '</div>' +
-		                    '<div class="price" style="color:#e53e3e; font-weight:800; font-size:16px; margin-top:6px;">' +
-		                    (p['상온 계약월임대료(원/Py)'] ? p['상온 계약월임대료(원/Py)'] + '원/Py' : '금액 미정') + '</div>' +
-		                    '<div class="info" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;">' +
-		                    (p['소재지'] ? '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">' + p['소재지'] + '</span>' : '') +
-		                    (p['구분'] ? '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">' + p['구분'] + '</span>' : '') +
-		                    (p['연면적(Py)'] ? '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">' + p['연면적(Py)'] + ' Py</span>' : '') +
-		                    '</div></div>';
-		            } else if (isTypeB) {
-		                listHtml +=
-		                    '<div class="list-item type-b" onclick="focusAnyMarker(' + layer._leaflet_id + ')" ' +
-		                    'style="padding:16px; border-bottom:1px solid #edf2f7; border-left:4px solid #3182ce; background:#fff; cursor:pointer; margin-bottom:4px;">' +
-		                    '<div style="font-size:11px; color:#3182ce; font-weight:bold; margin-bottom:4px;">실시간 매물</div>' +
-		                    '<div class="title" style="font-weight:bold; font-size:15px; color:#2d3748;">' + (p['소재지(통'] || '주소 정보 없음') + '</div>' +
-		                    '<div class="price" style="color:#e53e3e; font-weight:800; font-size:16px; margin-top:6px;">' + (p['의뢰금액'] || p['의뢰금액('] || '금액 미정') + '</div>' +
-		                    '<div class="info" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;">' +
-		                    (p['세부용도'] ? '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">' + p['세부용도'] + '</span>' : '') +
-		                    (p['보증금/월'] ? '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:11px; border:1px solid #e2e8f0;">보증/월: ' + p['보증금/월'] + '</span>' : '') +
-		                    '</div></div>';
-		            } else {
-		                listHtml +=
-		                    '<div class="list-item type-a" onclick="focusAnyMarker(' + layer._leaflet_id + ')" ' +
-		                    'style="padding:16px; border-bottom:1px solid #edf2f7; border-left:4px solid #718096; background:#f7fafc; cursor:pointer; margin-bottom:4px;">' +
-		                    '<div style="font-size:11px; color:#718096; font-weight:bold; margin-bottom:4px;">기본 데이터</div>' +
-		                    '<div class="title" style="font-weight:bold; font-size:14px; color:#4a5568;">' + (p['주소'] || p['건명'] || '정보 없음') + '</div>' +
-		                    '<div class="info" style="font-size:12px; color:#718096; margin-top:6px;">' +
-		                    (p['물건종류'] || '') + ' | ' + (p['담당자'] ? '담당: ' + p['담당자'] : '담당자 미정') +
-		                    '</div></div>';
-		            }
+		            var type = detectCardType(p);
+		            listHtml += buildCard(type, p, layer._leaflet_id);
 		        }
 		    });
 
