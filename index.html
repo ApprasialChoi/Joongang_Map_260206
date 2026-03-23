@@ -196,23 +196,36 @@
 		    .tb-sub { display: none; margin-top: 6px; padding-top: 6px; border-top: 1px solid #eee; }
 		    .tb-sub.open { display: flex; }
 
-		    /* 블럭2 - 데이터유형 */
+		    /* 블럭2 - 우측 상단 데이터유형 패널 */
+		    #block2 {
+		        position: fixed; top: 12px; right: 12px; z-index: 2000;
+		        background: rgba(255,255,255,0.97); border-radius: 12px;
+		        box-shadow: 0 2px 12px rgba(0,0,0,0.12); padding: 8px 10px;
+		        display: flex; flex-direction: column; gap: 4px;
+		        max-height: calc(100vh - 24px); overflow-y: auto;
+		        font-family: 'Segoe UI', sans-serif;
+		    }
 		    .dt-chip {
-		        display: inline-flex; align-items: center; gap: 4px; padding: 5px 12px;
-		        border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer;
+		        display: flex; align-items: center; gap: 6px; padding: 6px 12px;
+		        border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer;
 		        border: 1.5px solid #e2e8f0; background: #fff; color: #64748b;
 		        transition: all 0.15s; user-select: none; white-space: nowrap;
+		        position: relative;
 		    }
-		    .dt-chip:hover { border-color: #94a3b8; }
+		    .dt-chip:hover { border-color: #94a3b8; background: #f8fafc; }
 		    .dt-chip.selected { background: #fef2f2; color: #dc2626; border-color: #fca5a5; font-weight: 700; }
 		    .dt-chip .dt-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-		    .tb-label-toggle { display: none; margin-top: 6px; padding-top: 6px; border-top: 1px solid #eee; }
-		    .tb-label-toggle.open { display: block; }
-		    .tb-label-toggle .lt-row { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
-		    .tb-label-toggle label { display: flex; align-items: center; gap: 3px; font-size: 11px; cursor: pointer; user-select: none; }
-		    .lt-actions { display: flex; gap: 4px; margin-bottom: 4px; }
-		    .lt-actions button { font-size: 10px; padding: 2px 8px; border: 1px solid #ddd; border-radius: 4px; background: #fff; cursor: pointer; }
-		    .lt-actions button:hover { background: #f0f7ff; }
+		    /* 라벨 필드 플라이아웃 (칩 왼쪽으로 나옴) */
+		    .label-flyout {
+		        display: none; position: absolute; top: 0; right: calc(100% + 8px);
+		        background: #fff; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+		        padding: 10px 12px; min-width: 160px; max-width: 220px; z-index: 2001;
+		        font-size: 11px;
+		    }
+		    .label-flyout.open { display: block; }
+		    .label-flyout .lf-title { font-weight: 700; font-size: 12px; margin-bottom: 6px; color: #334155; border-bottom: 1px solid #eee; padding-bottom: 4px; }
+		    .label-flyout label { display: flex; align-items: center; gap: 4px; padding: 2px 0; cursor: pointer; user-select: none; color: #475569; }
+		    .label-flyout label:hover { color: #0051af; }
 
 		    /* 블럭3 - 상세필터 */
 		    #filter-result-count { font-size: 12px; color: #0051af; font-weight: bold; margin-left: auto; }
@@ -515,19 +528,6 @@
 		        </div>
 		    </div>
 
-		    <!-- 블럭2: 데이터 유형 선택 + 라벨 필드 토글 -->
-		    <div class="tb-block" id="block2">
-		        <div class="tb-row" id="data-type-chips"></div>
-		        <div class="tb-label-toggle" id="label-toggle-area">
-		            <div class="lt-actions">
-		                <button onclick="labelToggleAll(true)">전체 선택</button>
-		                <button onclick="labelToggleAll(false)">전체 해제</button>
-		                <button onclick="resetLabelPositions()" style="color:#dc2626;">위치 초기화</button>
-		            </div>
-		            <div class="lt-row" id="label-toggle-list"></div>
-		        </div>
-		    </div>
-
 		    <!-- 블럭3: 상세 필터 -->
 		    <div class="tb-block" id="block3">
 		        <div class="tb-row">
@@ -537,6 +537,11 @@
 		        </div>
 		        <div id="dynamic-filter-inputs" style="display:flex; flex-wrap:wrap; gap:6px; align-items:flex-end; margin-top:6px;"></div>
 		    </div>
+		</div>
+
+		<!-- 블럭2: 우측 상단 데이터 유형 패널 (독립 배치) -->
+		<div id="block2">
+		    <div id="data-type-chips"></div>
 		</div>
 
 		<!-- 건축물 검색 모달 -->
@@ -1285,7 +1290,7 @@
             '골프장 거래사례': layer_G_data_0
         };
 
-        // ========== 커스텀 데이터유형 선택 (블럭2) ==========
+        // ========== 커스텀 데이터유형 선택 (우측 상단) ==========
         var dataTypeList = [
             { key: 'A', label: '중앙 공통접수건', color: '#85b66f', layer: layer_map_data },
             { key: 'B', label: 'CRA 중개매물', color: '#3388ff', layer: layer_B_data_0 },
@@ -1296,32 +1301,98 @@
             { key: 'G', label: '골프장 거래사례', color: '#d97706', layer: layer_G_data_0 }
         ];
 
-        // 초기: A만 활성화
+        var currentFlyoutKey = null; // 현재 열려있는 플라이아웃
+
         function buildDataTypeChips() {
             var container = document.getElementById('data-type-chips');
             container.innerHTML = '';
             dataTypeList.forEach(function(dt) {
-                var chip = document.createElement('span');
+                var chip = document.createElement('div');
                 chip.className = 'dt-chip' + (map.hasLayer(dt.layer) ? ' selected' : '');
                 chip.setAttribute('data-key', dt.key);
-                chip.innerHTML = '<span class="dt-dot" style="background:' + dt.color + ';"></span>' + dt.label;
-                chip.onclick = function() {
+                chip.innerHTML = '<span class="dt-dot" style="background:' + dt.color + ';"></span><span>' + dt.label + '</span>';
+
+                // 플라이아웃 (라벨 필드 토글)
+                var flyout = document.createElement('div');
+                flyout.className = 'label-flyout';
+                flyout.id = 'flyout-' + dt.key;
+                chip.appendChild(flyout);
+
+                chip.onclick = function(e) {
+                    // 플라이아웃 내부 클릭 무시
+                    if (e.target.closest('.label-flyout')) return;
+
+                    // 레이어 토글
                     if (map.hasLayer(dt.layer)) {
-                        if (dt.key === 'A') return; // A는 항상 유지
-                        map.removeLayer(dt.layer);
-                        chip.classList.remove('selected');
+                        if (dt.key === 'A') {
+                            // A는 레이어 제거 안 함, 플라이아웃만 토글
+                        } else {
+                            map.removeLayer(dt.layer);
+                            chip.classList.remove('selected');
+                            closeFlyout(dt.key);
+                            onDataTypeChanged();
+                            return;
+                        }
                     } else {
                         map.addLayer(dt.layer);
                         chip.classList.add('selected');
+                        onDataTypeChanged();
                     }
-                    onDataTypeChanged();
+
+                    // 플라이아웃 토글
+                    if (currentFlyoutKey === dt.key) {
+                        closeFlyout(dt.key);
+                    } else {
+                        closeAllFlyouts();
+                        openFlyout(dt.key);
+                    }
                 };
+
                 container.appendChild(chip);
             });
         }
 
+        function openFlyout(key) {
+            var flyout = document.getElementById('flyout-' + key);
+            if (!flyout) return;
+            var info = labelToggleLookup[key];
+            if (!info) return;
+
+            var cfg = info.cfg;
+            var html = '<div class="lf-title">라벨 필드</div>';
+            cfg.fields.forEach(function(field) {
+                html += '<label><input type="checkbox" data-field="' + field + '" ' + 
+                    (cfg.visible[field] ? 'checked' : '') + '> ' + field + '</label>';
+            });
+            flyout.innerHTML = html;
+            flyout.classList.add('open');
+            currentFlyoutKey = key;
+
+            // 체크박스 이벤트
+            flyout.querySelectorAll('input[type=checkbox]').forEach(function(chk) {
+                chk.addEventListener('change', function() {
+                    cfg.visible[this.getAttribute('data-field')] = this.checked;
+                    refreshLabels(info);
+                });
+            });
+        }
+
+        function closeFlyout(key) {
+            var flyout = document.getElementById('flyout-' + key);
+            if (flyout) flyout.classList.remove('open');
+            if (currentFlyoutKey === key) currentFlyoutKey = null;
+        }
+
+        function closeAllFlyouts() {
+            dataTypeList.forEach(function(dt) { closeFlyout(dt.key); });
+        }
+
+        // 플라이아웃 외부 클릭 시 닫기
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#block2')) closeAllFlyouts();
+        });
+
         function onDataTypeChanged() {
-            // 활성 필터 타입 결정
             if (map.hasLayer(layer_G_data_0)) activeFilterType = 'G';
             else if (map.hasLayer(layer_F_data_0)) activeFilterType = 'F';
             else if (map.hasLayer(layer_E_data_0)) activeFilterType = 'E';
@@ -1330,7 +1401,6 @@
             else if (map.hasLayer(layer_B_data_0)) activeFilterType = 'B';
             else activeFilterType = 'A';
             buildFilterInputs(activeFilterType);
-            updateLabelToggleUI();
             updateDashboard();
             // 칩 상태 동기화
             document.querySelectorAll('.dt-chip').forEach(function(c) {
@@ -1340,7 +1410,7 @@
             });
         }
 
-        // 라벨 필드 토글 (블럭2 하위)
+        // 라벨 필드 토글 룩업
         var labelToggleLookup = {
             A: { cfg: labelFieldConfig_map_data, layer: layer_map_data, build: buildLabelContent_map_data, cls: 'css_map_data_A' },
             B: { cfg: labelFieldConfig_B_data, layer: layer_B_data_0, build: buildLabelContent_B_data, cls: 'css_map_data_B' },
@@ -1350,15 +1420,6 @@
             F: { cfg: labelFieldConfig_F_data, layer: layer_F_data_0, build: buildLabelContent_F_data, cls: 'css_map_data_F' },
             G: { cfg: labelFieldConfig_G_data, layer: layer_G_data_0, build: buildLabelContent_G_data, cls: 'css_map_data_G' }
         };
-
-        function getActiveLabelInfo() {
-            var order = ['G','F','E','D','C','B','A'];
-            for (var i = 0; i < order.length; i++) {
-                var info = labelToggleLookup[order[i]];
-                if (map.hasLayer(info.layer)) return { key: order[i], info: info };
-            }
-            return { key: 'A', info: labelToggleLookup.A };
-        }
 
         function refreshLabels(info) {
             info.layer.eachLayer(function(lyr) {
@@ -1372,39 +1433,6 @@
             });
             setTimeout(updateAllConnectors, 200);
         }
-
-        function updateLabelToggleUI() {
-            var area = document.getElementById('label-toggle-area');
-            var list = document.getElementById('label-toggle-list');
-            var active = getActiveLabelInfo();
-            var cfg = active.info.cfg;
-            list.innerHTML = '';
-            cfg.fields.forEach(function(key) {
-                var lbl = document.createElement('label');
-                lbl.innerHTML = '<input type="checkbox" ' + (cfg.visible[key] ? 'checked' : '') + '> ' + key;
-                lbl.querySelector('input').addEventListener('change', function() {
-                    cfg.visible[key] = this.checked;
-                    refreshLabels(active.info);
-                });
-                list.appendChild(lbl);
-            });
-            area.classList.add('open');
-        }
-
-        window.labelToggleAll = function(val) {
-            var active = getActiveLabelInfo();
-            active.info.cfg.fields.forEach(function(k) { active.info.cfg.visible[k] = val; });
-            updateLabelToggleUI();
-            refreshLabels(active.info);
-        };
-
-        window.resetLabelPositions = function() {
-            tooltipOffsets = {};
-            Object.keys(connectorLines).forEach(function(k) { map.removeLayer(connectorLines[k]); });
-            connectorLines = {};
-            var active = getActiveLabelInfo();
-            refreshLabels(active.info);
-        };
 
         // 감정평가 하위 토글
         window.toggleAppraisalSub = function() {
@@ -1423,14 +1451,10 @@
             }
         });
 
-        // overlayadd/overlayremove 이벤트에서 칩 동기화
-        map.on('overlayadd overlayremove', function() {
-            onDataTypeChanged();
-        });
+        map.on('overlayadd overlayremove', function() { onDataTypeChanged(); });
 
         // 초기화
         buildDataTypeChips();
-        updateLabelToggleUI();
         
         setBounds();
         var i = 0;
