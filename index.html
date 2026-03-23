@@ -243,7 +243,8 @@
 		    .leaflet-tooltip.css_map_data_D,
 		    .leaflet-tooltip.css_map_data_E,
 		    .leaflet-tooltip.css_map_data_F,
-		    .leaflet-tooltip.css_map_data_G {
+		    .leaflet-tooltip.css_map_data_G,
+		    .leaflet-tooltip.css_map_data_H {
 		        background-color: transparent !important;
 		        border: none !important;
 		        box-shadow: none !important;
@@ -295,7 +296,8 @@
 		    .labels-hidden .css_map_data_D,
 		    .labels-hidden .css_map_data_E,
 		    .labels-hidden .css_map_data_F,
-		    .labels-hidden .css_map_data_G {
+		    .labels-hidden .css_map_data_G,
+		    .labels-hidden .css_map_data_H {
 		        display: none !important;
 		    }
 		    .leaflet-tooltip-top.css_map_data_A:before,
@@ -304,7 +306,8 @@
 		    .leaflet-tooltip-top.css_map_data_D:before,
 		    .leaflet-tooltip-top.css_map_data_E:before,
 		    .leaflet-tooltip-top.css_map_data_F:before,
-		    .leaflet-tooltip-top.css_map_data_G:before {
+		    .leaflet-tooltip-top.css_map_data_G:before,
+		    .leaflet-tooltip-top.css_map_data_H:before {
 		        display: none !important;
 		    }
 		    /* 드래그 가능 라벨 */
@@ -617,6 +620,7 @@
 		<script src="data/E_data.js"></script>
 		<script src="data/F_data.js"></script>
 		<script src="data/G_data.js"></script>
+		<script src="data/H_data.js"></script>
         <script>
 		// ========== 사이드바 토글 ==========
 		var sidebarOpen = true;
@@ -678,6 +682,7 @@
             else if (cls.indexOf('_E') !== -1) lineColor = '#0891b2';
             else if (cls.indexOf('_F') !== -1) lineColor = '#db2777';
             else if (cls.indexOf('_G') !== -1) lineColor = '#d97706';
+            else if (cls.indexOf('_H') !== -1) lineColor = '#059669';
 
             var markerLatLng = layer.getLatLng();
             var markerPt = map.latLngToContainerPoint(markerLatLng);
@@ -1280,6 +1285,54 @@
 		    }
 		});
 
+		// H 데이터 (토지건물 임대료)
+		var labelFieldConfig_H_data = {
+		    fields: ["소재지(지번)", "감정평가액(원)", "기준시점", "감정평가사", "보증금합계", "월임대료합계"],
+		    visible: {
+		        "소재지(지번)": true, "감정평가액(원)": true, "기준시점": true,
+		        "감정평가사": true, "보증금합계": true, "월임대료합계": true
+		    }
+		};
+
+		function formatKrw(val) {
+		    if (!val && val !== 0) return '';
+		    var n = Number(val);
+		    if (isNaN(n)) return String(val);
+		    if (n >= 100000000) return (n / 100000000).toFixed(1).replace(/\.0$/, '') + '억';
+		    if (n >= 10000) return (n / 10000).toFixed(0) + '만';
+		    return n.toLocaleString();
+		}
+
+		function buildLabelContent_H_data(feature) {
+		    var cfg = labelFieldConfig_H_data;
+		    var p = feature.properties;
+		    var parts = [];
+		    if (cfg.visible["소재지(지번)"] && p['소재지(지번)'])
+		        parts.push('<div class="text-main"><span style="color:#888; font-size:11px;">소재:</span> ' + p['소재지(지번)'] + '</div>');
+		    if (cfg.visible["감정평가액(원)"] && p['감정평가액(원)'])
+		        parts.push('<div class="text-price"><span style="color:#888; font-size:11px;">평가액:</span> ' + formatKrw(p['감정평가액(원)']) + '</div>');
+		    if (cfg.visible["기준시점"] && p['기준시점'])
+		        parts.push('<div class="text-main"><span style="color:#888; font-size:11px;">기준:</span> ' + p['기준시점'] + '</div>');
+		    if (cfg.visible["감정평가사"] && p['감정평가사'])
+		        parts.push('<div class="text-main"><span style="color:#888; font-size:11px;">평가사:</span> ' + p['감정평가사'] + '</div>');
+		    if (cfg.visible["보증금합계"] && p['보증금합계'])
+		        parts.push('<div class="text-main"><span style="color:#888; font-size:11px;">보증금:</span> ' + formatKrw(p['보증금합계']) + '</div>');
+		    if (cfg.visible["월임대료합계"] && p['월임대료합계'])
+		        parts.push('<div style="font-weight:900; color:#059669; font-size:15px; margin-top:6px; border-top:1px solid #edf2f7; padding-top:6px;"><span style="color:#888; font-size:11px;">월임대:</span> ' + formatKrw(p['월임대료합계']) + '</div>');
+		    if (!parts.length) return '';
+		    return '<div class="custom-tooltip-box" style="border-color:#059669 !important;">' + parts.join('') + '</div>';
+		}
+
+		var layer_H_data_0 = new L.geoJson(json_H_data_0, {
+		    onEachFeature: function(feature, layer) {
+		        pop_map_data(feature, layer);
+		        bindDraggableTooltip(layer, buildLabelContent_H_data(feature), 'css_map_data_H', [0, -10]);
+		    },
+		    pointToLayer: function (feature, latlng) {
+		        return L.circleMarker(latlng, { radius: 6, fillColor: "#059669", color: "#000", weight: 1, fillOpacity: 0.8 });
+		    }
+		});
+
         var baseMaps = {};
         var overlays = {
             '중앙 공통접수건': layer_map_data,
@@ -1299,7 +1352,8 @@
             { key: 'D', label: '물류창고 거래사례', color: '#9333ea', layer: layer_D_data_0 },
             { key: 'E', label: '오피스 임대료/거래', color: '#0891b2', layer: layer_E_data_0 },
             { key: 'F', label: '호텔 거래사례', color: '#db2777', layer: layer_F_data_0 },
-            { key: 'G', label: '골프장 거래사례', color: '#d97706', layer: layer_G_data_0 }
+            { key: 'G', label: '골프장 거래사례', color: '#d97706', layer: layer_G_data_0 },
+            { key: 'H', label: '토지건물 임대료', color: '#059669', layer: layer_H_data_0 }
         ];
 
         var currentFlyoutKey = null;
@@ -1387,7 +1441,8 @@
         }
 
         function onDataTypeChanged() {
-            if (map.hasLayer(layer_G_data_0)) activeFilterType = 'G';
+            if (map.hasLayer(layer_H_data_0)) activeFilterType = 'H';
+            else if (map.hasLayer(layer_G_data_0)) activeFilterType = 'G';
             else if (map.hasLayer(layer_F_data_0)) activeFilterType = 'F';
             else if (map.hasLayer(layer_E_data_0)) activeFilterType = 'E';
             else if (map.hasLayer(layer_D_data_0)) activeFilterType = 'D';
@@ -1408,7 +1463,8 @@
             D: { cfg: labelFieldConfig_D_data, layer: layer_D_data_0, build: buildLabelContent_D_data, cls: 'css_map_data_D' },
             E: { cfg: labelFieldConfig_E_data, layer: layer_E_data_0, build: buildLabelContent_E_data, cls: 'css_map_data_E' },
             F: { cfg: labelFieldConfig_F_data, layer: layer_F_data_0, build: buildLabelContent_F_data, cls: 'css_map_data_F' },
-            G: { cfg: labelFieldConfig_G_data, layer: layer_G_data_0, build: buildLabelContent_G_data, cls: 'css_map_data_G' }
+            G: { cfg: labelFieldConfig_G_data, layer: layer_G_data_0, build: buildLabelContent_G_data, cls: 'css_map_data_G' },
+            H: { cfg: labelFieldConfig_H_data, layer: layer_H_data_0, build: buildLabelContent_H_data, cls: 'css_map_data_H' }
         };
 
         function refreshLabels(info) {
@@ -1509,6 +1565,14 @@
 		        { field: '홀수',       placeholder: '예: 18' },
 		        { field: '거래금액',   type: 'range', placeholderMin: '최저(억)', placeholderMax: '최고(억)' },
 		        { field: '홀당단가',   type: 'range', placeholderMin: '최저(억)', placeholderMax: '최고(억)' }
+		    ],
+		    H: [
+		        { field: '소재지(지번)', placeholder: '예: 서울 강남' },
+		        { field: '감정평가액(원)', type: 'range', placeholderMin: '최저', placeholderMax: '최고' },
+		        { field: '기준시점', type: 'range', placeholderMin: '시작일', placeholderMax: '종료일' },
+		        { field: '감정평가사', placeholder: '예: 홍길동' },
+		        { field: '보증금합계', type: 'range', placeholderMin: '최저', placeholderMax: '최고' },
+		        { field: '월임대료합계', type: 'range', placeholderMin: '최저', placeholderMax: '최고' }
 		    ]
 		};
 		
@@ -1520,6 +1584,7 @@
 		    if (!container) return;
 
 		    var badgeMap = {
+		        H: { text: '토지건물 임대료', bg: '#059669' },
 		        G: { text: '골프장 거래사례', bg: '#d97706' },
 		        F: { text: '호텔 거래사례', bg: '#db2777' },
 		        E: { text: '오피스 임대료/거래', bg: '#0891b2' },
@@ -1609,7 +1674,7 @@
 		        if (rangeFilters[k].min === undefined && rangeFilters[k].max === undefined) delete rangeFilters[k];
 		    });
 
-		    var layerMap = { G: layer_G_data_0, F: layer_F_data_0, E: layer_E_data_0, D: layer_D_data_0, C: layer_C_data_0, B: layer_B_data_0, A: layer_map_data };
+		    var layerMap = { H: layer_H_data_0, G: layer_G_data_0, F: layer_F_data_0, E: layer_E_data_0, D: layer_D_data_0, C: layer_C_data_0, B: layer_B_data_0, A: layer_map_data };
 		    var targetLayer = layerMap[activeFilterType] || layer_map_data;
 		    var visibleCount = 0;
 
@@ -1657,6 +1722,7 @@
 		        return;
 		    }
 		    var layerMap = {
+		        H: { layer: layer_H_data_0, fileName: '토지건물임대료_검색결과' },
 		        G: { layer: layer_G_data_0, fileName: '골프장거래사례_검색결과' },
 		        F: { layer: layer_F_data_0, fileName: '호텔거래사례_검색결과' },
 		        E: { layer: layer_E_data_0, fileName: '오피스_검색결과' },
@@ -1702,6 +1768,25 @@
 		
 		// ========== 대시보드 카드 시스템 ==========
 		var cardConfig = {
+		    H: {
+		        icon: '🏘️', label: '토지건물 임대료', color: '#059669', priceColor: '#059669', bg: '#fff',
+		        borderWidth: '4px', titleSize: '14px', priceSize: '15px',
+		        title: '소재지(지번)',
+		        price: '감정평가액(원)',
+		        pricePrefix: '',
+		        priceFormat: function(v) { 
+		            var n = Number(v); if (isNaN(n)) return v;
+		            if (n >= 100000000) return (n/100000000).toFixed(1).replace(/\.0$/,'') + '억';
+		            if (n >= 10000) return (n/10000).toFixed(0) + '만';
+		            return n.toLocaleString();
+		        },
+		        tags: [
+		            { field: '기준시점', style: 'muted' },
+		            { field: '감정평가사' },
+		            { field: '월임대료합계', prefix: '월임대: ', format: function(p) { var n=Number(p['월임대료합계']); if(isNaN(n)||!n) return ''; if(n>=10000) return (n/10000).toFixed(0)+'만'; return n.toLocaleString(); } }
+		        ],
+		        detect: function(p) { return p.hasOwnProperty('파일명') && p.hasOwnProperty('감정평가액(원)'); }
+		    },
 		    G: {
 		        icon: '⛳', label: '골프장', color: '#d97706', priceColor: '#b45309', bg: '#fff',
 		        borderWidth: '4px', titleSize: '15px', priceSize: '16px',
@@ -1798,7 +1883,7 @@
 		};
 
 		// 유형 순서 (우선순위 높은 순)
-		var cardTypeOrder = ['G', 'F', 'E', 'D', 'C', 'B', 'A'];
+		var cardTypeOrder = ['H', 'G', 'F', 'E', 'D', 'C', 'B', 'A'];
 
 		function detectCardType(p) {
 		    for (var i = 0; i < cardTypeOrder.length; i++) {
@@ -1842,6 +1927,7 @@
 		    if (c.price) {
 		        var priceVal = p[c.price] || (c.priceAlt ? p[c.priceAlt] : '') || '금액 미정';
 		        if (priceVal === '-') priceVal = '금액 미정';
+		        if (c.priceFormat && priceVal !== '금액 미정') priceVal = c.priceFormat(priceVal);
 		        priceHtml = '<div style="color:' + c.priceColor + '; font-weight:800; font-size:' + c.priceSize + '; margin-top:6px;">' +
 		            (c.pricePrefix || '') + priceVal + (c.priceSuffix || '') + '</div>';
 		    } else if (c.infoFormat) {
@@ -2385,7 +2471,7 @@
 		}
 
 		function checkAllAttachBadges() {
-		    var layers = [layer_map_data, layer_B_data_0, layer_C_data_0, layer_D_data_0, layer_E_data_0, layer_F_data_0, layer_G_data_0];
+		    var layers = [layer_map_data, layer_B_data_0, layer_C_data_0, layer_D_data_0, layer_E_data_0, layer_F_data_0, layer_G_data_0, layer_H_data_0];
 		    layers.forEach(function(layerGroup) {
 		        if (!map.hasLayer(layerGroup)) return;
 		        layerGroup.eachLayer(function(layer) {
