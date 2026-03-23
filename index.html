@@ -1287,9 +1287,9 @@
 
 		// H 데이터 (토지건물 임대료)
 		var labelFieldConfig_H_data = {
-		    fields: ["소재지(지번)", "감정평가액(원)", "기준시점", "감정평가사", "보증금합계", "월임대료합계"],
+		    fields: ["감정서번호", "소재지(지번)", "감정평가액(원)", "기준시점", "감정평가사", "보증금합계", "월임대료합계"],
 		    visible: {
-		        "소재지(지번)": true, "감정평가액(원)": true, "기준시점": true,
+		        "감정서번호": true, "소재지(지번)": true, "감정평가액(원)": true, "기준시점": true,
 		        "감정평가사": true, "보증금합계": true, "월임대료합계": true
 		    }
 		};
@@ -1307,18 +1307,20 @@
 		    var cfg = labelFieldConfig_H_data;
 		    var p = feature.properties;
 		    var parts = [];
+		    if (cfg.visible["감정서번호"] && p['파일명'])
+		        parts.push('<div class="text-main"><span style="color:#888; font-size:11px;">감정서:</span> ' + p['파일명'] + '</div>');
 		    if (cfg.visible["소재지(지번)"] && p['소재지(지번)'])
 		        parts.push('<div class="text-main"><span style="color:#888; font-size:11px;">소재:</span> ' + p['소재지(지번)'] + '</div>');
 		    if (cfg.visible["감정평가액(원)"] && p['감정평가액(원)'])
-		        parts.push('<div class="text-price"><span style="color:#888; font-size:11px;">평가액:</span> ' + formatKrw(p['감정평가액(원)']) + '</div>');
+		        parts.push('<div class="text-price"><span style="color:#888; font-size:11px;">평가액:</span> ' + Number(p['감정평가액(원)']).toLocaleString() + '</div>');
 		    if (cfg.visible["기준시점"] && p['기준시점'])
 		        parts.push('<div class="text-main"><span style="color:#888; font-size:11px;">기준:</span> ' + p['기준시점'] + '</div>');
 		    if (cfg.visible["감정평가사"] && p['감정평가사'])
 		        parts.push('<div class="text-main"><span style="color:#888; font-size:11px;">평가사:</span> ' + p['감정평가사'] + '</div>');
 		    if (cfg.visible["보증금합계"] && p['보증금합계'])
-		        parts.push('<div class="text-main"><span style="color:#888; font-size:11px;">보증금:</span> ' + formatKrw(p['보증금합계']) + '</div>');
+		        parts.push('<div style="font-weight:900; color:#059669; font-size:15px; margin-top:6px; border-top:1px solid #edf2f7; padding-top:6px;"><span style="color:#888; font-size:11px;">보증금:</span> ' + Number(p['보증금합계']).toLocaleString() + '</div>');
 		    if (cfg.visible["월임대료합계"] && p['월임대료합계'])
-		        parts.push('<div style="font-weight:900; color:#059669; font-size:15px; margin-top:6px; border-top:1px solid #edf2f7; padding-top:6px;"><span style="color:#888; font-size:11px;">월임대:</span> ' + formatKrw(p['월임대료합계']) + '</div>');
+		        parts.push('<div style="font-weight:900; color:#059669; font-size:15px;"><span style="color:#888; font-size:11px;">월임대:</span> ' + Number(p['월임대료합계']).toLocaleString() + '</div>');
 		    if (!parts.length) return '';
 		    return '<div class="custom-tooltip-box" style="border-color:#059669 !important;">' + parts.join('') + '</div>';
 		}
