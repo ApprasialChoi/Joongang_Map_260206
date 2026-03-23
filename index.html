@@ -141,84 +141,88 @@
 		}
         </style>
 		<style>
-		    /* ========== 사이드바 토글 시스템 ========== */
-		    :root {
-		        --sidebar-width: 350px;
-		    }
+		    /* ========== 레이아웃 시스템 ========== */
+		    :root { --sidebar-width: 350px; }
 		    #side-dashboard {
 		        width: var(--sidebar-width);
 		        transition: transform 0.3s ease, box-shadow 0.3s ease;
 		    }
-		    #side-dashboard.collapsed {
-		        transform: translateX(calc(-1 * var(--sidebar-width)));
-		        box-shadow: none;
-		    }
+		    #side-dashboard.collapsed { transform: translateX(calc(-1 * var(--sidebar-width))); box-shadow: none; }
 		    #map, #kakao-map {
 		        left: var(--sidebar-width) !important;
 		        width: calc(100% - var(--sidebar-width)) !important;
 		        transition: left 0.3s ease, width 0.3s ease;
 		    }
-		    body.sidebar-collapsed #map,
-		    body.sidebar-collapsed #kakao-map {
-		        left: 0 !important;
-		        width: 100% !important;
-		    }
-		    /* 토글 버튼 */
+		    body.sidebar-collapsed #map, body.sidebar-collapsed #kakao-map { left: 0 !important; width: 100% !important; }
 		    #sidebar-toggle-btn {
-		        position: fixed;
-		        top: 50%;
-		        left: var(--sidebar-width);
-		        transform: translateY(-50%);
-		        z-index: 3001;
-		        width: 24px;
-		        height: 64px;
-		        background: #ffffff;
-		        border: 1px solid #d1d5db;
-		        border-left: none;
-		        border-radius: 0 8px 8px 0;
-		        cursor: pointer;
-		        display: flex;
-		        align-items: center;
-		        justify-content: center;
-		        box-shadow: 2px 0 8px rgba(0,0,0,0.1);
-		        transition: left 0.3s ease, background 0.2s;
-		        font-size: 14px;
-		        color: #64748b;
-		        padding: 0;
+		        position: fixed; top: 50%; left: var(--sidebar-width); transform: translateY(-50%);
+		        z-index: 3001; width: 24px; height: 64px; background: #fff; border: 1px solid #d1d5db;
+		        border-left: none; border-radius: 0 8px 8px 0; cursor: pointer; display: flex;
+		        align-items: center; justify-content: center; box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+		        transition: left 0.3s ease; font-size: 14px; color: #64748b; padding: 0;
 		    }
-		    #sidebar-toggle-btn:hover {
-		        background: #f0f7ff;
-		        color: #0051af;
-		    }
-		    body.sidebar-collapsed #sidebar-toggle-btn {
-		        left: 0;
-		    }
-		    /* 필터 패널 반응형 */
-		    .filter-panel {
-		        left: calc(var(--sidebar-width) + 20px) !important;
-		        width: calc(100% - var(--sidebar-width) - 40px) !important;
-		        max-width: 1100px;
-		        transition: left 0.3s ease, width 0.3s ease;
-		        box-sizing: border-box;
-		    }
-		    body.sidebar-collapsed .filter-panel {
-		        left: 20px !important;
-		        width: calc(100% - 40px) !important;
-		    }
-		    /* 로드뷰 패널 연동 */
-		    #roadview-panel {
-		        left: var(--sidebar-width);
-		        transition: left 0.3s ease;
-		    }
-		    body.sidebar-collapsed #roadview-panel {
-		        left: 0;
-		    }
+		    #sidebar-toggle-btn:hover { background: #f0f7ff; color: #0051af; }
+		    body.sidebar-collapsed #sidebar-toggle-btn { left: 0; }
 
+		    /* ========== 3블럭 Toolbar ========== */
+		    #toolbar {
+		        position: fixed; top: 12px; z-index: 2000; font-family: 'Segoe UI', sans-serif;
+		        left: calc(var(--sidebar-width) + 16px);
+		        width: calc(100% - var(--sidebar-width) - 32px);
+		        max-width: 1200px;
+		        transition: left 0.3s ease, width 0.3s ease;
+		        display: flex; flex-direction: column; gap: 0;
+		        pointer-events: none;
+		    }
+		    body.sidebar-collapsed #toolbar { left: 16px; width: calc(100% - 32px); }
+		    #toolbar > .tb-block { pointer-events: auto; }
+
+		    .tb-block {
+		        background: rgba(255,255,255,0.97); border-radius: 12px;
+		        box-shadow: 0 2px 12px rgba(0,0,0,0.12); padding: 8px 14px;
+		        margin-bottom: 6px; box-sizing: border-box;
+		    }
+		    .tb-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+		    /* 블럭1 - 주소/지적/감정평가 */
+		    .tb-pill {
+		        display: inline-flex; align-items: center; gap: 4px; padding: 5px 12px;
+		        border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer;
+		        border: 1.5px solid #d1d5db; background: #fff; color: #475569;
+		        transition: all 0.2s; user-select: none; white-space: nowrap;
+		    }
+		    .tb-pill:hover { border-color: #0051af; color: #0051af; }
+		    .tb-pill.active { background: #0051af; color: #fff; border-color: #0051af; }
+		    .tb-sub { display: none; margin-top: 6px; padding-top: 6px; border-top: 1px solid #eee; }
+		    .tb-sub.open { display: flex; }
+
+		    /* 블럭2 - 데이터유형 */
+		    .dt-chip {
+		        display: inline-flex; align-items: center; gap: 4px; padding: 5px 12px;
+		        border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer;
+		        border: 1.5px solid #e2e8f0; background: #fff; color: #64748b;
+		        transition: all 0.15s; user-select: none; white-space: nowrap;
+		    }
+		    .dt-chip:hover { border-color: #94a3b8; }
+		    .dt-chip.selected { background: #fef2f2; color: #dc2626; border-color: #fca5a5; font-weight: 700; }
+		    .dt-chip .dt-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+		    .tb-label-toggle { display: none; margin-top: 6px; padding-top: 6px; border-top: 1px solid #eee; }
+		    .tb-label-toggle.open { display: block; }
+		    .tb-label-toggle .lt-row { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+		    .tb-label-toggle label { display: flex; align-items: center; gap: 3px; font-size: 11px; cursor: pointer; user-select: none; }
+		    .lt-actions { display: flex; gap: 4px; margin-bottom: 4px; }
+		    .lt-actions button { font-size: 10px; padding: 2px 8px; border: 1px solid #ddd; border-radius: 4px; background: #fff; cursor: pointer; }
+		    .lt-actions button:hover { background: #f0f7ff; }
+
+		    /* 블럭3 - 상세필터 */
+		    #filter-result-count { font-size: 12px; color: #0051af; font-weight: bold; margin-left: auto; }
+
+		    /* 주소 검색 드롭다운 */
+		    #addr-search-results { display:none; position:absolute; top:100%; left:0; margin-top:4px; background:#fff; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.2); max-height:300px; overflow-y:auto; font-size:13px; width:340px; z-index:9999; }
+
+		    /* 사이드바 리스트 */
 		    .list-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; transition: background 0.2s; }
 		    .list-item:hover { background: #f0f7ff; }
-		    .list-item .title { font-weight: bold; font-size: 15px; margin-bottom: 5px; }
-		    .list-item .price { color: #d32f2f; font-weight: bold; }
-		    .list-item .info { font-size: 13px; color: #666; margin-top: 5px; }
 		</style>
 		<style>
 		    .leaflet-tooltip.css_map_data_B,
@@ -481,59 +485,58 @@
 		</div>
         <div id="kakao-map"></div>
 		<div id="map"></div>
-		<!-- 로드뷰 패널 -->
-		<div id="roadview-panel" style="display:none; position:fixed; bottom:0; right:0; height:35%; z-index:2000; background:#000; border-top:3px solid #0051af;">
-		    <div style="position:absolute; top:0; left:0; right:0; height:32px; background:#0051af; display:flex; align-items:center; padding:0 12px; z-index:1;">
-		        <span style="color:white; font-size:13px; font-weight:bold;">📷 로드뷰</span>
-		        <span id="roadview-address" style="color:#cce4ff; font-size:12px; margin-left:10px;"></span>
-		        <button onclick="closeRoadview()" style="margin-left:auto; background:transparent; border:none; color:white; font-size:18px; cursor:pointer; line-height:1;">✕</button>
-		    </div>
-		    <div id="roadview" style="position:absolute; top:32px; left:0; right:0; bottom:0;"></div>
-		</div>
 
-		<div class="filter-panel" style="position: fixed; top: 20px; z-index: 2000; background: white; padding: 10px 14px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-family: sans-serif;">
-		    <div style="display: flex; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
-		        <h4 style="margin: 0; font-size: 13px; color: #333;">상세 필터</h4>
-		        <span id="filter-layer-badge" style="font-size:11px; color:#fff; background:#0051af; padding:2px 7px; border-radius:10px;">A 데이터</span>
-		        <span id="filter-result-count" style="font-size:12px; color:#0051af; font-weight:bold; margin-left:auto;"></span>
-		        <button onclick="openBuildingSearchModal()" style="padding:4px 10px; background-color:#0051af; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold; font-size:11px; white-space:nowrap;">
-		            🏗️ 건축물 검색
-		        </button>
-		        <button onclick="exportToExcel()" style="padding:4px 10px; background-color:#28a745; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold; font-size:11px; white-space:nowrap;">
-		            📊 엑셀 저장
-		        </button>
-		    </div>
-		    <div id="dynamic-filter-inputs" style="display:flex; flex-wrap:wrap; gap:6px; align-items:flex-end;"></div>
-		    <div style="display:flex; align-items:center; gap:10px; margin-top:8px; padding-top:8px; border-top:1px solid #eee; flex-wrap:wrap;">
-		        <div style="display:flex; align-items:center; gap:8px; font-size:12px; flex-wrap:wrap;">
-		            <span style="font-size:11px; font-weight:bold; color:#555; white-space:nowrap;">🗺️ 지도</span>
-		            <label style="display:flex; align-items:center; gap:3px; cursor:pointer; white-space:nowrap;">
-		                <input type="checkbox" class="kakao-layer-toggle" data-type="USE_DISTRICT"> 지적편집도
+		<!-- ========== 3블럭 Toolbar ========== -->
+		<div id="toolbar">
+		    <!-- 블럭1: 주소 검색 / 지적편집도 / 감정평가 기능 -->
+		    <div class="tb-block" id="block1">
+		        <div class="tb-row">
+		            <div style="position:relative; display:flex; align-items:center; gap:4px;">
+		                <input type="text" id="addr-search-input" placeholder="🔍 주소 검색 (예: 강남구 역삼동)"
+		                    style="width:260px; padding:6px 12px; border:1.5px solid #d1d5db; border-radius:20px; font-size:12px; outline:none; transition:border 0.2s;"
+		                    onfocus="this.style.borderColor='#0051af'" onblur="this.style.borderColor='#d1d5db'"
+		                    onkeydown="if(event.key==='Enter') searchAddress()">
+		                <button onclick="searchAddress()" style="padding:6px 10px; background:#0051af; color:#fff; border:none; border-radius:20px; font-size:12px; cursor:pointer;">검색</button>
+		                <div id="addr-search-results"></div>
+		            </div>
+		            <div style="width:1px; height:20px; background:#e2e8f0;"></div>
+		            <label class="tb-pill" id="pill-cadastral" style="gap:5px;">
+		                <input type="checkbox" id="chk-cadastral" style="margin:0;"> 지적편집도
 		            </label>
-		            <label style="display:flex; align-items:center; gap:3px; cursor:pointer; white-space:nowrap;">
-		                <input type="checkbox" class="kakao-layer-toggle" data-type="TRAFFIC"> 🚦 교통
-		            </label>
-		            <label style="display:flex; align-items:center; gap:3px; cursor:pointer; white-space:nowrap;">
-		                <input type="checkbox" class="kakao-layer-toggle" data-type="ROADVIEW"> 📷 로드뷰
-		            </label>
+		            <div style="width:1px; height:20px; background:#e2e8f0;"></div>
+		            <span class="tb-pill" id="pill-appraisal" onclick="toggleAppraisalSub()">⚙️ 감정평가 기능</span>
 		        </div>
-		        <div style="width:1px; height:18px; background:#ddd;"></div>
-		        <div style="display:flex; align-items:center; gap:6px; font-size:12px;">
-		            <span style="font-size:11px; font-weight:bold; color:#0051af; white-space:nowrap;">📂 GeoJSON</span>
-		            <input type="file" id="external-geojson-input" accept=".json,.geojson" style="font-size:11px; max-width:160px;">
-		        </div>
-		        <div style="width:1px; height:18px; background:#ddd;"></div>
-		        <!-- 주소 검색 (필터 패널 내부 통합) -->
-		        <div style="display:flex; align-items:center; gap:4px; position:relative;">
-		            <input type="text" id="addr-search-input" placeholder="주소 검색"
-		                style="width:200px; padding:6px 10px; border:2px solid #0051af; border-radius:8px; font-size:12px; outline:none;"
-		                onkeydown="if(event.key==='Enter') searchAddress()">
-		            <button onclick="searchAddress()"
-		                style="padding:6px 10px; background:#0051af; color:white; border:none; border-radius:8px; font-size:12px; font-weight:bold; cursor:pointer; white-space:nowrap;">🔍</button>
-		            <div id="addr-search-results" style="display:none; position:absolute; top:100%; left:0; margin-top:4px; background:white; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.2); max-height:300px; overflow-y:auto; font-size:13px; width:320px; z-index:9999;"></div>
+		        <!-- 감정평가 하위 -->
+		        <div class="tb-sub" id="sub-appraisal">
+		            <div class="tb-row">
+		                <button onclick="openBuildingSearchModal()" style="padding:5px 14px; background:#0051af; color:#fff; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">🏗️ 건축물 검색</button>
+		                <button onclick="exportToExcel()" style="padding:5px 14px; background:#16a34a; color:#fff; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">📊 엑셀 저장</button>
+		            </div>
 		        </div>
 		    </div>
-		    <div id="external-label-controls"></div>
+
+		    <!-- 블럭2: 데이터 유형 선택 + 라벨 필드 토글 -->
+		    <div class="tb-block" id="block2">
+		        <div class="tb-row" id="data-type-chips"></div>
+		        <div class="tb-label-toggle" id="label-toggle-area">
+		            <div class="lt-actions">
+		                <button onclick="labelToggleAll(true)">전체 선택</button>
+		                <button onclick="labelToggleAll(false)">전체 해제</button>
+		                <button onclick="resetLabelPositions()" style="color:#dc2626;">위치 초기화</button>
+		            </div>
+		            <div class="lt-row" id="label-toggle-list"></div>
+		        </div>
+		    </div>
+
+		    <!-- 블럭3: 상세 필터 -->
+		    <div class="tb-block" id="block3">
+		        <div class="tb-row">
+		            <span style="font-size:12px; font-weight:700; color:#334155;">📋 상세 필터</span>
+		            <span id="filter-layer-badge" style="font-size:11px; color:#fff; background:#0051af; padding:2px 8px; border-radius:10px;">A</span>
+		            <span id="filter-result-count"></span>
+		        </div>
+		        <div id="dynamic-filter-inputs" style="display:flex; flex-wrap:wrap; gap:6px; align-items:flex-end; margin-top:6px;"></div>
+		    </div>
 		</div>
 
 		<!-- 건축물 검색 모달 -->
@@ -1282,111 +1285,152 @@
             '골프장 거래사례': layer_G_data_0
         };
 
-        window.layerControl = L.control.layers(
-            baseMaps, overlays, { collapsed: false, position: 'topright' }
-        ).addTo(map);
+        // ========== 커스텀 데이터유형 선택 (블럭2) ==========
+        var dataTypeList = [
+            { key: 'A', label: '중앙 공통접수건', color: '#85b66f', layer: layer_map_data },
+            { key: 'B', label: 'CRA 중개매물', color: '#3388ff', layer: layer_B_data_0 },
+            { key: 'C', label: '물류창고 임대료', color: '#ff6b35', layer: layer_C_data_0 },
+            { key: 'D', label: '물류창고 거래사례', color: '#9333ea', layer: layer_D_data_0 },
+            { key: 'E', label: '오피스 임대료/거래', color: '#0891b2', layer: layer_E_data_0 },
+            { key: 'F', label: '호텔 거래사례', color: '#db2777', layer: layer_F_data_0 },
+            { key: 'G', label: '골프장 거래사례', color: '#d97706', layer: layer_G_data_0 }
+        ];
 
-        (function addLabelFieldToggleControl() {
-            var Control = L.Control.extend({
-                options: { position: 'topright' },
-                onAdd: function(m) {
-                    var div = L.DomUtil.create('div', 'popup-field-toggle');
-                    div.id = 'dynamic-label-toggle';
-                    div.innerHTML = [
-                        '<div class="title" style="font-weight:bold; margin-bottom:5px;">라벨 필드 토글</div>',
-                        '<div class="actions" style="margin-bottom:5px;">',
-                        '  <button type="button" data-action="all" style="font-size:10px;">전체</button>',
-                        '  <button type="button" data-action="none" style="font-size:10px;">해제</button>',
-                        '  <button type="button" data-action="reset-pos" style="font-size:10px; margin-left:4px; color:#e53e3e;">위치 초기화</button>',
-                        '</div>',
-                        '<div class="list"></div>'
-                    ].join('');
-                    L.DomEvent.disableClickPropagation(div);
-                    L.DomEvent.disableScrollPropagation(div);
+        // 초기: A만 활성화
+        function buildDataTypeChips() {
+            var container = document.getElementById('data-type-chips');
+            container.innerHTML = '';
+            dataTypeList.forEach(function(dt) {
+                var chip = document.createElement('span');
+                chip.className = 'dt-chip' + (map.hasLayer(dt.layer) ? ' selected' : '');
+                chip.setAttribute('data-key', dt.key);
+                chip.innerHTML = '<span class="dt-dot" style="background:' + dt.color + ';"></span>' + dt.label;
+                chip.onclick = function() {
+                    if (map.hasLayer(dt.layer)) {
+                        if (dt.key === 'A') return; // A는 항상 유지
+                        map.removeLayer(dt.layer);
+                        chip.classList.remove('selected');
+                    } else {
+                        map.addLayer(dt.layer);
+                        chip.classList.add('selected');
+                    }
+                    onDataTypeChanged();
+                };
+                container.appendChild(chip);
+            });
+        }
 
-                    div.updateUI = function() {
-                        var list = div.querySelector('.list');
-                        list.innerHTML = '';
-                        
-                        var cfg, targetLayer, buildFunc;
-                        if (map.hasLayer(layer_G_data_0)) {
-                            cfg = labelFieldConfig_G_data; targetLayer = layer_G_data_0; buildFunc = buildLabelContent_G_data;
-                        } else if (map.hasLayer(layer_F_data_0)) {
-                            cfg = labelFieldConfig_F_data; targetLayer = layer_F_data_0; buildFunc = buildLabelContent_F_data;
-                        } else if (map.hasLayer(layer_E_data_0)) {
-                            cfg = labelFieldConfig_E_data; targetLayer = layer_E_data_0; buildFunc = buildLabelContent_E_data;
-                        } else if (map.hasLayer(layer_D_data_0)) {
-                            cfg = labelFieldConfig_D_data; targetLayer = layer_D_data_0; buildFunc = buildLabelContent_D_data;
-                        } else if (map.hasLayer(layer_C_data_0)) {
-                            cfg = labelFieldConfig_C_data; targetLayer = layer_C_data_0; buildFunc = buildLabelContent_C_data;
-                        } else if (map.hasLayer(layer_B_data_0)) {
-                            cfg = labelFieldConfig_B_data; targetLayer = layer_B_data_0; buildFunc = buildLabelContent_B_data;
-                        } else {
-                            cfg = labelFieldConfig_map_data; targetLayer = layer_map_data; buildFunc = buildLabelContent_map_data;
-                        }
+        function onDataTypeChanged() {
+            // 활성 필터 타입 결정
+            if (map.hasLayer(layer_G_data_0)) activeFilterType = 'G';
+            else if (map.hasLayer(layer_F_data_0)) activeFilterType = 'F';
+            else if (map.hasLayer(layer_E_data_0)) activeFilterType = 'E';
+            else if (map.hasLayer(layer_D_data_0)) activeFilterType = 'D';
+            else if (map.hasLayer(layer_C_data_0)) activeFilterType = 'C';
+            else if (map.hasLayer(layer_B_data_0)) activeFilterType = 'B';
+            else activeFilterType = 'A';
+            buildFilterInputs(activeFilterType);
+            updateLabelToggleUI();
+            updateDashboard();
+            // 칩 상태 동기화
+            document.querySelectorAll('.dt-chip').forEach(function(c) {
+                var key = c.getAttribute('data-key');
+                var dt = dataTypeList.find(function(d) { return d.key === key; });
+                if (dt) c.classList.toggle('selected', map.hasLayer(dt.layer));
+            });
+        }
 
-						function refresh() {
-						    targetLayer.eachLayer(function(lyr) {
-						        lyr.unbindTooltip();
-						        var newContent = buildFunc(lyr.feature);
-						        if (newContent) {
-						            var className = 'css_map_data_A';
-						            if (targetLayer === layer_B_data_0) className = 'css_map_data_B';
-						            if (targetLayer === layer_C_data_0) className = 'css_map_data_C';
-						            if (targetLayer === layer_D_data_0) className = 'css_map_data_D';
-						            if (targetLayer === layer_E_data_0) className = 'css_map_data_E';
-						            if (targetLayer === layer_F_data_0) className = 'css_map_data_F';
-						            if (targetLayer === layer_G_data_0) className = 'css_map_data_G';
-						            var offset = getStoredOffset(lyr.feature, [0, -10]);
-						            lyr.bindTooltip(newContent, {
-						                permanent: true, direction: 'top', className: className,
-						                offset: offset, sticky: false, opacity: 1, interactive: true
-						            });
-						            lyr.on('tooltipopen', function() {
-						                setTimeout(function() { makeDraggableTooltip(lyr); }, 50);
-						            });
-						        }
-						    });
-						    setTimeout(updateAllConnectors, 200);
-						}
+        // 라벨 필드 토글 (블럭2 하위)
+        var labelToggleLookup = {
+            A: { cfg: labelFieldConfig_map_data, layer: layer_map_data, build: buildLabelContent_map_data, cls: 'css_map_data_A' },
+            B: { cfg: labelFieldConfig_B_data, layer: layer_B_data_0, build: buildLabelContent_B_data, cls: 'css_map_data_B' },
+            C: { cfg: labelFieldConfig_C_data, layer: layer_C_data_0, build: buildLabelContent_C_data, cls: 'css_map_data_C' },
+            D: { cfg: labelFieldConfig_D_data, layer: layer_D_data_0, build: buildLabelContent_D_data, cls: 'css_map_data_D' },
+            E: { cfg: labelFieldConfig_E_data, layer: layer_E_data_0, build: buildLabelContent_E_data, cls: 'css_map_data_E' },
+            F: { cfg: labelFieldConfig_F_data, layer: layer_F_data_0, build: buildLabelContent_F_data, cls: 'css_map_data_F' },
+            G: { cfg: labelFieldConfig_G_data, layer: layer_G_data_0, build: buildLabelContent_G_data, cls: 'css_map_data_G' }
+        };
 
-                        cfg.fields.forEach(function(key, i) {
-                            var row = document.createElement('label');
-                            row.style.display = 'block';
-                            var checked = cfg.visible[key] ? 'checked' : '';
-                            row.innerHTML = '<input type="checkbox" ' + checked + '> <span style="font-size:11px;">' + key + '</span>';
-                            row.querySelector('input').addEventListener('change', function() {
-                                cfg.visible[key] = !!this.checked;
-                                refresh();
-                            });
-                            list.appendChild(row);
-                        });
+        function getActiveLabelInfo() {
+            var order = ['G','F','E','D','C','B','A'];
+            for (var i = 0; i < order.length; i++) {
+                var info = labelToggleLookup[order[i]];
+                if (map.hasLayer(info.layer)) return { key: order[i], info: info };
+            }
+            return { key: 'A', info: labelToggleLookup.A };
+        }
 
-                        div.querySelector('[data-action="all"]').onclick = function() {
-                            cfg.fields.forEach(function(k) { cfg.visible[k] = true; });
-                            div.updateUI(); refresh();
-                        };
-                        div.querySelector('[data-action="none"]').onclick = function() {
-                            cfg.fields.forEach(function(k) { cfg.visible[k] = false; });
-                            div.updateUI(); refresh();
-                        };
-						div.querySelector('[data-action="reset-pos"]').onclick = function() {
-                            tooltipOffsets = {};
-                            Object.keys(connectorLines).forEach(function(k) {
-                                map.removeLayer(connectorLines[k]);
-                            });
-                            connectorLines = {};
-                            refresh();
-                        };
-                    };
-
-                    m.on('overlayadd overlayremove', function() { div.updateUI(); });
-                    setTimeout(function() { div.updateUI(); }, 100);
-                    return div;
+        function refreshLabels(info) {
+            info.layer.eachLayer(function(lyr) {
+                lyr.unbindTooltip();
+                var content = info.build(lyr.feature);
+                if (content) {
+                    var offset = getStoredOffset(lyr.feature, [0, -10]);
+                    lyr.bindTooltip(content, { permanent: true, direction: 'top', className: info.cls, offset: offset, sticky: false, opacity: 1, interactive: true });
+                    lyr.on('tooltipopen', function() { setTimeout(function() { makeDraggableTooltip(lyr); }, 50); });
                 }
             });
-            map.addControl(new Control());
-        })();
+            setTimeout(updateAllConnectors, 200);
+        }
+
+        function updateLabelToggleUI() {
+            var area = document.getElementById('label-toggle-area');
+            var list = document.getElementById('label-toggle-list');
+            var active = getActiveLabelInfo();
+            var cfg = active.info.cfg;
+            list.innerHTML = '';
+            cfg.fields.forEach(function(key) {
+                var lbl = document.createElement('label');
+                lbl.innerHTML = '<input type="checkbox" ' + (cfg.visible[key] ? 'checked' : '') + '> ' + key;
+                lbl.querySelector('input').addEventListener('change', function() {
+                    cfg.visible[key] = this.checked;
+                    refreshLabels(active.info);
+                });
+                list.appendChild(lbl);
+            });
+            area.classList.add('open');
+        }
+
+        window.labelToggleAll = function(val) {
+            var active = getActiveLabelInfo();
+            active.info.cfg.fields.forEach(function(k) { active.info.cfg.visible[k] = val; });
+            updateLabelToggleUI();
+            refreshLabels(active.info);
+        };
+
+        window.resetLabelPositions = function() {
+            tooltipOffsets = {};
+            Object.keys(connectorLines).forEach(function(k) { map.removeLayer(connectorLines[k]); });
+            connectorLines = {};
+            var active = getActiveLabelInfo();
+            refreshLabels(active.info);
+        };
+
+        // 감정평가 하위 토글
+        window.toggleAppraisalSub = function() {
+            var sub = document.getElementById('sub-appraisal');
+            var pill = document.getElementById('pill-appraisal');
+            sub.classList.toggle('open');
+            pill.classList.toggle('active');
+        };
+
+        // 지적편집도 토글
+        document.getElementById('chk-cadastral').addEventListener('change', function() {
+            var targetMap = window.kakaoMap || window.k_map || window.kakao_map;
+            if (targetMap && targetMap.addOverlayMapTypeId) {
+                if (this.checked) targetMap.addOverlayMapTypeId(kakao.maps.MapTypeId['USE_DISTRICT']);
+                else targetMap.removeOverlayMapTypeId(kakao.maps.MapTypeId['USE_DISTRICT']);
+            }
+        });
+
+        // overlayadd/overlayremove 이벤트에서 칩 동기화
+        map.on('overlayadd overlayremove', function() {
+            onDataTypeChanged();
+        });
+
+        // 초기화
+        buildDataTypeChips();
+        updateLabelToggleUI();
         
         setBounds();
         var i = 0;
@@ -1588,51 +1632,9 @@
 		    updateDashboard();
 		}
 		
-		map.on('overlayadd overlayremove', function(e) {
-		    if (map.hasLayer(layer_G_data_0)) activeFilterType = 'G';
-		    else if (map.hasLayer(layer_F_data_0)) activeFilterType = 'F';
-		    else if (map.hasLayer(layer_E_data_0)) activeFilterType = 'E';
-		    else if (map.hasLayer(layer_D_data_0)) activeFilterType = 'D';
-		    else if (map.hasLayer(layer_C_data_0)) activeFilterType = 'C';
-		    else if (map.hasLayer(layer_B_data_0)) activeFilterType = 'B';
-		    else activeFilterType = 'A';
-		    buildFilterInputs(activeFilterType);
-		});
 		
 		buildFilterInputs('A');
 		
-		// ========== 로드뷰 ==========
-		var roadviewObj = null;
-		var roadviewClient = null;
-		var roadviewOpen = false;
-		
-		function openRoadview(latlng, addressText) {
-		    var panel = document.getElementById('roadview-panel');
-		    panel.style.display = 'block';
-		    roadviewOpen = true;
-		    document.getElementById('map').style.bottom = '35%';
-		    document.getElementById('kakao-map').style.bottom = '35%';
-		    map.invalidateSize();
-		    if (!roadviewObj) {
-		        roadviewObj = new kakao.maps.Roadview(document.getElementById('roadview'));
-		        roadviewClient = new kakao.maps.RoadviewClient();
-		    }
-		    if (addressText) document.getElementById('roadview-address').innerText = '— ' + addressText;
-		    var kakaoLatLng = new kakao.maps.LatLng(latlng.lat, latlng.lng);
-		    roadviewClient.getNearestPanoId(kakaoLatLng, 50, function(panoId) {
-		        if (panoId) { roadviewObj.setPanoId(panoId, kakaoLatLng); }
-		        else { document.getElementById('roadview-address').innerText = '— 해당 위치의 로드뷰가 없습니다.'; }
-		    });
-		}
-		
-		function closeRoadview() {
-		    document.getElementById('roadview-panel').style.display = 'none';
-		    roadviewOpen = false;
-		    document.getElementById('map').style.bottom = '0';
-		    document.getElementById('kakao-map').style.bottom = '0';
-		    map.invalidateSize();
-		}
-
 		// ========== 엑셀 내보내기 ==========
 		function exportToExcel() {
 		    var pw = prompt('엑셀 저장을 위해 비밀번호를 입력하세요:');
@@ -1684,88 +1686,6 @@
 		    document.body.appendChild(link); link.click(); document.body.removeChild(link);
 		}
 		
-		// ========== 카카오 레이어 토글 ==========
-		document.querySelectorAll('.kakao-layer-toggle').forEach(function(checkbox) {
-		    checkbox.addEventListener('change', function(e) {
-		        var layerType = e.target.getAttribute('data-type');
-		        var targetMap = window.kakaoMap || window.k_map || window.kakao_map;
-		        if (targetMap && targetMap.addOverlayMapTypeId) {
-		            if (e.target.checked) targetMap.addOverlayMapTypeId(kakao.maps.MapTypeId[layerType]);
-		            else targetMap.removeOverlayMapTypeId(kakao.maps.MapTypeId[layerType]);
-		        }
-		    });
-		});
-		
-		// ========== 외부 GeoJSON ==========
-		var externalLabelConfig = { fields: [], visible: {} };
-		var currentExternalLayer = null;
-		var externalLayerGroup = L.featureGroup().addTo(map);
-		
-		document.getElementById('external-geojson-input').addEventListener('change', function(e) {
-		    var file = e.target.files[0];
-		    if (!file) return;
-		    var reader = new FileReader();
-		    reader.onload = function(event) {
-		        try {
-		            var geojsonData = JSON.parse(event.target.result);
-		            externalLayerGroup.clearLayers();
-		            var oldUI = document.getElementById('external-label-controls');
-		            if (oldUI) oldUI.remove();
-		            var features = geojsonData.features || [];
-		            if (features.length === 0) { alert("파일 내에 유효한 매물 데이터가 없습니다."); return; }
-		            var sampleProps = features[0].properties;
-		            externalLabelConfig.fields = Object.keys(sampleProps);
-		            externalLabelConfig.fields.forEach(function(f) {
-		                externalLabelConfig.visible[f] = (f.indexOf('소재지') !== -1 || f === '구분' || f === '세부용도');
-		            });
-		            createExternalToggleUI(file.name);
-		            currentExternalLayer = L.geoJson(geojsonData, {
-		                onEachFeature: function(feature, layer) { pop_map_data(feature, layer); renderExternalLabel(layer); },
-		                pointToLayer: function (feature, latlng) {
-		                    return L.circleMarker(latlng, { radius: 8, fillColor: "#ff4500", color: "#ffffff", weight: 2, fillOpacity: 0.9 });
-		                }
-		            });
-		            externalLayerGroup.addLayer(currentExternalLayer);
-		            if (window.layerControl) window.layerControl.addOverlay(externalLayerGroup, "📂 " + file.name);
-		            map.fitBounds(externalLayerGroup.getBounds());
-		            alert("'" + file.name + "' 데이터를 성공적으로 불러왔습니다!");
-		        } catch (err) { alert("JSON 형식이 잘못되었거나 파일 읽기 중 오류가 발생했습니다."); }
-		    };
-		    reader.readAsText(file);
-		});
-		
-		function renderExternalLabel(layer) {
-		    var props = layer.feature.properties;
-		    var labelParts = [];
-		    externalLabelConfig.fields.forEach(function(f) {
-		        if (externalLabelConfig.visible[f] && props[f]) labelParts.push(String(props[f]));
-		    });
-		    if (labelParts.length > 0) {
-		        layer.bindTooltip('<div style="text-align:center; font-weight:bold; line-height:1.4;">' + labelParts.join('<br>') + '</div>', {
-		            permanent: true, offset: [0, -12], direction: 'top', className: 'css_map_data'
-		        }).openTooltip();
-		    } else { layer.unbindTooltip(); }
-		}
-		
-		function createExternalToggleUI(fileName) {
-		    var parent = document.getElementById('external-geojson-input').parentNode;
-		    var ui = document.createElement('div');
-		    ui.id = 'external-label-controls';
-		    ui.style = "margin-top:10px; padding:12px; background:#fff4e5; border-radius:10px; border:1px solid #ffb366; max-height:200px; overflow-y:auto;";
-		    var title = '<div style="font-size:11px; font-weight:bold; color:#d35400; margin-bottom:8px;">📍 라벨 표시 항목 선택 (' + fileName + ')</div>';
-		    var listHtml = externalLabelConfig.fields.map(function(f) {
-		        return '<label style="display:block; font-size:11px; margin-bottom:4px; cursor:pointer;"><input type="checkbox" class="ext-chk" data-field="' + f + '" ' + (externalLabelConfig.visible[f] ? 'checked' : '') + '> ' + f + '</label>';
-		    }).join('');
-		    ui.innerHTML = title + listHtml;
-		    parent.appendChild(ui);
-		    ui.querySelectorAll('.ext-chk').forEach(function(chk) {
-		        chk.addEventListener('change', function() {
-		            externalLabelConfig.visible[this.dataset.field] = this.checked;
-		            if (currentExternalLayer) currentExternalLayer.eachLayer(function(lyr) { renderExternalLabel(lyr); });
-		        });
-		    });
-		}
-
 		// ========== 대시보드 카드 시스템 ==========
 		var cardConfig = {
 		    G: {
@@ -1967,9 +1887,8 @@
 		    });
 		};
 		
-		map.on('overlayadd overlayremove moveend zoomend', updateDashboard);
+		map.on('moveend zoomend', updateDashboard);
 
-		var lControl = window.layerControl;
 
 		// ========== 건축물 검색 (PythonAnywhere 서버 연동) ==========
 		var BUILDING_API = 'https://appraisalchoi.pythonanywhere.com';
