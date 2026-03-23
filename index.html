@@ -1322,27 +1322,24 @@
                     // 플라이아웃 내부 클릭 무시
                     if (e.target.closest('.label-flyout')) return;
 
-                    // 레이어 토글
-                    if (map.hasLayer(dt.layer)) {
-                        if (dt.key === 'A') {
-                            // A는 레이어 제거 안 함, 플라이아웃만 토글
-                        } else {
-                            map.removeLayer(dt.layer);
-                            chip.classList.remove('selected');
-                            closeFlyout(dt.key);
-                            onDataTypeChanged();
-                            return;
-                        }
+                    var wasActive = map.hasLayer(dt.layer);
+                    var flyoutWasOpen = (currentFlyoutKey === dt.key);
+
+                    if (wasActive && flyoutWasOpen) {
+                        // 플라이아웃 열린 상태에서 재클릭 → 닫기 + 레이어 OFF
+                        closeFlyout(dt.key);
+                        map.removeLayer(dt.layer);
+                        chip.classList.remove('selected');
+                        onDataTypeChanged();
+                    } else if (wasActive && !flyoutWasOpen) {
+                        // 활성이지만 플라이아웃 닫혀있음 → 플라이아웃만 열기
+                        closeAllFlyouts();
+                        openFlyout(dt.key);
                     } else {
+                        // 비활성 → 레이어 ON + 플라이아웃 열기
                         map.addLayer(dt.layer);
                         chip.classList.add('selected');
                         onDataTypeChanged();
-                    }
-
-                    // 플라이아웃 토글
-                    if (currentFlyoutKey === dt.key) {
-                        closeFlyout(dt.key);
-                    } else {
                         closeAllFlyouts();
                         openFlyout(dt.key);
                     }
