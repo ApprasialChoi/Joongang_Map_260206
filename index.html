@@ -1390,7 +1390,7 @@
 		            return;
 		        }
 		
-		        var basePath = 'images/H_screenshots/' + folderName + '/';
+		        var basePath = 'images/H_screenshots_temp/' + folderName + '/';
 		        var html = '<div style="margin-bottom:8px;">' +
 		            '<span style="font-weight:bold; font-size:13px; color:#059669;">📷 감정평가서 스크린샷 (' + files.length + '장)</span>' +
 		            '</div>';
@@ -1449,7 +1449,7 @@
 		
 		// ========== H 데이터 스크린샷 매니페스트 ==========
 		var hScreenshotManifest = {};
-		fetch('images/H_screenshots/manifest.json')
+		fetch('images/H_screenshots_temp/manifest.json')
 		    .then(function(r) { return r.json(); })
 		    .then(function(data) { hScreenshotManifest = data; })
 		    .catch(function() { console.log('H 스크린샷 manifest 로드 실패'); });
