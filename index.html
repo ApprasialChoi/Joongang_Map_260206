@@ -767,12 +767,12 @@
         // ========== 드래그 가능 라벨 시스템 ==========
         var tooltipOffsets = {};
 
-        function getFeatureId(feature) {
-            var p = feature.properties;
-            return p['감정서번호'] || p['빌딩명'] || p['호텔명'] || p['골프장명(인수 후 명칭)'] || 
-                   p['물류센터명'] || p['명칭'] || p['소재지(통'] || 
-                   (p['위도'] + '_' + p['경도']) || JSON.stringify(p).substring(0, 80);
-        }
+		function getFeatureId(feature) {
+		    var p = feature.properties;
+		    return p['감정서번호'] || p['파일명'] || p['빌딩명'] || p['호텔명'] || p['골프장명(인수 후 명칭)'] || 
+		           p['물류센터명'] || p['명칭'] || p['소재지(통'] || 
+		           (p['위도'] + '_' + p['경도']) || JSON.stringify(p).substring(0, 80);
+		}
 
         function getStoredOffset(feature, defaultOffset) {
             var fid = getFeatureId(feature);
@@ -1325,9 +1325,146 @@
 		    return '<div class="custom-tooltip-box" style="border-color:#059669 !important;">' + parts.join('') + '</div>';
 		}
 
+		function buildPopupContent_H_data(feature) {
+		    var p = feature.properties || {};
+		    var rows = '';
+		
+		    // 스크린샷 영역
+		    var rawName = p['파일명'] || '';
+		    var folderName = rawName.replace(/\.[pP][dD][fF]$/, '') + '_screenshots';
+		    rows += '<tr><td colspan="2" id="h-screenshots-' + folderName.replace(/[^a-zA-Z0-9_\-]/g, '_') + '" style="text-align:center;">' +
+		        '<div style="color:#888; font-size:12px; padding:10px;">📷 스크린샷 로딩 중...</div>' +
+		        '</td></tr>';
+		
+		    // 기본 속성 테이블
+		    var displayFields = [
+		        ['감정서번호', rawName],
+		        ['물건구분', p['물건구분']],
+		        ['소재지(지번)', p['소재지(지번)']],
+		        ['도로명주소', p['도로명주소']],
+		        ['감정평가액', p['감정평가액(원)'] ? Number(p['감정평가액(원)']).toLocaleString() + '원' : ''],
+		        ['의뢰인', p['의뢰인']],
+		        ['채무자', p['채무자']],
+		        ['소유자', p['소유자']],
+		        ['감정평가목적', p['감정평가목적']],
+		        ['제출처', p['제출처']],
+		        ['기준시점', p['기준시점']],
+		        ['감정평가사', p['감정평가사']],
+		        ['보증금합계', p['보증금합계'] ? Number(p['보증금합계']).toLocaleString() + '원' : ''],
+		        ['월임대료합계', p['월임대료합계'] ? Number(p['월임대료합계']).toLocaleString() + '원' : '']
+		    ];
+		
+		    displayFields.forEach(function(f) {
+		        if (f[1] && f[1] !== '' && f[1] !== 'undefined') {
+		            rows += '<tr><th style="min-width:90px; text-align:left; padding:3px 6px; background:#f0fdf4;">' + f[0] + '</th>' +
+		                '<td style="padding:3px 6px;">' + f[1] + '</td></tr>';
+		        }
+		    });
+		
+		    // 첨부파일 영역 (기존 시스템 유지)
+		    var markerId = String(rawName).trim().replace(/[^a-zA-Z0-9가-힣_\-]/g, '_');
+		    rows += '<tr><td colspan="2" style="padding-top:10px; border-top:2px solid #e2e8f0;">' +
+		        '<div id="attach-area-' + markerId + '" style="margin-top:4px;">' +
+		        '  <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">' +
+		        '    <span style="font-weight:bold; font-size:13px;">📎 첨부파일</span>' +
+		        '    <label style="padding:4px 10px; background:#0051af; color:white; border-radius:5px; font-size:11px; cursor:pointer;">' +
+		        '      업로드' +
+		        '      <input type="file" multiple style="display:none;" onchange="uploadAttachFiles(this,\'' + markerId + '\')">' +
+		        '    </label>' +
+		        '  </div>' +
+		        '  <div id="attach-list-' + markerId + '" style="font-size:12px; color:#555;">로딩 중...</div>' +
+		        '</div>' +
+		        '</td></tr>';
+		
+		    setTimeout(function() { loadAttachList(markerId); }, 100);
+		
+		    // 스크린샷 렌더링
+		    setTimeout(function() {
+		        var containerId = 'h-screenshots-' + folderName.replace(/[^a-zA-Z0-9_\-]/g, '_');
+		        var container = document.getElementById(containerId);
+		        if (!container) return;
+		
+		        var files = hScreenshotManifest[folderName];
+		        if (!files || files.length === 0) {
+		            container.innerHTML = '<div style="color:#aaa; font-size:11px; padding:6px;">스크린샷 없음</div>';
+		            return;
+		        }
+		
+		        var basePath = 'images/H_screenshots/' + folderName + '/';
+		        var html = '<div style="margin-bottom:8px;">' +
+		            '<span style="font-weight:bold; font-size:13px; color:#059669;">📷 감정평가서 스크린샷 (' + files.length + '장)</span>' +
+		            '</div>';
+		
+		        // 현재 보고 있는 페이지 인덱스
+		        var viewerId = 'hv-' + containerId;
+		        html += '<div id="' + viewerId + '">' +
+		            '<img src="' + basePath + files[0] + '" style="width:100%; max-height:500px; object-fit:contain; border-radius:8px; border:1px solid #e2e8f0;" ' +
+		            'onerror="this.style.display=\'none\'">' +
+		            '</div>';
+		
+		        if (files.length > 1) {
+		            html += '<div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:8px;">' +
+		                '<button onclick="hScreenNav(\'' + viewerId + '\',-1)" style="padding:4px 12px; border:1px solid #ddd; border-radius:6px; background:#fff; cursor:pointer; font-size:14px;">◀</button>' +
+		                '<span id="' + viewerId + '-counter" style="font-size:12px; color:#666;">1 / ' + files.length + '</span>' +
+		                '<button onclick="hScreenNav(\'' + viewerId + '\',1)" style="padding:4px 12px; border:1px solid #ddd; border-radius:6px; background:#fff; cursor:pointer; font-size:14px;">▶</button>' +
+		                '</div>';
+		        }
+		
+		        container.innerHTML = html;
+		
+		        // 뷰어 상태 저장
+		        container._hFiles = files;
+		        container._hBasePath = basePath;
+		        container._hIndex = 0;
+		        container._hViewerId = viewerId;
+		
+		    }, 150);
+		
+		    return '<table style="width:100%; border-collapse:collapse;">' + rows + '</table>';
+		}
+		
+		// 스크린샷 네비게이션
+		window.hScreenNav = function(viewerId, dir) {
+		    var containers = document.querySelectorAll('[id^="h-screenshots-"]');
+		    var container = null;
+		    containers.forEach(function(c) {
+		        if (c._hViewerId === viewerId) container = c;
+		    });
+		    if (!container || !container._hFiles) return;
+		
+		    var idx = container._hIndex + dir;
+		    if (idx < 0) idx = container._hFiles.length - 1;
+		    if (idx >= container._hFiles.length) idx = 0;
+		    container._hIndex = idx;
+		
+		    var viewer = document.getElementById(viewerId);
+		    if (viewer) {
+		        viewer.innerHTML = '<img src="' + container._hBasePath + container._hFiles[idx] +
+		            '" style="width:100%; max-height:500px; object-fit:contain; border-radius:8px; border:1px solid #e2e8f0;" ' +
+		            'onerror="this.style.display=\'none\'">';
+		    }
+		    var counter = document.getElementById(viewerId + '-counter');
+		    if (counter) counter.textContent = (idx + 1) + ' / ' + container._hFiles.length;
+		};
+		
+		// ========== H 데이터 스크린샷 매니페스트 ==========
+		var hScreenshotManifest = {};
+		fetch('images/H_screenshots/manifest.json')
+		    .then(function(r) { return r.json(); })
+		    .then(function(data) { hScreenshotManifest = data; })
+		    .catch(function() { console.log('H 스크린샷 manifest 로드 실패'); });
 		var layer_H_data_0 = new L.geoJson(json_H_data_0, {
 		    onEachFeature: function(feature, layer) {
-		        pop_map_data(feature, layer);
+		        layer.bindPopup(function(l) {
+		            return buildPopupContent_H_data(l.feature);
+		        }, {
+		            maxHeight: 600, minWidth: 400, maxWidth: 460,
+		            offset: [0, -10], className: 'custom-popup-styled'
+		        });
+		        layer.on('popupopen', function(e) {
+		            var img = e.popup._container.querySelector('img');
+		            if (img) { img.onload = function() { e.popup.update(); }; }
+		        });
 		        bindDraggableTooltip(layer, buildLabelContent_H_data(feature), 'css_map_data_H', [0, -10]);
 		    },
 		    pointToLayer: function (feature, latlng) {
