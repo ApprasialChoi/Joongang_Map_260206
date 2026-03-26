@@ -2496,7 +2496,7 @@
 		        renderResult();
 		    });
 
-		    function queryLandDirect(pnu) {
+		   function queryLandDirect(pnu) {
 			    fetch(BUILDING_API + '/api/land-info', {
 			        method: 'POST',
 			        headers: {'Content-Type': 'application/json'},
@@ -2507,18 +2507,7 @@
 			        if (data.error) {
 			            landData = {error: data.error};
 			        } else {
-			            landData = {
-			                '지목': data['지목'] || '',
-			                '토지면적': data['토지면적(㎡)'] || '',
-			                '용도지역1': data['용도지역1'] || '',
-			                '용도지역2': data['용도지역2'] || '',
-			                '이용상황': data['토지이용상황'] || '',
-			                '지형높이': data['지형높이'] || '',
-			                '지형형상': data['지형형상'] || '',
-			                '도로접면': data['도로접면'] || '',
-			                '공시지가': data['공시지가(원/㎡)'] || '',
-			                '기준연도': data['기준연도'] || ''
-			            };
+			            landData = data;
 			        }
 			        renderResult();
 			    })
@@ -2527,6 +2516,7 @@
 			        renderResult();
 			    });
 			}
+		}
 
 		// ========== 파일 첨부 시스템 ==========
 		function loadAttachList(markerId) {
