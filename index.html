@@ -2496,44 +2496,37 @@
 		        renderResult();
 		    });
 
-		    function queryLandDirect(pnu) {
-		        var url = 'https://api.vworld.kr/ned/data/getLandCharacteristics' +
-		            '?key=E333059C-5AF1-3959-9C69-99B588DBFB75' +
-		            '&pnu=' + pnu +
-		            '&stdrYear=2025' +
-		            '&format=json' +
-		            '&numOfRows=10&pageNo=1' +
-		            '&domain=apprasialchoi.github.io';
-
-		        fetch(url)
-		        .then(function(r) { return r.json(); })
-		        .then(function(data) {
-		            var items = ((data.landCharacteristics || {}).field) || [];
-		            if (!Array.isArray(items)) items = [items];
-		            if (items.length > 0) {
-		                var nd = items[items.length - 1];
-		                landData = {
-		                    '지목': nd.lndcgrCodeNm || '',
-		                    '토지면적': nd.lndpclAr || '',
-		                    '용도지역1': nd.prposArea1Nm || '',
-		                    '용도지역2': nd.prposArea2Nm || '',
-		                    '이용상황': nd.ladUseSittnNm || '',
-		                    '지형높이': nd.tpgrphHgCodeNm || '',
-		                    '지형형상': nd.tpgrphFrmCodeNm || '',
-		                    '도로접면': nd.roadSideCodeNm || '',
-		                    '공시지가': nd.pblntfPclnd || '',
-		                    '기준연도': nd.stdrYear || ''
-		                };
-		            } else {
-		                landData = { error: '토지특성 데이터 없음' };
-		            }
-		            renderResult();
-		        })
-		        .catch(function(err) {
-		            landData = { error: '브이월드 조회 실패: ' + err.message };
-		            renderResult();
-		        });
-		    }
+			function queryLandDirect(pnu) {
+			    fetch(BUILDING_API + '/api/land-info', {
+			        method: 'POST',
+			        headers: {'Content-Type': 'application/json'},
+			        body: JSON.stringify({pnu: pnu})
+			    })
+			    .then(function(r) { return r.json(); })
+			    .then(function(data) {
+			        if (data.error) {
+			            landData = {error: data.error};
+			        } else {
+			            landData = {
+			                '지목': data['지목'] || '',
+			                '토지면적': data['토지면적(㎡)'] || '',
+			                '용도지역1': data['용도지역1'] || '',
+			                '용도지역2': data['용도지역2'] || '',
+			                '이용상황': data['토지이용상황'] || '',
+			                '지형높이': data['지형높이'] || '',
+			                '지형형상': data['지형형상'] || '',
+			                '도로접면': data['도로접면'] || '',
+			                '공시지가': data['공시지가(원/㎡)'] || '',
+			                '기준연도': data['기준연도'] || ''
+			            };
+			        }
+			        renderResult();
+			    })
+			    .catch(function(err) {
+			        landData = {error: '서버 연결 실패: ' + err.message};
+			        renderResult();
+			    });
+			}
 		}
 
 		// ========== 파일 첨부 시스템 ==========
